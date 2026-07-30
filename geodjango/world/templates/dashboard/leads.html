@@ -1,0 +1,58 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Leads de contacto{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Leads de contacto</h1>
+<p class="dsh-lede">
+    Mensajes enviados desde el formulario de contacto. Se responden por correo;
+    nada de esto se publica.
+</p>
+
+<div class="dsh-filters">{% include "dashboard/_filters.html" %}</div>
+
+<div class="dsh-card" style="padding:0">
+    <div class="dsh-table-wrap">
+        <table class="dsh-table">
+            <thead>
+                <tr>
+                    <th style="width:200px">Quién</th>
+                    <th>Mensaje</th>
+                    <th style="width:120px">Llegó de</th>
+                    <th style="width:240px">Seguimiento</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in page_obj %}
+                <tr>
+                    <td>
+                        <strong>{{ lead.name }}</strong><br>
+                        <a class="dsh-small" href="mailto:{{ lead.email }}">{{ lead.email }}</a><br>
+                        <span class="dsh-small dsh-muted">{{ lead.created_at|date:"d M Y H:i" }}</span>
+                    </td>
+                    <td style="white-space:pre-wrap">{{ lead.message }}</td>
+                    <td class="dsh-small dsh-mono">{{ lead.source_path|default:"—" }}</td>
+                    <td>
+                        <form method="post" class="dsh-triage">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ lead.pk }}">
+                            <select class="dsh-select" name="review_status">
+                                {% for value, label in statuses %}
+                                    <option value="{{ value }}" {% if lead.review_status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <textarea class="dsh-textarea" name="internal_notes" placeholder="Nota interna">{{ lead.internal_notes }}</textarea>
+                            <button class="dsh-btn is-small" type="submit">Guardar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4"><p class="dsh-empty">No hay leads con este filtro.</p></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include "dashboard/_pager.html" %}
+{% endblock %}

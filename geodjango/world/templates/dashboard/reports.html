@@ -1,0 +1,84 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Reportes de despojo{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Reportes de despojo</h1>
+<p class="dsh-lede">
+    Casos enviados por el público desde el mapa de despojos.
+</p>
+
+<p class="dsh-note is-warning">
+    <strong>Datos personales de víctimas de un delito.</strong>
+    Estos relatos vienen con el nombre y el correo de quien los escribió. No se
+    publican, no se dibujan en el mapa y no salen por ningún endpoint público:
+    se leen aquí y se responden por correo. Reproducir cualquier parte requiere
+    autorización escrita de la persona que lo envió.
+</p>
+
+<div class="dsh-filters">{% include "dashboard/_filters.html" %}</div>
+
+<div class="dsh-card" style="padding:0">
+    <div class="dsh-table-wrap">
+        <table class="dsh-table">
+            <thead>
+                <tr>
+                    <th style="width:200px">Quién</th>
+                    <th style="width:180px">Dónde y cuándo</th>
+                    <th>Denuncia y relato</th>
+                    <th style="width:240px">Seguimiento</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for report in page_obj %}
+                <tr>
+                    <td>
+                        <strong>{{ report.name }}</strong><br>
+                        <a class="dsh-small" href="mailto:{{ report.email }}">{{ report.email }}</a><br>
+                        <span class="dsh-small dsh-muted">Enviado el {{ report.created_at|date:"d M Y H:i" }}</span>
+                        {% if report.consent_contact %}
+                            <br><span class="dsh-badge is-approved">Autorizó contacto</span>
+                        {% else %}
+                            <br><span class="dsh-badge is-failed">Sin autorización</span>
+                        {% endif %}
+                    </td>
+                    <td class="dsh-small">
+                        {{ report.borough|default:"Alcaldía no indicada" }}
+                        {% if report.neighborhood %}<br>Col. {{ report.neighborhood }}{% endif %}
+                        {% if report.year_of_events %}<br>Hechos de {{ report.year_of_events }}{% endif %}
+                    </td>
+                    <td>
+                        <span class="dsh-badge">{{ report.get_denuncia_status_display|default:"Sin indicar" }}</span>
+                        {% if report.account %}
+                            <details class="dsh-details" style="margin-top:8px">
+                                <summary>Leer el relato ({{ report.account|length }} caracteres)</summary>
+                                <p class="dsh-account">{{ report.account }}</p>
+                            </details>
+                        {% else %}
+                            <div class="dsh-small dsh-muted" style="margin-top:8px">Sin relato.</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="post" class="dsh-triage">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ report.pk }}">
+                            <select class="dsh-select" name="review_status">
+                                {% for value, label in statuses %}
+                                    <option value="{{ value }}" {% if report.review_status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <textarea class="dsh-textarea" name="internal_notes" placeholder="Nota interna">{{ report.internal_notes }}</textarea>
+                            <button class="dsh-btn is-small" type="submit">Guardar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4"><p class="dsh-empty">No hay reportes con este filtro.</p></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include "dashboard/_pager.html" %}
+{% endblock %}

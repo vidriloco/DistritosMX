@@ -1,0 +1,5 @@
+{% comment %}Status strip with counts. Expects `status_filters`, `status`, `total`.{% endcomment %}
+<a href="?" class="{% if not status %}is-current{% endif %}">Todas ({{ total }})</a>
+{% for f in status_filters %}
+    <a href="?status={{ f.value }}" class="{% if f.current %}is-current{% endif %}">{{ f.label }} ({{ f.count }})</a>
+{% endfor %}

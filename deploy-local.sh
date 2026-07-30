@@ -9,6 +9,8 @@
 #   ./deploy-local.sh --seed          also ingest the datasets tracked in git
 #   ./deploy-local.sh --seed-fgj      also download + ingest the FGJ carpetas de
 #                                     investigacion dataset (felonies, despojos, etc.)
+#   ./deploy-local.sh --seed-denue    also download + ingest the INEGI DENUE
+#                                     business registry (powers /negocios)
 #   ./deploy-local.sh --superuser     also create a Django superuser (interactive)
 #   ./deploy-local.sh --fresh         drop containers and start from a clean DB
 #
@@ -25,14 +27,29 @@ DB_NAME="wikiando_db"
 FGJ_CSV="geodjango/data/fgj/carpetas.csv"
 FGJ_URL="https://archivo.datos.cdmx.gob.mx/FGJ/carpetas/carpetasFGJ_acumulado_2025_01.csv"
 
+# INEGI DENUE, the national business registry (~120MB zipped, ~1M rows across
+# the three files). Feeds DenueRecord, which is what the /negocios wizard reads
+# for its category autocomplete and its per-radius business stats.
+# INEGI splits Mexico state in two; the local names match the stems
+# import_denue_cities expects. Entity codes: 09 = CDMX, 15 = Mexico state.
+DENUE_DIR="geodjango/data/denue"
+DENUE_BASE_URL="https://www.inegi.org.mx/contenidos/masiva/denue"
+DENUE_PARTS=(
+    "cdmx:denue_09_csv"
+    "edomex1:denue_15_1_csv"
+    "edomex2:denue_15_2_csv"
+)
+
 SEED=false
 SEED_FGJ=false
+SEED_DENUE=false
 SUPERUSER=false
 FRESH=false
 for arg in "$@"; do
     case "$arg" in
         --seed) SEED=true ;;
         --seed-fgj) SEED_FGJ=true ;;
+        --seed-denue) SEED_DENUE=true ;;
         --superuser) SUPERUSER=true ;;
         --fresh) FRESH=true ;;
         *) echo "Unknown option: $arg" >&2; exit 1 ;;
@@ -48,6 +65,45 @@ download_fgj_carpetas() {
     mkdir -p "$(dirname "$FGJ_CSV")"
     curl -fL --progress-bar -o "${FGJ_CSV}.tmp" "$FGJ_URL"
     mv "${FGJ_CSV}.tmp" "$FGJ_CSV"
+}
+
+download_denue() {
+    if ! command -v unzip >/dev/null 2>&1; then
+        echo "unzip is required to unpack the DENUE downloads. Install it and retry." >&2
+        exit 1
+    fi
+    mkdir -p "$DENUE_DIR"
+
+    for part in "${DENUE_PARTS[@]}"; do
+        local city="${part%%:*}"
+        local slug="${part##*:}"
+        local target="${DENUE_DIR}/${city}.csv"
+
+        if [ -f "$target" ]; then
+            echo "==> $target already present, skipping download."
+            continue
+        fi
+
+        echo "==> Downloading DENUE ${city} (${slug}.zip) from INEGI..."
+        local tmpdir
+        tmpdir="$(mktemp -d)"
+        # Cleaned up on any exit path, including a failed curl under `set -e`.
+        trap 'rm -rf "$tmpdir"' RETURN
+
+        curl -fL --progress-bar -o "${tmpdir}/denue.zip" "${DENUE_BASE_URL}/${slug}.zip"
+
+        # The payload sits under conjunto_de_datos/ and its filename encodes
+        # INEGI's own numbering, so it is globbed rather than named.
+        unzip -o -q -j "${tmpdir}/denue.zip" "conjunto_de_datos/*.csv" -d "$tmpdir"
+        local extracted
+        extracted="$(find "$tmpdir" -maxdepth 1 -name '*.csv' | head -1)"
+        if [ -z "$extracted" ]; then
+            echo "No CSV found inside ${slug}.zip — INEGI may have changed the layout." >&2
+            exit 1
+        fi
+        mv "$extracted" "$target"
+        echo "    -> $target ($(du -h "$target" | cut -f1))"
+    done
 }
 
 # The data directories are tracked in git but ignored for new files; restore
@@ -103,11 +159,17 @@ not tracked in git (see README "Prepare AGEB and DENUE data") and must be
 placed in geodjango/data/ manually before running them:
   - risks_felonies_load                (use --seed-fgj to fetch + run this one)
   - geo_area_update_from_felonies       (run manually once felonies are loaded)
-  - import_denue_cities                (needs data/denue/<city>.csv)
-  - ageb_update_from_denues
+  - import_denue_cities                (use --seed-denue to fetch + run this one)
   - ageb_update_motor_data
   - import_airbnb_listings             (needs data/airbnbs/cdmx.csv)
 EOF
+fi
+
+if [ "$SEED_DENUE" = true ]; then
+    echo "==> Seeding DENUE business registry (powers the /negocios wizard)..."
+    download_denue
+    # ~1M rows: minutes, not seconds.
+    $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py import_denue_cities"
 fi
 
 if [ "$SEED_FGJ" = true ]; then

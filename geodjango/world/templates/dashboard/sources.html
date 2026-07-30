@@ -1,0 +1,192 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Fuentes y términos{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Fuentes y términos</h1>
+<p class="dsh-lede">
+    Los dos controles del buscador: <strong>dónde</strong> lee y <strong>qué</strong>
+    considera una coincidencia. Los cambios aplican en la siguiente ejecución;
+    no hace falta desplegar nada.
+</p>
+
+<div class="dsh-card">
+    {% include "dashboard/_run_form.html" %}
+</div>
+
+<h2 class="dsh-section">Fuentes</h2>
+
+<div class="dsh-card" style="padding:0">
+    <div class="dsh-table-wrap">
+        <table class="dsh-table">
+            <thead>
+                <tr>
+                    <th>Identificador</th>
+                    <th>Tipo</th>
+                    <th>Busca / lee</th>
+                    <th>Acotada</th>
+                    <th>Última lectura</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for feed in feeds %}
+                <tr>
+                    <td class="dsh-mono">
+                        {{ feed.slug }}
+                        {% if not feed.is_active %}<br><span class="dsh-badge">inactiva</span>{% endif %}
+                    </td>
+                    <td class="dsh-small">{{ feed.get_kind_display }}</td>
+                    <td>
+                        {% if feed.query %}<strong>{{ feed.query }}</strong>{% else %}{{ feed.url }}{% endif %}
+                        {% if feed.name %}<br><span class="dsh-small dsh-muted">Firma como «{{ feed.name }}»</span>{% endif %}
+                        {% if feed.notes %}<br><span class="dsh-small dsh-muted">{{ feed.notes }}</span>{% endif %}
+                        <br><a class="dsh-small dsh-muted" href="{{ feed.feed_url }}" target="_blank" rel="noopener noreferrer">Ver el feed ↗</a>
+                    </td>
+                    <td class="dsh-small">{% if feed.scoped %}Sí, ya es de CDMX{% else %}No — debe mencionar la ciudad{% endif %}</td>
+                    <td class="dsh-small">
+                        {% if feed.last_run_at %}
+                            {% if feed.last_status == 'failed' %}
+                                <span class="dsh-badge is-failed">Falló</span>
+                            {% else %}
+                                <span class="dsh-badge is-approved">Correcto</span>
+                            {% endif %}
+                            <br>{{ feed.last_run_at|date:"d M H:i" }}
+                            <br><span class="dsh-muted">{{ feed.last_message|truncatechars:90 }}</span>
+                        {% else %}
+                            <span class="dsh-muted">Nunca se ha leído</span>
+                        {% endif %}
+                    </td>
+                    <td class="dsh-nowrap">
+                        <form method="post" class="dsh-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="toggle_feed">
+                            <input type="hidden" name="feed" value="{{ feed.pk }}">
+                            <button class="dsh-btn is-small" type="submit">{% if feed.is_active %}Desactivar{% else %}Activar{% endif %}</button>
+                        </form>
+                        <form method="post" class="dsh-inline" onsubmit="return confirm('¿Eliminar la fuente «{{ feed.slug }}»? Las notas que ya trajo se conservan.')">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete_feed">
+                            <input type="hidden" name="feed" value="{{ feed.pk }}">
+                            <button class="dsh-btn is-small is-danger" type="submit">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="6"><p class="dsh-empty">No hay ninguna fuente configurada, así que el buscador no tiene dónde leer.</p></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="dsh-card">
+    <h3 class="dsh-section" style="margin-top:0">Agregar una fuente</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_feed">
+        <div class="dsh-row">
+            <div class="dsh-field" style="flex:1 1 180px">
+                <label for="f-slug">Identificador</label>
+                <input class="dsh-input dsh-mono" id="f-slug" name="slug" maxlength="60" placeholder="gnews-invasiones" required>
+            </div>
+            <div class="dsh-field" style="flex:1 1 200px">
+                <label for="f-kind">Tipo</label>
+                <select class="dsh-select" id="f-kind" name="kind">
+                    {% for value, label in feed_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="dsh-row" style="margin-top:12px">
+            <div class="dsh-field" style="flex:2 1 280px">
+                <label for="f-query">Términos a buscar <span class="dsh-muted">(para una búsqueda)</span></label>
+                <input class="dsh-input" id="f-query" name="query" maxlength="200" placeholder='despojo de inmuebles CDMX'>
+            </div>
+        </div>
+        <div class="dsh-row" style="margin-top:12px">
+            <div class="dsh-field" style="flex:2 1 280px">
+                <label for="f-url">URL del RSS <span class="dsh-muted">(para el feed de un medio)</span></label>
+                <input class="dsh-input" id="f-url" name="url" type="url" maxlength="500" placeholder="https://www.ejemplo.mx/rss/capital.xml">
+            </div>
+            <div class="dsh-field" style="flex:1 1 160px">
+                <label for="f-name">Nombre del medio</label>
+                <input class="dsh-input" id="f-name" name="name" maxlength="120" placeholder="La Jornada">
+            </div>
+        </div>
+        <div class="dsh-row" style="margin-top:12px">
+            <div class="dsh-field" style="flex:2 1 260px">
+                <label for="f-notes">Nota interna</label>
+                <input class="dsh-input" id="f-notes" name="notes" maxlength="200">
+            </div>
+            <label class="dsh-small" style="flex:1 1 220px; padding-bottom:8px">
+                <input type="checkbox" name="scoped" checked>
+                La fuente ya está acotada a la CDMX
+            </label>
+            <button class="dsh-btn is-primary" type="submit">Agregar fuente</button>
+        </div>
+        <p class="dsh-small dsh-muted" style="margin:12px 0 0">
+            Una <em>búsqueda</em> consulta Google Noticias con los términos que escribas;
+            cubre a toda la prensa pero enlaza al agregador. El <em>feed de un medio</em>
+            enlaza directo, si el medio publica RSS.
+        </p>
+    </form>
+</div>
+
+<h2 class="dsh-section">Palabras clave</h2>
+<p class="dsh-note">
+    Se comparan contra el titular y el resumen, ignorando acentos y mayúsculas:
+    <code>invasión</code> e <code>INVASION</code> son el mismo término.
+    Si no hay ningún término de <em>tema</em> activo, no se filtra por asunto y
+    entra todo lo que traigan las fuentes.
+</p>
+
+<div class="dsh-grid-2">
+    {% for group in keyword_groups %}
+        <div class="dsh-card">
+            <h3 class="dsh-section" style="margin-top:0">{{ group.label }}</h3>
+            {% if group.terms %}
+                <table class="dsh-table">
+                    <tbody>
+                    {% for keyword in group.terms %}
+                        <tr>
+                            <td {% if not keyword.is_active %}class="dsh-muted"{% endif %}>
+                                {{ keyword.term }}
+                                {% if not keyword.is_active %}<span class="dsh-badge">inactivo</span>{% endif %}
+                                {% if keyword.notes %}<br><span class="dsh-small dsh-muted">{{ keyword.notes }}</span>{% endif %}
+                            </td>
+                            <td class="dsh-nowrap" style="text-align:right">
+                                <form method="post" class="dsh-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="toggle_keyword">
+                                    <input type="hidden" name="keyword" value="{{ keyword.pk }}">
+                                    <button class="dsh-btn is-small" type="submit">{% if keyword.is_active %}Desactivar{% else %}Activar{% endif %}</button>
+                                </form>
+                                <form method="post" class="dsh-inline" onsubmit="return confirm('¿Eliminar «{{ keyword.term }}»?')">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_keyword">
+                                    <input type="hidden" name="keyword" value="{{ keyword.pk }}">
+                                    <button class="dsh-btn is-small is-danger" type="submit">✕</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="dsh-empty">Sin términos en esta lista.</p>
+            {% endif %}
+
+            <form method="post" class="dsh-row" style="margin-top:14px">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="add_keyword">
+                <input type="hidden" name="kind" value="{{ group.kind }}">
+                <div class="dsh-field" style="flex:1 1 160px">
+                    <label for="k-{{ group.kind }}">Agregar término</label>
+                    <input class="dsh-input" id="k-{{ group.kind }}" name="term" maxlength="80" required>
+                </div>
+                <button class="dsh-btn" type="submit">Agregar</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

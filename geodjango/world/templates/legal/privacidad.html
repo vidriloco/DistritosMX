@@ -1,0 +1,205 @@
+{% extends "legal/base.html" %}
+
+{% block page_title %}Aviso de Privacidad{% endblock %}
+{% block page_description %}Aviso de privacidad de {{ site_name }}: qué datos personales recabamos, para qué los usamos y cómo ejercer tus derechos ARCO.{% endblock %}
+
+{% block content %}
+<h1 class="legal-title">Aviso de Privacidad</h1>
+<p class="legal-updated">Última actualización: {{ updated_at }}</p>
+
+<p class="legal-lede">
+    Este aviso explica qué datos personales recabamos en {{ site_name }}, para qué los usamos,
+    con quién los compartimos y cómo puedes controlarlos. Está redactado en los términos de la
+    Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP).
+</p>
+
+<h2>1. Quién es responsable de tus datos</h2>
+<p>
+    El responsable del tratamiento de tus datos personales es <strong>{{ company_name }}</strong>,
+    con domicilio en {{ company_address }} y correo de contacto
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>. {{ site_name }} es una
+    plataforma de análisis territorial y visualización de datos geoespaciales de México
+    operada por {{ company_name }}.
+</p>
+
+<h2>2. Qué datos recabamos</h2>
+<p>
+    Sólo recabamos datos personales cuando tú decides enviárnoslos a través de un formulario,
+    más los datos técnicos que genera cualquier navegación en internet. No compramos bases de
+    datos ni obtenemos tus datos de terceros.
+</p>
+
+<table class="legal-table">
+    <thead>
+        <tr>
+            <th>Origen</th>
+            <th>Datos</th>
+            <th>¿Es obligatorio?</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Formulario de contacto</td>
+            <td>Nombre, correo electrónico, mensaje y la página desde la que nos escribiste</td>
+            <td>Sí, para poder responderte</td>
+        </tr>
+        <tr>
+            <td>Formulario “Reporta tu caso” (despojos)</td>
+            <td>Nombre, correo electrónico, alcaldía, colonia, año de los hechos, si presentaste
+                denuncia y el relato de lo ocurrido</td>
+            <td>Sólo nombre y correo; el resto es opcional</td>
+        </tr>
+        <tr>
+            <td>Navegación</td>
+            <td>Dirección IP, tipo de navegador y dispositivo, páginas visitadas y capas
+                consultadas</td>
+            <td>Se genera automáticamente</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3>Datos personales sensibles</h3>
+<p>
+    El formulario “Reporta tu caso” puede contener <strong>datos personales sensibles</strong>:
+    el relato de un delito del que fuiste víctima, y con él información sobre tu patrimonio, tu
+    domicilio y tu situación jurídica. Por eso ese formulario exige tu
+    <strong>consentimiento expreso</strong> mediante una casilla que debes marcar antes de
+    enviarlo. Sin esa casilla marcada, el formulario no se envía.
+</p>
+
+<h2>3. Para qué usamos tus datos</h2>
+<p><strong>Finalidades primarias</strong> (necesarias para darte el servicio):</p>
+<ul>
+    <li>Responder tu mensaje o dar seguimiento a tu caso por correo electrónico.</li>
+    <li>Identificar desde qué sección nos escribiste, para entender qué necesitas.</li>
+    <li>Mantener la seguridad de la plataforma y prevenir abusos, fraude y envíos automatizados.</li>
+    <li>Elaborar estadísticas agregadas de uso que nos indiquen qué capas y secciones se consultan.</li>
+</ul>
+<p><strong>Finalidades secundarias</strong> (no necesarias, y puedes oponerte a ellas):</p>
+<ul>
+    <li>Contactarte sobre nuevas funciones, proyectos o publicaciones de {{ site_name }}.</li>
+</ul>
+<p>
+    Si no quieres que usemos tus datos para las finalidades secundarias, escríbenos a
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>. Negarte no afecta en nada la
+    respuesta a tu mensaje ni el seguimiento de tu caso.
+</p>
+
+<h2>4. Qué no hacemos con tus datos</h2>
+<div class="legal-callout">
+    <p>
+        <strong>No vendemos ni rentamos tus datos personales a nadie.</strong>
+    </p>
+    <p>
+        Lo que envías por el formulario “Reporta tu caso” <strong>no se publica, no se dibuja en
+        el mapa y no se entrega a terceros</strong>. Se lee internamente para darte seguimiento
+        por correo. Publicar cualquier parte de tu testimonio requeriría tu autorización
+        posterior, por separado y por escrito.
+    </p>
+    <p>
+        Los puntos que sí aparecen en el mapa de despojos provienen de datos abiertos de la
+        Fiscalía General de Justicia de la Ciudad de México, no de los casos que la gente nos
+        envía por el formulario.
+    </p>
+</div>
+
+<h2>5. Cookies y tecnologías similares</h2>
+<p>
+    {{ site_name }} usa cookies propias para recordar preferencias de la interfaz —por ejemplo,
+    que ya cerraste la presentación de una sección y no quieres verla de nuevo—. Estas cookies no
+    te identifican ni te siguen fuera del sitio.
+</p>
+<p>
+    También usamos <strong>Mixpanel</strong>, un servicio de analítica que guarda un
+    identificador anónimo en el almacenamiento local de tu navegador para medir el uso agregado
+    de la plataforma. No usamos cookies de publicidad ni vendemos perfiles de navegación.
+</p>
+<p>
+    Puedes borrar o bloquear las cookies y el almacenamiento local desde la configuración de tu
+    navegador. Si lo haces, el sitio sigue funcionando, pero es posible que vuelvas a ver los
+    mensajes de bienvenida.
+</p>
+
+<h2>6. Con quién compartimos datos</h2>
+<p>
+    No transferimos tus datos personales a terceros para que los usen por su cuenta. Sí nos
+    apoyamos en proveedores que los tratan por encargo nuestro y sólo para operar el servicio:
+</p>
+<ul>
+    <li><strong>Proveedor de hospedaje</strong>: almacena la base de datos y los registros del servidor.</li>
+    <li><strong>Mapbox</strong>: entrega los mapas base; recibe tu dirección IP al cargar los mosaicos del mapa.</li>
+    <li><strong>Mixpanel</strong>: analítica de uso agregada.</li>
+    <li><strong>Redes de distribución de contenido</strong> (jsDelivr, Cloudflare, unpkg): entregan
+        librerías de código; reciben tu dirección IP al cargar los archivos.</li>
+</ul>
+<p>
+    Algunos de estos proveedores están fuera de México, por lo que tus datos pueden tratarse en
+    el extranjero. También podemos divulgar datos cuando una autoridad competente lo requiera
+    conforme a la ley.
+</p>
+
+<h2>7. Cuánto tiempo conservamos tus datos</h2>
+<p>
+    Conservamos los mensajes de contacto y los reportes de caso mientras sean necesarios para
+    darles seguimiento y, después, durante el plazo que exija la ley. Puedes pedirnos que los
+    eliminemos antes en cualquier momento.
+</p>
+
+<h2>8. Tus derechos ARCO</h2>
+<p>Tienes derecho a:</p>
+<ul>
+    <li><strong>Acceder</strong> a los datos personales que tenemos sobre ti.</li>
+    <li><strong>Rectificarlos</strong> cuando sean inexactos o estén incompletos.</li>
+    <li><strong>Cancelarlos</strong> cuando consideres que no los necesitamos.</li>
+    <li><strong>Oponerte</strong> a que los usemos para fines determinados.</li>
+</ul>
+<p>
+    También puedes <strong>revocar tu consentimiento</strong> en cualquier momento, incluido el
+    consentimiento expreso que diste al enviar un reporte de caso.
+</p>
+<p>
+    Para ejercer cualquiera de estos derechos, escríbenos a
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a> desde el correo con el que nos
+    contactaste, indicando qué derecho quieres ejercer y a qué datos te refieres. Te
+    responderemos en un plazo máximo de <strong>20 días hábiles</strong>. Si no quedas conforme
+    con nuestra respuesta, puedes acudir ante la autoridad competente en materia de protección
+    de datos personales.
+</p>
+
+<h2>9. Seguridad</h2>
+<p>
+    El sitio se sirve por conexión cifrada y el acceso a los reportes y mensajes está restringido
+    al personal que da seguimiento a los casos. Aun así, ningún sistema es completamente
+    infalible: no podemos garantizar seguridad absoluta.
+</p>
+<div class="legal-callout">
+    <p>
+        Si tu seguridad física está en riesgo, considera qué información compartes por internet.
+        Puedes escribirnos sin incluir domicilios exactos ni nombres de terceros; con la alcaldía
+        y la colonia es suficiente para orientarte.
+    </p>
+</div>
+
+<h2>10. Menores de edad</h2>
+<p>
+    {{ site_name }} no está dirigido a menores de 18 años y no recabamos intencionalmente sus
+    datos. Si detectamos que recibimos datos de un menor sin autorización de quien ejerce la
+    patria potestad, los eliminaremos.
+</p>
+
+<h2>11. Cambios a este aviso</h2>
+<p>
+    Podemos actualizar este aviso cuando cambien nuestras prácticas o la legislación aplicable.
+    La versión vigente siempre estará publicada en esta página con su fecha de última
+    actualización. Si el cambio es sustancial, lo haremos notar en el sitio.
+</p>
+
+<h2>12. Contacto</h2>
+<p>
+    Cualquier duda sobre este aviso o sobre el tratamiento de tus datos:
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+</p>
+<p>
+    Consulta también nuestros <a href="/terminos">Términos y Condiciones</a>.
+</p>
+{% endblock %}

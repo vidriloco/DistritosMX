@@ -3,34 +3,51 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Distritos MX - Ofrecemos respuestas a interrogantes territoriales</title>
+    {% comment %}
+    Rendered server-side from world/seo.py. Social crawlers do not run JS, so
+    the client-side seoConfig further down never reaches them — these tags are
+    the only thing a shared link is judged on.
+
+    Multi-line notes must use this comment block. The short hash form only works
+    on a single line and is emitted verbatim into the page when it spans several.
+    {% endcomment %}
+    <title>{{ seo.title }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Distritos MX: Plataforma de análisis territorial y visualización de datos geoespaciales para México. Explora indicadores demográficos, económicos y de movilidad urbana.">
-    <meta name="keywords" content="distritos mx, análisis territorial, datos geoespaciales, indicadores demográficos, movilidad urbana, México, geografía, estadísticas, mapas interactivos">
-    <meta name="author" content="Distritos MX">
+    <meta name="description" content="{{ seo.description }}">
+    {% if seo.keywords %}<meta name="keywords" content="{{ seo.keywords }}">{% endif %}
+    <meta name="author" content="{{ seo.site_name }}">
     <meta name="robots" content="index, follow">
     <meta name="language" content="es">
     <meta name="revisit-after" content="7 days">
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://distritos.mx/">
-    <meta property="og:title" content="Distritos MX - Análisis Territorial Inteligente">
-    <meta property="og:description" content="Plataforma de análisis territorial y visualización de datos geoespaciales para México. Explora indicadores demográficos, económicos y de movilidad urbana.">
-    <meta property="og:image" content="{% static 'images/opengraph-seo.jpg' %}">
+    <!-- Open Graph / Facebook / WhatsApp / LinkedIn -->
+    {% comment %}
+    Absolute URLs are mandatory here: a relative og:image is dropped without
+    warning by every major crawler, which is why links previewed bare.
+    {% endcomment %}
+    <meta property="og:type" content="{{ seo.og_type }}">
+    <meta property="og:url" content="{{ seo.canonical }}">
+    <meta property="og:title" content="{{ seo.og_title }}">
+    <meta property="og:description" content="{{ seo.og_description }}">
+    <meta property="og:image" content="{{ seo.image }}">
+    <meta property="og:image:secure_url" content="{{ seo.image }}">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:site_name" content="Distritos MX">
+    <meta property="og:image:alt" content="{{ seo.image_alt }}">
+    <meta property="og:site_name" content="{{ seo.site_name }}">
     <meta property="og:locale" content="es_MX">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://distritos.mx/">
-    <meta property="twitter:title" content="Distritos MX - Análisis Territorial Inteligente">
-    <meta property="twitter:description" content="Plataforma de análisis territorial y visualización de datos geoespaciales para México. Explora indicadores demográficos, económicos y de movilidad urbana.">
-    <meta property="twitter:image" content="{% static 'images/twitter-seo.jpg' %}">
+    {% if seo.section %}<meta property="article:section" content="{{ seo.section }}">{% endif %}
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ seo.canonical }}">
+    <meta name="twitter:title" content="{{ seo.og_title }}">
+    <meta name="twitter:description" content="{{ seo.og_description }}">
+    <meta name="twitter:image" content="{{ seo.image }}">
+    <meta name="twitter:image:alt" content="{{ seo.image_alt }}">
     
     <!-- Additional SEO -->
     <meta name="theme-color" content="#010846">
@@ -40,7 +57,7 @@
     <meta name="apple-mobile-web-app-title" content="Distritos MX">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="https://distritos.mx/">
+    <link rel="canonical" href="{{ seo.canonical }}">
     
     <!-- Sitemap -->
     <link rel="sitemap" type="application/xml" title="Sitemap" href="https://distritos.mx/sitemap.xml">
@@ -55,13 +72,38 @@
     <meta name="geo.placename" content="México">
     <meta name="geo.position" content="23.6345;-102.5528">
     <meta name="ICBM" content="23.6345, -102.5528">
-    <meta name="DC.title" content="Distritos MX">
-    <meta name="DC.description" content="Plataforma de análisis territorial y visualización de datos geoespaciales para México">
+    <meta name="DC.title" content="{{ seo.title }}">
+    <meta name="DC.description" content="{{ seo.description }}">
     <meta name="DC.language" content="es">
     <meta name="DC.coverage" content="México">
     <meta name="DC.subject" content="Análisis territorial, datos geoespaciales, indicadores demográficos">
     
     <!-- Structured Data -->
+    {% if seo.dataset %}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Dataset",
+        "name": "{{ seo.dataset.name|escapejs }}",
+        "description": "{{ seo.dataset.description|escapejs }}",
+        "url": "{{ seo.canonical }}",
+        "image": "{{ seo.image }}",
+        "inLanguage": "es-MX",
+        "temporalCoverage": "{{ seo.dataset.temporal }}",
+        "spatialCoverage": {
+            "@type": "Place",
+            "name": "{{ seo.dataset.spatial|escapejs }}"
+        },
+        "isBasedOn": "{{ seo.dataset.source|escapejs }}",
+        "keywords": "{{ seo.keywords|escapejs }}",
+        "creator": {
+            "@type": "Organization",
+            "name": "{{ seo.site_name }}",
+            "url": "{{ seo.canonical }}"
+        }
+    }
+    </script>
+    {% endif %}
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -3006,6 +3048,16 @@
             border-radius: 2px;
             margin-bottom: 6px;
         }
+        /* Filled rather than outlined: this tag is not a footnote on the year,
+           it is the reason the number under it is small. Kept on one line —
+           it is a question, and a question broken across two lines stops
+           reading as one. */
+        .despojo-tag.is-missing {
+            color: #fff;
+            background: var(--dsp-amber, #a8700c);
+            border-color: var(--dsp-amber, #a8700c);
+            white-space: nowrap;
+        }
         .despojo-spinner {
             width: 12px; height: 12px;
             border: 2px solid var(--dsp-line, #dce0da);
@@ -3049,6 +3101,27 @@
         .despojo-delta-chip.is-flat {
             color: var(--dsp-faint, #77827f); background: var(--dsp-inset, #eef0ed);
             font-weight: 500;
+        }
+
+        /* The gap in the source, stated under the count it explains. Amber and
+           boxed so it is not read as one more caption: on a partial year this
+           is the most important thing on the panel. */
+        .despojo-missing {
+            display: flex; align-items: flex-start; gap: 8px;
+            margin: 10px 0 0; padding: 9px 11px;
+            font-size: 12px; line-height: 1.45;
+            color: var(--dsp-ink, #1a2027);
+            background: rgba(168,112,12,.10);
+            border-left: 3px solid var(--dsp-amber, #a8700c);
+            border-radius: 0 3px 3px 0;
+        }
+        .despojo-missing strong { color: var(--dsp-amber, #a8700c); }
+        .despojo-missing-mark {
+            flex: 0 0 auto;
+            width: 15px; height: 15px; margin-top: 1px;
+            border-radius: 50%;
+            background: var(--dsp-amber, #a8700c); color: #fff;
+            font-size: 10px; font-weight: 700; line-height: 15px; text-align: center;
         }
 
         .despojo-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
@@ -3115,6 +3188,22 @@
             .despojo-nearcta, .despojo-nearcta-arrow { transition: none; }
             .despojo-nearcta:hover { transform: none; }
         }
+
+        /* Outlined, not filled: reporting a case is an offer that closes the
+           "cerca de mí" view, not an action the reader came for. */
+        .despojo-report {
+            display: flex; align-items: center; justify-content: center; gap: 7px;
+            width: 100%; margin-top: 10px; padding: 11px 12px;
+            border: 1px solid var(--dsp-seal, #98122b); border-radius: 5px;
+            background: transparent; color: var(--dsp-seal, #98122b); cursor: pointer;
+            font-family: 'Ruda', sans-serif; font-size: 11.5px; font-weight: 700;
+            letter-spacing: .05em; text-transform: uppercase;
+            transition: background .14s ease, color .14s ease;
+        }
+        .despojo-report svg { width: 14px; height: 14px; flex: none; }
+        .despojo-report:hover { background: var(--dsp-seal, #98122b); color: #fff; }
+        .despojo-report:focus-visible { outline: 2px solid var(--dsp-ink, #1a2027); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { .despojo-report { transition: none; } }
 
         .despojo-back {
             display: inline-flex; align-items: center; gap: 5px;
@@ -3954,12 +4043,222 @@
             background: rgba(255, 255, 255, 0.3);
             color: #fff;
         }
-        
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-dropdown-caret {
+            font-size: 0.7rem;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-dropdown-caret.open {
+            transform: rotate(180deg);
+        }
+
+        .nav-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            min-width: 180px;
+            background: rgba(2, 1, 62, 0.95);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            padding: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 1001;
+        }
+
+        .nav-dropdown-item {
+            background: none;
+            border: none;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: left;
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .nav-dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* ---- contact form modal (opened from the nav "Contacto" entry) ---- */
+        .contact-modal-backdrop {
+            position: fixed; inset: 0; background: rgba(2, 1, 62, 0.55);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 999999; padding: 20px;
+            /* The nav this opens from disables pointer events so clicks reach
+               the map; the modal has to take them back. */
+            pointer-events: auto;
+        }
+        .contact-modal {
+            background: #fff; border-radius: 10px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+            width: 100%; max-width: 560px;
+            max-height: calc(100vh - 40px); overflow-y: auto;
+            padding: 28px; position: relative;
+            font-family: 'Ruda', sans-serif; color: #1a2027;
+            text-align: left;
+        }
+        /* The template has no global border-box reset, so a `width: 100%` input
+           with padding overflows its column by exactly the padding. */
+        .contact-modal *,
+        .contact-modal *::before,
+        .contact-modal *::after { box-sizing: border-box; }
+
+        .contact-modal-close {
+            position: absolute; top: 12px; right: 14px;
+            background: none; border: 0; font-size: 26px; line-height: 1;
+            color: #77827f; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+        }
+        .contact-modal-close:hover { background: #eef0ed; color: #1a2027; }
+
+        .contact-title {
+            font-family: 'Ruda', sans-serif; font-size: 24px; font-weight: 700;
+            margin: 0; color: #02013e;
+        }
+        .contact-lede {
+            font-size: 13.5px; line-height: 1.55; color: #4d5a5c;
+            margin: 8px 0 0 0; max-width: 46ch;
+        }
+
+        .contact-formgrid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 14px 18px; margin-top: 20px;
+        }
+        .contact-field { display: flex; flex-direction: column; gap: 5px; }
+        .contact-field-wide { grid-column: 1 / -1; }
+        .contact-field > span {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .1em; color: #4d5a5c;
+        }
+        .contact-field input,
+        .contact-field textarea {
+            font-family: 'Ruda', sans-serif; font-size: 14px;
+            color: #1a2027; background: #fff;
+            border: 1px solid #dce0da; border-radius: 6px;
+            padding: 10px 11px; width: 100%;
+        }
+        .contact-field textarea { resize: vertical; min-height: 110px; }
+        .contact-field input:focus,
+        .contact-field textarea:focus {
+            outline: 2px solid #02013e; outline-offset: -1px;
+            border-color: #02013e;
+        }
+        .contact-req { color: #98122b; }
+
+        /* Honeypot: off-screen rather than display:none, which some bots skip. */
+        .contact-hp {
+            position: absolute; left: -9999px; width: 1px; height: 1px;
+            overflow: hidden;
+        }
+
+        .contact-error {
+            color: #98122b; font-size: 12.5px; font-weight: 600;
+            margin: 12px 0 0 0;
+        }
+        .contact-formfoot { margin-top: 18px; }
+        .contact-cta {
+            display: block; width: 100%;
+            font-family: 'Ruda', sans-serif; font-size: 14px; font-weight: 600;
+            color: #fff; background: #02013e;
+            border: 0; border-radius: 6px; padding: 13px 18px;
+            cursor: pointer; transition: opacity .2s ease;
+        }
+        .contact-cta:hover { opacity: .88; }
+        .contact-cta:disabled { opacity: .5; cursor: not-allowed; }
+        .contact-cta:focus-visible { outline: 2px solid #02013e; outline-offset: 2px; }
+        .contact-privacy {
+            display: block; font-size: 11px; color: #77827f;
+            margin-top: 10px; text-align: center;
+        }
+        .contact-sent { text-align: center; padding: 20px 0; }
+        .contact-sent .contact-lede { margin: 10px auto 20px; max-width: 40ch; }
+        .contact-sent .contact-cta { max-width: 200px; margin-inline: auto; }
+
+        @media (max-width: 720px) {
+            .contact-formgrid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .contact-cta { transition: none; }
+        }
+
+        /* "Un proyecto de Taller de Apps" credit */
+        .project-credit {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(2, 1, 62, 0.55);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-decoration: none;
+            transition: background 0.2s ease;
+        }
+
+        .project-credit:hover {
+            background: rgba(2, 1, 62, 0.8);
+        }
+
+        .project-credit-text {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            white-space: nowrap;
+        }
+
+        .project-credit-logo {
+            height: 18px;
+            width: auto;
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .navigation-bar {
                 top: 5px;
                 left: 5px;
                 right: 5px;
+            }
+
+            .project-credit {
+                bottom: 34px;
+                padding: 6px 12px;
+                gap: 8px;
+            }
+
+            .project-credit-text {
+                font-size: 0.68rem;
+            }
+
+            .project-credit-logo {
+                height: 15px;
             }
             
             .nav-content {
@@ -5401,16 +5700,18 @@
     </style>
 </head>
 <body>
+    {% if "/proyectos/mapas/despojos-viviendas" not in request.path %}
     <div class="loading-view">
         <div class="loading-content">
-            <img 
-                src="{% static 'images/distritos-mx-logo.png' %}" 
-                alt="Distritos MX Logo" 
+            <img
+                src="{% static 'images/distritos-mx-logo.png' %}"
+                alt="Distritos MX Logo"
                 class="loading-logo"
             />
             <img src="{% static 'images/walking-animation.gif' %}" alt="Loading Text" class="loading-animation">
         </div>
     </div>
+    {% endif %}
     <div id="root"></div>
 
     <!-- Load Theme Manager -->
@@ -5699,6 +6000,7 @@
     <script type="text/babel" src="{% static 'js/components/TransportPageWelcomeIntro.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/RotatingMap.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/TopNavigationBar.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/ContactForm.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/NavigationBar.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/Spacer.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/PhoneLocationTooltip.js' %}"></script>
@@ -5777,6 +6079,25 @@
                 ogTitle: 'Trip Faker - Distritos MX',
                 ogDescription: 'Pantalla dividida con mapa y visor JSON para experimentar con recorridos.',
                 canonical: 'https://distritos.mx/trip-faker'
+            },
+            // Kept in step with world/seo.py. Without an entry here the updater
+            // falls back to '/' and overwrites the server-rendered tags with the
+            // home page's — and Googlebot does run this.
+            '/proyectos/mapas/despojos-viviendas': {
+                title: 'Despojo de vivienda en la CDMX: el mapa de los casos denunciados — Distritos MX',
+                description: 'Mapa interactivo del despojo de vivienda en la Ciudad de México a partir de las carpetas de investigación de la Fiscalía General de Justicia desde 2016: dónde se concentra, cómo cambia año con año y qué alcaldías acumulan más casos.',
+                keywords: 'despojo de vivienda, despojo CDMX, invasión de inmuebles, FGJ CDMX, carpetas de investigación, mapa de despojos, Ciudad de México, datos abiertos',
+                ogTitle: 'Despojo de vivienda en la CDMX: el mapa de los casos denunciados',
+                ogDescription: 'Miles de carpetas de investigación por despojo abiertas ante la FGJ desde 2016, colocadas en el mapa: dónde se concentra, cómo cambia año con año y qué alcaldías acumulan más casos.',
+                canonical: 'https://distritos.mx/proyectos/mapas/despojos-viviendas'
+            },
+            '/proyectos/mapas/turistas-cdmx-2024-2025': {
+                title: 'Turistas en la CDMX 2024–2025 — Distritos MX',
+                description: 'Cómo se mueven las personas visitantes en la Ciudad de México: zonas más visitadas, temporalidad y concentración por colonia.',
+                keywords: 'turismo CDMX, turistas Ciudad de México, movilidad turística, datos de visitantes, colonias más visitadas',
+                ogTitle: 'Por dónde se mueven las personas turistas en la CDMX',
+                ogDescription: 'Zonas más visitadas, temporalidad y concentración por colonia en la Ciudad de México.',
+                canonical: 'https://distritos.mx/proyectos/mapas/turistas-cdmx-2024-2025'
             }
         };
 

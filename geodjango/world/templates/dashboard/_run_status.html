@@ -1,0 +1,5 @@
+{% comment %}A run's status as a coloured chip.{% endcomment %}
+{% if run.status == 'running' %}<span class="dsh-badge is-running">En curso</span>
+{% elif run.status == 'ok' %}<span class="dsh-badge is-approved">Terminada</span>
+{% elif run.status == 'partial' %}<span class="dsh-badge is-pending">Con fuentes caídas</span>
+{% else %}<span class="dsh-badge is-failed">Falló</span>{% endif %}

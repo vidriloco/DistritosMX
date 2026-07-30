@@ -17,7 +17,19 @@ from world.views_categorized.despojos import (
     get_despojo_points,
     get_despojo_summary,
     get_despojo_boroughs,
+    get_despojo_news,
     submit_despojo_report,
+)
+from world.views_categorized.contact import submit_contact_lead
+from world.views_categorized.legal import privacy_page, terms_page
+from world.views_categorized.dashboard import (
+    dashboard_home,
+    dashboard_news,
+    dashboard_sources,
+    dashboard_runs,
+    dashboard_run,
+    dashboard_leads,
+    dashboard_reports,
 )
 from django.views.static import serve
 import os
@@ -45,6 +57,12 @@ urlpatterns = [
     path('acerca-de', map_admin_page, name='acerca_de_page'),
     path('acerca-de/', map_admin_page, name='acerca_de_page_with_slash'),
 
+    # Legal pages, linked from every form that collects personal data
+    path('privacidad', privacy_page, name='privacy_page'),
+    path('privacidad/', privacy_page, name='privacy_page_with_slash'),
+    path('terminos', terms_page, name='terms_page'),
+    path('terminos/', terms_page, name='terms_page_with_slash'),
+
     # API for AGEBs
     path('api/agebs/all', get_all_agebs, name='get_all_agebs'),
     path('api/neighborhoods/all', get_all_neighborhoods, name='get_all_neighborhoods'),
@@ -57,7 +75,11 @@ urlpatterns = [
     path('api/despojos/points', get_despojo_points, name='get_despojo_points'),
     path('api/despojos/summary', get_despojo_summary, name='get_despojo_summary'),
     path('api/despojos/by-borough', get_despojo_boroughs, name='get_despojo_boroughs'),
+    path('api/despojos/news', get_despojo_news, name='get_despojo_news'),
     path('api/despojos/report', submit_despojo_report, name='submit_despojo_report'),
+
+    # Contact form in the navigation bar
+    path('api/contacto', submit_contact_lead, name='submit_contact_lead'),
 
 
     path('api/business/location/stats', get_business_location_stats, name='get_business_location_stats'),
@@ -94,8 +116,19 @@ urlpatterns = [
         'document_root': os.path.join(settings.BASE_DIR, 'data', 'transports')
     }),
     
+    # Staff panel. Every view is behind the admin's own session check; an
+    # anonymous visitor is bounced to the admin login and returned here.
+    path('dashboard', RedirectView.as_view(pattern_name='dashboard_home', permanent=False)),
+    path('dashboard/', dashboard_home, name='dashboard_home'),
+    path('dashboard/notas/', dashboard_news, name='dashboard_news'),
+    path('dashboard/fuentes/', dashboard_sources, name='dashboard_sources'),
+    path('dashboard/ejecuciones/', dashboard_runs, name='dashboard_runs'),
+    path('dashboard/ejecuciones/<int:pk>/', dashboard_run, name='dashboard_run'),
+    path('dashboard/leads/', dashboard_leads, name='dashboard_leads'),
+    path('dashboard/reportes/', dashboard_reports, name='dashboard_reports'),
+
     path('admin/', admin.site.urls),
-]   
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

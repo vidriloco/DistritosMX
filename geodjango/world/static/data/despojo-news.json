@@ -1,5 +1,5 @@
 {
-  "_comment": "Curated by hand: no reliable public API exists for the Mexican press. Review weekly and keep the four most relevant items. Newest first.",
+  "_comment": "Fallback only. The rail reads /api/despojos/news, filled by the despojo_news_fetch RSS job and approved in the admin; this file is what it shows if that endpoint is down or nothing has been approved yet. Newest first.",
   "updated": "2026-07-29",
   "items": [
     {

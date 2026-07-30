@@ -1,0 +1,33 @@
+{% extends "admin/change_list.html" %}
+
+{# Buttons rather than links: starting a run changes things, so it goes over POST. #}
+{% block object-tools-items %}
+  <li>
+    <form method="post" action="{% url 'admin:world_despojonewsrun_run_now' %}" style="display:inline">
+      {% csrf_token %}
+      <input type="hidden" name="days" value="7">
+      <button type="submit" class="button" style="cursor:pointer">Buscar notas ahora (7 días)</button>
+    </form>
+  </li>
+  <li>
+    <form method="post" action="{% url 'admin:world_despojonewsrun_run_now' %}" style="display:inline">
+      {% csrf_token %}
+      <input type="hidden" name="days" value="30">
+      <button type="submit" class="button" style="cursor:pointer">Buscar en los últimos 30 días</button>
+    </form>
+  </li>
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  <p style="margin:0 0 1em 0; padding:.8em 1em; background:#f6f6f6; border-left:4px solid #999;">
+    El buscador no corre solo: cada ejecución se inicia desde aquí o con
+    <code>manage.py despojo_news_fetch</code>. Las fuentes se administran en
+    <a href="{% url 'admin:world_despojonewsfeed_changelist' %}">Fuentes de noticias</a>
+    y los términos en
+    <a href="{% url 'admin:world_despojonewskeyword_changelist' %}">Palabras clave</a>.
+    Lo que encuentre queda
+    <a href="{% url 'admin:world_despojonewsitem_changelist' %}?review_status__exact=pending">por revisar</a>.
+  </p>
+  {{ block.super }}
+{% endblock %}

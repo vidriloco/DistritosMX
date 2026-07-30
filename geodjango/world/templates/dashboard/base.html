@@ -1,0 +1,59 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {# Staff-only, and two of these pages hold personal data of crime victims. #}
+    <meta name="robots" content="noindex, nofollow, noarchive">
+    <title>{% block title %}Panel{% endblock %} · Distritos MX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Ruda:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    {% block head %}{% endblock %}
+</head>
+<body class="dsh">
+
+<header class="dsh-top">
+    <div class="dsh-top-inner">
+        <a class="dsh-brand" href="{% url 'dashboard_home' %}">Distritos<span>MX</span> · Panel</a>
+
+        <nav class="dsh-nav">
+            <a href="{% url 'dashboard_home' %}" class="{% if section == 'home' %}is-current{% endif %}">Resumen</a>
+            <a href="{% url 'dashboard_news' %}" class="{% if section == 'news' %}is-current{% endif %}">
+                Notas
+                {% if nav_news_pending %}<span class="dsh-badge is-pending">{{ nav_news_pending }}</span>{% endif %}
+            </a>
+            <a href="{% url 'dashboard_sources' %}" class="{% if section == 'sources' %}is-current{% endif %}">Fuentes y términos</a>
+            <a href="{% url 'dashboard_runs' %}" class="{% if section == 'runs' %}is-current{% endif %}">Ejecuciones</a>
+            <a href="{% url 'dashboard_leads' %}" class="{% if section == 'leads' %}is-current{% endif %}">
+                Leads
+                {% if nav_leads_new %}<span class="dsh-badge is-pending">{{ nav_leads_new }}</span>{% endif %}
+            </a>
+            <a href="{% url 'dashboard_reports' %}" class="{% if section == 'reports' %}is-current{% endif %}">
+                Reportes de despojo
+                {% if nav_reports_new %}<span class="dsh-badge is-pending">{{ nav_reports_new }}</span>{% endif %}
+            </a>
+        </nav>
+
+        <div class="dsh-who">
+            {{ request.user.get_username }}
+            <a href="{% url 'admin:index' %}">Admin</a>
+            <a href="{% url 'admin:logout' %}">Salir</a>
+        </div>
+    </div>
+</header>
+
+<main class="dsh-main">
+    {% if messages %}
+        <div class="dsh-msgs">
+            {% for message in messages %}
+                <div class="dsh-msg is-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

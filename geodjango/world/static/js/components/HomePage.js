@@ -99,6 +99,21 @@ function HomePage({ initialStateIndex = 0, showCatchLead = false }) {
             {showCatchLeadPanel && (
                 <CatchLeadPanel onClose={handleCloseCatchLeadPanel} init={catchLeadInit} />
             )}
+
+            {/* Project credit */}
+            <a
+                className="project-credit"
+                href="https://tallerdeapps.mx"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+                <span className="project-credit-text">Un proyecto de</span>
+                <img
+                    src="/static/images/taller-de-apps-logo.svg"
+                    alt="Taller de Apps"
+                    className="project-credit-logo"
+                />
+            </a>
         </div>
     );
 }

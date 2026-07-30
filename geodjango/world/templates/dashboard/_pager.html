@@ -1,0 +1,19 @@
+{% comment %}
+Paginator links that keep whatever filters are already on the URL.
+`request.GET.urlencode` still carries the old `page`, so the anchor's own page
+parameter has to come last — later wins when the querystring is parsed.
+{% endcomment %}
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="dsh-pager">
+    {% if page_obj.has_previous %}
+        <a href="?{{ request.GET.urlencode }}&amp;page={{ page_obj.previous_page_number }}">← Anteriores</a>
+    {% endif %}
+    <span class="dsh-pager-at">
+        Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+        · {{ page_obj.paginator.count }} en total
+    </span>
+    {% if page_obj.has_next %}
+        <a href="?{{ request.GET.urlencode }}&amp;page={{ page_obj.next_page_number }}">Siguientes →</a>
+    {% endif %}
+</nav>
+{% endif %}

@@ -214,6 +214,31 @@ function DespojoPlayerPanel() {
     const count = year != null ? (byYear[year] || 0) : 0;
 
     const fmt = n => (n == null ? '—' : Number(n).toLocaleString('es-MX'));
+
+    // Which months a partial year actually has, said by name. "Solo tiene
+    // enero" is a claim a reader can check against the calendar; "1 de 12
+    // meses" leaves them wondering which one is missing. Falls back to the
+    // count when the months are not contiguous, because "de enero a octubre"
+    // would then be a lie about the gaps in between.
+    const MONTHS_ES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                       'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const monthsPhrase = (info) => {
+        const list = (info.monthList || []).slice().sort((a, b) => a - b);
+        const count = `${info.months} de 12 meses`;
+        if (list.length === 1) return { name: MONTHS_ES[list[0] - 1], count: count };
+        const contiguous = list.length > 1 &&
+            list[list.length - 1] - list[0] === list.length - 1;
+        return {
+            name: contiguous
+                ? `de ${MONTHS_ES[list[0] - 1]} a ${MONTHS_ES[list[list.length - 1] - 1]}`
+                : null,
+            count: count,
+        };
+    };
+    const monthsText = (info) => {
+        const m = monthsPhrase(info);
+        return m.name ? `${m.name} (${m.count})` : m.count;
+    };
     const fmtRate = n => Number(n).toLocaleString('es-MX', {
         minimumFractionDigits: 1, maximumFractionDigits: 1
     });
@@ -384,19 +409,11 @@ function DespojoPlayerPanel() {
     // available in the title.
     const deltaChip = () => {
         if (year == null || !summary) return null;
-        if (partialInfo) {
-            // The projection in the summary is for the whole city, so it is only
-            // offered when the whole city is what the panel is reporting on.
-            return selected ? {
-                tone: 'is-partial',
-                label: 'año incompleto',
-                title: `Corte a ${partialInfo.months} de 12 meses.`
-            } : {
-                tone: 'is-partial',
-                label: `≈${fmt(partialInfo.projected)} proyectadas`,
-                title: `Corte a ${partialInfo.months} de 12 meses; proyección directa al año completo.`
-            };
-        }
+        // A year the registry has barely loaded gets no chip: the badge on the
+        // year and the callout under the count already say what is going on,
+        // and a projection next to them would answer the question the panel is
+        // asking with a number the source has not published.
+        if (partialInfo) return null;
         if (year < registryStart) {
             return {
                 tone: 'is-flat',
@@ -413,6 +430,26 @@ function DespojoPlayerPanel() {
             title: `${fmt(count)} carpetas en ${year}, frente a ${fmt(base)} en ${registryStart}.`
         };
     };
+
+    // Opens the intake modal. DespojoPage owns the form and listens for this
+    // event, so the panel doesn't have to thread a callback down through the
+    // map. Only the "cerca de mí" view offers it: someone who just looked up
+    // their own street is who might have a case; the city-wide view is for
+    // reading the data, not for telling us about it.
+    const reportButton = (
+        <button
+            type="button"
+            className="despojo-report"
+            onClick={() => window.dispatchEvent(new Event('despojoOpenForm'))}
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
+                 strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 21V4" />
+                <path d="M5 4h11l-1.7 3.5L16 11H5" />
+            </svg>
+            Reportar despojo
+        </button>
+    );
 
     // ---- render --------------------------------------------------------
     if (error) {
@@ -597,6 +634,8 @@ function DespojoPlayerPanel() {
                         </React.Fragment>
                     )}
                 </div>
+
+                {reportButton}
             </div>
         );
     }
@@ -650,7 +689,14 @@ function DespojoPlayerPanel() {
                 {selectedBorough && (
                     <span className="despojo-scope-name">· {selectedBorough.name}</span>
                 )}
-                {partialInfo && <span className="despojo-tag">Parcial</span>}
+                {partialInfo && (
+                    <span
+                        className="despojo-tag is-missing"
+                        title={`De ${year} el registro público solo tiene ${monthsText(partialInfo)}.`}
+                    >
+                        ¿Dónde están los datos?
+                    </span>
+                )}
                 {!pointsReady && <span className="despojo-spinner" aria-label="Cargando puntos"></span>}
                 {selectedBorough && (
                     <button
@@ -675,6 +721,24 @@ function DespojoPlayerPanel() {
                     );
                 })()}
             </div>
+
+            {/* An incomplete year is not a low year. Said next to the number
+                rather than only as a tag, because the count is the one thing a
+                reader takes away from the panel and 152 against ~3,900 reads as
+                a collapse in despojo unless the gap is spelled out. */}
+            {partialInfo && (
+                <p className="despojo-missing">
+                    <span className="despojo-missing-mark" aria-hidden="true">!</span>
+                    <span>
+                        {/* Neither the question nor the year nor the count is
+                            repeated here: the badge asks, the year is the
+                            headline above and the number sits right on top of
+                            this line. All this has to add is what is missing. */}
+                        Solo hay <strong>{(m => m.name || m.count)(monthsPhrase(partialInfo))}</strong>{' '}
+                        en el registro público: el conteo no es el total del año.
+                    </span>
+                </p>
+            )}
 
             {/* transport */}
             <div className="despojo-controls">
@@ -794,7 +858,7 @@ function DespojoPlayerPanel() {
                                 type="button"
                                 className={'despojo-bar' + (partial[y] ? ' is-partial' : '') + (clipped ? ' is-clipped' : '')}
                                 aria-pressed={y === year}
-                                aria-label={`${y}: ${fmt(n)} carpetas${clipped ? ' (por debajo del inicio del eje)' : ''}`}
+                                aria-label={`${y}: ${fmt(n)} carpetas${partial[y] ? ' (faltan datos del año)' : ''}${clipped ? ' (por debajo del inicio del eje)' : ''}`}
                                 onClick={() => { setPlaying(false); setYear(y); }}
                             >
                                 <span className="despojo-stem" style={{ height: stemHeight(n) + '%' }}>
@@ -803,7 +867,7 @@ function DespojoPlayerPanel() {
                                         It hangs off the top of the stem, so it tracks the bar. */}
                                     <span className="despojo-bartip" aria-hidden="true">
                                         {fmt(n)} carpetas
-                                        {partial[y] && <em> · año incompleto</em>}
+                                        {partial[y] && <em> · faltan datos</em>}
                                         {clipped && <em> · fuera de escala</em>}
                                     </span>
                                 </span>

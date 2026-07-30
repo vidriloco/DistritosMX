@@ -1,0 +1,157 @@
+{% extends "legal/base.html" %}
+
+{% block page_title %}Términos y Condiciones{% endblock %}
+{% block page_description %}Términos y condiciones de uso de {{ site_name }}: alcance del servicio, origen y límites de los datos, usos permitidos y responsabilidades.{% endblock %}
+
+{% block content %}
+<h1 class="legal-title">Términos y Condiciones</h1>
+<p class="legal-updated">Última actualización: {{ updated_at }}</p>
+
+<p class="legal-lede">
+    Estos términos rigen el uso de {{ site_name }}. Al usar el sitio aceptas lo que aquí se
+    describe. Si no estás de acuerdo, te pedimos no utilizarlo.
+</p>
+
+<h2>1. Qué es {{ site_name }}</h2>
+<p>
+    {{ site_name }} es una plataforma operada por <strong>{{ company_name }}</strong> que reúne,
+    procesa y visualiza datos geoespaciales sobre el territorio mexicano: indicadores
+    demográficos y económicos, actividad comercial, sistemas de transporte público e incidencia
+    delictiva reportada, entre otros.
+</p>
+<p>
+    Es una <strong>herramienta de consulta y análisis</strong>. No es un registro oficial, no
+    sustituye a las fuentes gubernamentales y no constituye asesoría de ningún tipo.
+</p>
+
+<h2>2. De dónde vienen los datos</h2>
+<p>
+    La mayor parte de la información proviene de fuentes públicas y datos abiertos, entre ellas:
+</p>
+<ul>
+    <li><strong>INEGI</strong>: marco geoestadístico, AGEB, censos de población y vivienda, y el
+        Directorio Estadístico Nacional de Unidades Económicas (DENUE).</li>
+    <li><strong>Fiscalía General de Justicia de la Ciudad de México</strong>: carpetas de
+        investigación publicadas como datos abiertos.</li>
+    <li><strong>SEMOVI</strong> y los organismos operadores de cada sistema de transporte.</li>
+    <li>Notas periodísticas de medios públicos, enlazadas siempre a su fuente original.</li>
+</ul>
+<p>
+    Los derechos sobre esas fuentes corresponden a quien las publica y se rigen por sus propios
+    términos de uso. Nuestro trabajo consiste en integrarlas, normalizarlas y representarlas.
+</p>
+
+<h2>3. Límites importantes de los datos</h2>
+<div class="legal-callout">
+    <p>
+        <strong>La incidencia delictiva que se muestra refleja delitos denunciados, no delitos
+        ocurridos.</strong> Una zona con más puntos puede ser una zona donde se denuncia más, no
+        necesariamente donde pasan más cosas. La cifra negra —los delitos que nunca se
+        denuncian— no aparece en ningún mapa.
+    </p>
+</div>
+<p>Además:</p>
+<ul>
+    <li>Los datos abiertos se publican con retraso y pueden corregirse después de que los
+        integramos.</li>
+    <li>La ubicación de un registro suele corresponder al punto reportado en la denuncia, que no
+        siempre coincide con el lugar exacto de los hechos.</li>
+    <li>Los indicadores por AGEB o colonia son <strong>agregados estadísticos</strong>: describen
+        una zona, nunca a una persona ni a un inmueble en particular.</li>
+    <li>Partes de la plataforma están en <strong>fase beta</strong> y pueden presentar errores.</li>
+</ul>
+<p>
+    Por lo anterior, <strong>no debes usar {{ site_name }} como base única</strong> para decisiones
+    de inversión, compraventa o arrendamiento de inmuebles, contratación, otorgamiento de
+    crédito o seguros, ni para decisiones legales o de seguridad personal. Verifica siempre
+    contra la fuente oficial.
+</p>
+
+<h2>4. Uso permitido</h2>
+<p>Puedes consultar el sitio, y citar o reproducir sus visualizaciones y hallazgos con fines
+    informativos, periodísticos, académicos o de investigación, siempre que atribuyas la fuente a
+    {{ site_name }} y, cuando corresponda, a la fuente original de los datos.</p>
+
+<h2>5. Uso prohibido</h2>
+<p>No está permitido:</p>
+<ul>
+    <li>Intentar <strong>reidentificar</strong> a personas a partir de datos agregados o
+        cruzarlos con otras bases con ese fin.</li>
+    <li>Usar la información para <strong>discriminar</strong> a personas o comunidades por su
+        lugar de residencia, incluyendo negarles crédito, seguro, empleo o vivienda.</li>
+    <li>Extraer datos de forma automatizada a un volumen o frecuencia que degrade el servicio,
+        ni evadir límites técnicos.</li>
+    <li>Alterar, interferir o intentar acceder sin autorización a la plataforma, sus servidores o
+        sus bases de datos.</li>
+    <li>Presentar la información como oficial, o atribuir a {{ site_name }} afirmaciones que no
+        haya hecho.</li>
+    <li>Enviar por los formularios contenido falso, difamatorio o datos personales de terceros
+        sin su consentimiento.</li>
+</ul>
+
+<h2>6. Contenido que nos envías</h2>
+<p>
+    Cuando usas el formulario de contacto o el de “Reporta tu caso”, conservas la titularidad de
+    lo que escribes. Nos autorizas únicamente a leerlo y tratarlo internamente para responderte
+    y dar seguimiento, en los términos del <a href="/privacidad">Aviso de Privacidad</a>.
+</p>
+<p>
+    <strong>No publicamos tu testimonio ni lo mostramos en el mapa.</strong> Hacerlo requeriría
+    tu autorización posterior, por separado y por escrito. Te pedimos no incluir datos
+    personales de terceros que no te hayan autorizado a compartirlos.
+</p>
+
+<h2>7. Propiedad intelectual</h2>
+<p>
+    El código, el diseño, la marca y las visualizaciones originales de {{ site_name }} pertenecen
+    a {{ company_name }}, salvo los componentes de terceros que se rigen por sus propias
+    licencias. Los datos de origen público conservan la titularidad y las condiciones de la
+    institución que los publica.
+</p>
+
+<h2>8. Disponibilidad del servicio</h2>
+<p>
+    Ofrecemos el sitio “tal cual” y según disponibilidad. Podemos modificar, suspender o
+    descontinuar cualquier sección, capa o conjunto de datos en cualquier momento, incluso sin
+    aviso previo, por mantenimiento, por cambios en las fuentes o por decisión del proyecto.
+</p>
+
+<h2>9. Limitación de responsabilidad</h2>
+<p>
+    No garantizamos que la información esté libre de errores, completa o actualizada, ni que el
+    servicio funcione de forma ininterrumpida. En la medida que permita la ley, {{ company_name }}
+    no será responsable por daños derivados del uso o la imposibilidad de uso del sitio, ni de
+    decisiones tomadas con base en la información aquí publicada.
+</p>
+<p>
+    Si detectas un dato incorrecto, escríbenos: corregirlo nos interesa tanto como a ti.
+</p>
+
+<h2>10. Enlaces a sitios de terceros</h2>
+<p>
+    El sitio enlaza a fuentes oficiales y notas periodísticas que no operamos. No respondemos por
+    su contenido, su disponibilidad ni sus prácticas de privacidad.
+</p>
+
+<h2>11. Cambios a estos términos</h2>
+<p>
+    Podemos actualizar estos términos. La versión vigente siempre estará publicada en esta página
+    con su fecha de última actualización; el uso del sitio después de un cambio implica su
+    aceptación.
+</p>
+
+<h2>12. Ley aplicable</h2>
+<p>
+    Estos términos se rigen por la legislación mexicana. Para cualquier controversia, las partes
+    se someten a los tribunales competentes de la Ciudad de México, renunciando a cualquier otro
+    fuero que pudiera corresponderles.
+</p>
+
+<h2>13. Contacto</h2>
+<p>
+    Dudas sobre estos términos: <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+</p>
+<p>
+    Consulta también nuestro <a href="/privacidad">Aviso de Privacidad</a>.
+</p>
+{% endblock %}

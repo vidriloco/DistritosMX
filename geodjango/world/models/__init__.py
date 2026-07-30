@@ -32,7 +32,12 @@ from .trip_home import TripHome
 from .trip_outstanding import TripOutstanding
 from .polygon_of_interest import PolygonOfInterest
 from .trips_matching import TripsMatching
+from .contact_lead import ContactLead
 from .despojo_report import DespojoCaseReport
+from .despojo_news import (
+    DespojoNewsFeed, DespojoNewsItem, DespojoNewsKeyword, DespojoNewsRun,
+    DespojoNewsSetting,
+)
 
 __all__ = [
     'Line',
@@ -95,5 +100,11 @@ __all__ = [
     'TripOutstanding',
     'PolygonOfInterest',
     'TripsMatching',
+    'ContactLead',
     'DespojoCaseReport',
+    'DespojoNewsItem',
+    'DespojoNewsFeed',
+    'DespojoNewsKeyword',
+    'DespojoNewsRun',
+    'DespojoNewsSetting',
 ]

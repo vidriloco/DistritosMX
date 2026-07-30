@@ -1,7 +1,10 @@
 // NavigationBar component - Reusable navigation bar
 function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
     const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
-    
+    const [analisisOpen, setAnalisisOpen] = React.useState(false);
+    const [contactOpen, setContactOpen] = React.useState(false);
+    const analisisRef = React.useRef(null);
+
     // Listen for path changes
     React.useEffect(() => {
         const updatePath = () => {
@@ -51,6 +54,47 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
         }
     };
     
+    // Close the Análisis dropdown when clicking outside or pressing Escape
+    React.useEffect(() => {
+        if (!analisisOpen) return;
+
+        const handleClickOutside = (e) => {
+            if (analisisRef.current && !analisisRef.current.contains(e.target)) {
+                setAnalisisOpen(false);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setAnalisisOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [analisisOpen]);
+
+    const handleDespojosClick = () => {
+        setAnalisisOpen(false);
+        if (window.navigate) {
+            window.navigate('/proyectos/mapas/despojos-viviendas');
+        } else {
+            window.location.href = '/proyectos/mapas/despojos-viviendas';
+        }
+    };
+
+    const handleContactoClick = () => {
+        setAnalisisOpen(false);
+        setContactOpen(true);
+    };
+
+    const handleContactClose = React.useCallback(() => setContactOpen(false), []);
+
     const handleAcercaDeClick = () => {
         if (window.navigate) {
             window.navigate('/acerca-de');
@@ -59,6 +103,9 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
         }
     };
     
+    // Loaded as a separate babel script, so it may not be defined yet.
+    const ContactModal = window.ContactForm || (() => null);
+
     // Check path - use both state and direct check for reliability
     const currentPathCheck = currentPath || window.location.pathname;
     const isMundial2025 = currentPathCheck === '/proyectos/mundial-2025';
@@ -93,12 +140,42 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                     >
                         Explorar
                     </button>
-                    <button 
+                    <button
                         className="nav-button"
                         onClick={handleNegociosClick}
                         style={{ color: '#fff' }}
                     >
                         Negocios
+                    </button>
+                    <div className="nav-dropdown" ref={analisisRef}>
+                        <button
+                            className="nav-button nav-dropdown-toggle"
+                            onClick={() => setAnalisisOpen(!analisisOpen)}
+                            style={{ color: '#fff' }}
+                            aria-haspopup="true"
+                            aria-expanded={analisisOpen}
+                        >
+                            Análisis
+                            <span className={`nav-dropdown-caret ${analisisOpen ? 'open' : ''}`} aria-hidden="true">▾</span>
+                        </button>
+                        {analisisOpen && (
+                            <div className="nav-dropdown-menu" role="menu">
+                                <button
+                                    className="nav-dropdown-item"
+                                    onClick={handleDespojosClick}
+                                    role="menuitem"
+                                >
+                                    Despojos
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        className="nav-button"
+                        onClick={handleContactoClick}
+                        style={{ color: '#fff' }}
+                    >
+                        Contacto
                     </button>
                     {isMundial2025 && (
                         <div 
@@ -115,6 +192,8 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                     )}
                 </div>
             </div>
+
+            <ContactModal open={contactOpen} onClose={handleContactClose} />
         </nav>
     );
 }

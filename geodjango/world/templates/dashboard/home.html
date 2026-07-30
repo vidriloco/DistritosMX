@@ -1,0 +1,117 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Resumen{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Resumen</h1>
+<p class="dsh-lede">
+    Lo que está esperando a alguien. El buscador de notas no corre solo: se lanza
+    desde aquí o desde <code>manage.py despojo_news_fetch</code>.
+</p>
+
+<div class="dsh-tiles">
+    <a class="dsh-tile" href="{% url 'dashboard_news' %}?status=pending">
+        <div class="dsh-tile-n {% if not news_pending %}is-zero{% endif %}">{{ news_pending }}</div>
+        <div class="dsh-tile-label">Notas por revisar</div>
+        <div class="dsh-tile-note">{{ news_approved }} publicada{{ news_approved|pluralize:"s" }} en el mapa</div>
+    </a>
+    <a class="dsh-tile" href="{% url 'dashboard_leads' %}?status=new">
+        <div class="dsh-tile-n {% if not leads_new %}is-zero{% endif %}">{{ leads_new }}</div>
+        <div class="dsh-tile-label">Leads sin revisar</div>
+        <div class="dsh-tile-note">{{ leads_total }} en total</div>
+    </a>
+    <a class="dsh-tile" href="{% url 'dashboard_reports' %}?status=new">
+        <div class="dsh-tile-n {% if not reports_new %}is-zero{% endif %}">{{ reports_new }}</div>
+        <div class="dsh-tile-label">Reportes de despojo sin revisar</div>
+        <div class="dsh-tile-note">{{ reports_total }} en total</div>
+    </a>
+    <a class="dsh-tile" href="{% url 'dashboard_sources' %}">
+        <div class="dsh-tile-n {% if not feeds_active %}is-zero{% endif %}">{{ feeds_active }}</div>
+        <div class="dsh-tile-label">Fuentes activas</div>
+        <div class="dsh-tile-note">
+            {{ keywords_active }} término{{ keywords_active|pluralize:"s" }} activo{{ keywords_active|pluralize:"s" }}{% if feeds_broken %} · <strong>{{ feeds_broken }} sin responder</strong>{% endif %}
+        </div>
+    </a>
+</div>
+
+<div class="dsh-card">
+    <h2 class="dsh-section" style="margin-top:0">Buscar notas</h2>
+    {% include "dashboard/_run_form.html" %}
+</div>
+
+<div class="dsh-grid-2">
+    <div class="dsh-card">
+        <h2 class="dsh-section" style="margin-top:0">Últimas ejecuciones</h2>
+        {% if recent_runs %}
+            <div class="dsh-table-wrap">
+                <table class="dsh-table">
+                    <thead>
+                        <tr><th>Cuándo</th><th>Estado</th><th class="dsh-num">Nuevas</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                    {% for run in recent_runs %}
+                        <tr>
+                            <td class="dsh-nowrap">{{ run.started_at|date:"d M Y H:i" }}</td>
+                            <td>{% include "dashboard/_run_status.html" with run=run %}</td>
+                            <td class="dsh-num">{{ run.created }}</td>
+                            <td><a class="dsh-small" href="{% url 'dashboard_run' run.pk %}">Ver bitácora</a></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-bottom:0"><a class="dsh-small" href="{% url 'dashboard_runs' %}">Ver todas →</a></p>
+        {% else %}
+            <p class="dsh-empty">Todavía no se ha ejecutado ninguna búsqueda.</p>
+        {% endif %}
+    </div>
+
+    <div class="dsh-card">
+        <h2 class="dsh-section" style="margin-top:0">Últimos leads</h2>
+        {% if recent_leads %}
+            <div class="dsh-table-wrap">
+                <table class="dsh-table">
+                    <thead><tr><th>Quién</th><th>Cuándo</th><th>Estado</th></tr></thead>
+                    <tbody>
+                    {% for lead in recent_leads %}
+                        <tr>
+                            <td>{{ lead.name }}<br><span class="dsh-small dsh-muted">{{ lead.email }}</span></td>
+                            <td class="dsh-nowrap dsh-small">{{ lead.created_at|date:"d M Y" }}</td>
+                            <td><span class="dsh-badge">{{ lead.get_review_status_display }}</span></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-bottom:0"><a class="dsh-small" href="{% url 'dashboard_leads' %}">Ver todos →</a></p>
+        {% else %}
+            <p class="dsh-empty">Nadie ha escrito todavía.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="dsh-card">
+    <h2 class="dsh-section" style="margin-top:0">Últimos reportes de despojo</h2>
+    {% if recent_reports %}
+        <div class="dsh-table-wrap">
+            <table class="dsh-table">
+                <thead><tr><th>Quién</th><th>Alcaldía</th><th>Año</th><th>Cuándo</th><th>Estado</th></tr></thead>
+                <tbody>
+                {% for report in recent_reports %}
+                    <tr>
+                        <td>{{ report.name }}</td>
+                        <td>{{ report.borough|default:"—" }}</td>
+                        <td class="dsh-num">{{ report.year_of_events|default:"—" }}</td>
+                        <td class="dsh-nowrap dsh-small">{{ report.created_at|date:"d M Y" }}</td>
+                        <td><span class="dsh-badge">{{ report.get_review_status_display }}</span></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-bottom:0"><a class="dsh-small" href="{% url 'dashboard_reports' %}">Ver todos →</a></p>
+    {% else %}
+        <p class="dsh-empty">Nadie ha enviado su caso todavía.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,5 +1,8 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.contrib.gis.geos import Point
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
+from django.urls import path
 from django.utils.html import format_html
 from django import forms
 from django.forms import widgets
@@ -12,7 +15,13 @@ from leaflet.admin import LeafletGeoAdmin
 from .models.felony import Felony
 from .models.ageb_risk import AgebRisk
 from .models.airbnb_listing import AirbnbListing
+from .models.contact_lead import ContactLead
 from .models.despojo_report import DespojoCaseReport
+from .models.despojo_news import (
+    DespojoNewsFeed, DespojoNewsItem, DespojoNewsKeyword, DespojoNewsRun,
+)
+from .utils.despojo_news import harvest_in_background
+from .views_categorized.despojos import invalidate_news_cache
 
 # Create a custom admin site for transportation models
 class TransportationAdminSite(admin.AdminSite):
@@ -780,3 +789,280 @@ class DespojoCaseReportAdmin(admin.ModelAdmin):
         return False
 
 admin.site.register(DespojoCaseReport, DespojoCaseReportAdmin)
+
+
+class ContactLeadAdmin(admin.ModelAdmin):
+    """
+    Inbound leads from the "Contacto" form. What the sender wrote is read-only;
+    only the triage fields can be edited.
+    """
+    list_display = ['name', 'email', 'short_message', 'source_path', 'review_status', 'created_at']
+    list_filter = ['review_status', 'created_at']
+    list_editable = ['review_status']
+    search_fields = ['name', 'email', 'message']
+    readonly_fields = ['name', 'email', 'message', 'source_path', 'created_at']
+    ordering = ['-created_at']
+
+    fieldsets = (
+        ('Contacto', {
+            'fields': ('name', 'email', 'message')
+        }),
+        ('Origen', {
+            'fields': ('source_path', 'created_at')
+        }),
+        ('Seguimiento', {
+            'fields': ('review_status', 'internal_notes')
+        }),
+    )
+
+    def short_message(self, obj):
+        return obj.message[:70] + ('…' if len(obj.message) > 70 else '')
+    short_message.short_description = 'Mensaje'
+
+    def has_add_permission(self, request):
+        # Leads only arrive through the public form.
+        return False
+
+admin.site.register(ContactLead, ContactLeadAdmin)
+
+
+class DespojoNewsItemAdmin(admin.ModelAdmin):
+    """
+    Review queue for the news rail on the despojos map.
+
+    `despojo_news_fetch` files everything it finds as "Por revisar". Only the
+    items approved here are served to the map, newest first — the searches
+    behind the feeds match on a word, and the word has other meanings.
+    """
+    list_display = ['headline', 'source', 'published_at', 'review_status', 'open_link']
+    list_filter = ['review_status', 'source', 'feed_slug', 'published_at']
+    list_editable = ['review_status']
+    search_fields = ['headline', 'source', 'summary', 'url']
+    # Headline and source stay editable: the aggregator mangles a title now and
+    # then ("Búsqueda - ...") and names half the outlets by their domain, and
+    # what is on screen should be what the outlet actually published.
+    readonly_fields = ['url', 'summary', 'published_at',
+                       'feed_slug', 'fetched_at', 'updated_at', 'open_link']
+    ordering = ['-published_at']
+    date_hierarchy = 'published_at'
+    actions = ['approve_items', 'reject_items']
+
+    fieldsets = (
+        ('Nota', {
+            'fields': ('headline', 'source', 'published_at', 'open_link', 'summary')
+        }),
+        ('Revisión', {
+            'fields': ('review_status', 'internal_notes')
+        }),
+        ('Origen', {
+            'fields': ('url', 'feed_slug', 'fetched_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    def has_add_permission(self, request):
+        # Items only arrive through the RSS job.
+        return False
+
+    def open_link(self, obj):
+        if not obj.url:
+            return '-'
+        return format_html('<a href="{}" target="_blank" rel="noopener">Abrir nota ↗</a>', obj.url)
+    open_link.short_description = 'Enlace'
+
+    def _set_status(self, request, queryset, status, message):
+        updated = queryset.update(review_status=status)
+        invalidate_news_cache()
+        self.message_user(request, f'{updated} {message}')
+
+    def approve_items(self, request, queryset):
+        self._set_status(
+            request, queryset, DespojoNewsItem.ReviewStatus.APPROVED,
+            'nota(s) publicadas en el mapa.',
+        )
+    approve_items.short_description = 'Publicar en el mapa'
+
+    def reject_items(self, request, queryset):
+        self._set_status(
+            request, queryset, DespojoNewsItem.ReviewStatus.REJECTED,
+            'nota(s) descartadas.',
+        )
+    reject_items.short_description = 'Descartar'
+
+    def save_model(self, request, obj, form, change):
+        # Also covers the changelist's inline status column, which Django saves
+        # one object at a time through this same hook.
+        super().save_model(request, obj, form, change)
+        invalidate_news_cache()
+
+admin.site.register(DespojoNewsItem, DespojoNewsItemAdmin)
+
+
+class DespojoNewsFeedAdmin(admin.ModelAdmin):
+    """
+    The sources the harvester reads. Adding a search here is how you widen the
+    net — one row per phrase worth watching.
+    """
+    list_display = ['slug', 'kind', 'what_it_reads', 'scoped', 'is_active',
+                    'last_run_at', 'last_status', 'last_message']
+    list_filter = ['is_active', 'kind', 'last_status']
+    list_editable = ['is_active']
+    search_fields = ['slug', 'query', 'url', 'name', 'notes']
+    readonly_fields = ['last_run_at', 'last_status', 'last_message', 'created_at',
+                       'resolved_url']
+    actions = ['run_selected_feeds']
+
+    fieldsets = (
+        ('Fuente', {
+            'fields': ('slug', 'kind', 'is_active', 'notes')
+        }),
+        ('Búsqueda en Google Noticias', {
+            'fields': ('query',),
+            'description': 'Los términos a buscar. Sólo aplica cuando el tipo es una búsqueda.',
+        }),
+        ('Feed propio de un medio', {
+            'fields': ('url', 'name'),
+            'description': 'La URL del RSS y el nombre del medio, que estos feeds no suelen traer. '
+                           'Sólo aplica cuando el tipo es un feed de medio.',
+        }),
+        ('Alcance', {
+            'fields': ('scoped',)
+        }),
+        ('Última lectura', {
+            'fields': ('resolved_url', 'last_run_at', 'last_status', 'last_message', 'created_at'),
+        }),
+    )
+
+    def what_it_reads(self, obj):
+        return obj.query or obj.url
+    what_it_reads.short_description = 'Busca / lee'
+
+    def resolved_url(self, obj):
+        if not obj.pk:
+            return '-'
+        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>',
+                           obj.feed_url, obj.feed_url)
+    resolved_url.short_description = 'URL consultada'
+
+    def run_selected_feeds(self, request, queryset):
+        slugs = list(queryset.filter(is_active=True).values_list('slug', flat=True))
+        if not slugs:
+            self.message_user(request, 'Ninguna de las fuentes seleccionadas está activa.',
+                              level=messages.WARNING)
+            return None
+        run = harvest_in_background(days=7, actor=request.user.get_username(), feed_slugs=slugs)
+        self.message_user(
+            request,
+            f'Buscando en {len(slugs)} fuente(s). La ejecución #{run.pk} se está registrando; '
+            'recarga esta página para ver el resultado.',
+        )
+        return redirect('admin:world_despojonewsrun_change', run.pk)
+    run_selected_feeds.short_description = 'Buscar notas ahora en las fuentes seleccionadas (7 días)'
+
+admin.site.register(DespojoNewsFeed, DespojoNewsFeedAdmin)
+
+
+class DespojoNewsKeywordAdmin(admin.ModelAdmin):
+    """
+    The terms the harvester matches on. Accents and case are ignored when
+    matching, so write them however reads best.
+    """
+    list_display = ['term', 'kind', 'is_active', 'notes']
+    list_filter = ['kind', 'is_active']
+    list_editable = ['is_active']
+    search_fields = ['term', 'notes']
+    ordering = ['kind', 'term']
+
+admin.site.register(DespojoNewsKeyword, DespojoNewsKeywordAdmin)
+
+
+class DespojoNewsRunAdmin(admin.ModelAdmin):
+    """
+    The log. One row per execution, started from the button on this page or
+    from `manage.py despojo_news_fetch` — nothing runs on a schedule.
+    """
+    list_display = ['started_at', 'status', 'trigger', 'actor', 'days',
+                    'feeds_read', 'feeds_failed', 'entries_read', 'matched',
+                    'created', 'duplicates', 'took']
+    list_filter = ['status', 'trigger', 'started_at']
+    search_fields = ['actor', 'log']
+    date_hierarchy = 'started_at'
+    ordering = ['-started_at']
+
+    readonly_fields = ['status', 'trigger', 'actor', 'days', 'feeds_read', 'feeds_failed',
+                       'entries_read', 'matched', 'created', 'duplicates', 'undated',
+                       'skipped', 'started_at', 'finished_at', 'took', 'log_view']
+    exclude = ['log']
+
+    fieldsets = (
+        ('Ejecución', {
+            'fields': ('status', 'trigger', 'actor', 'days', 'started_at', 'finished_at', 'took')
+        }),
+        ('Resultado', {
+            'fields': ('feeds_read', 'feeds_failed', 'entries_read', 'matched',
+                       'created', 'duplicates', 'undated', 'skipped')
+        }),
+        ('Bitácora', {
+            'fields': ('log_view',)
+        }),
+    )
+
+    def has_add_permission(self, request):
+        # Runs are created by starting one, not by filling in a form.
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        # Read-only: a log you can edit is not a log.
+        return False
+
+    def took(self, obj):
+        seconds = obj.duration_seconds
+        if seconds is None:
+            return '— en curso —'
+        return f'{seconds:.0f} s'
+    took.short_description = 'Duración'
+
+    def log_view(self, obj):
+        return format_html(
+            '<pre style="white-space:pre-wrap;max-height:32em;overflow:auto;'
+            'background:#f6f6f6;padding:1em;border:1px solid #ddd;border-radius:4px;">{}</pre>',
+            obj.log or 'Sin líneas todavía.',
+        )
+    log_view.short_description = 'Bitácora'
+
+    def get_urls(self):
+        return [
+            path(
+                'run-now/',
+                self.admin_site.admin_view(self.run_now_view),
+                name='world_despojonewsrun_run_now',
+            ),
+        ] + super().get_urls()
+
+    def run_now_view(self, request):
+        """
+        Start a run from the button on the changelist.
+
+        POST only: this changes things, and a GET that changes things can be
+        fired by any page a logged-in editor happens to open.
+        """
+        if request.method != 'POST':
+            return redirect('admin:world_despojonewsrun_changelist')
+        if not request.user.has_perm('world.change_despojonewsitem'):
+            raise PermissionDenied
+
+        try:
+            days = int(request.POST.get('days', 7))
+        except (TypeError, ValueError):
+            days = 7
+        days = max(1, min(days, 365))
+
+        run = harvest_in_background(days=days, actor=request.user.get_username())
+        self.message_user(
+            request,
+            f'Ejecución #{run.pk} iniciada sobre los últimos {days} días. '
+            'Corre en segundo plano; recarga para ver cómo avanza.',
+        )
+        return redirect('admin:world_despojonewsrun_change', run.pk)
+
+admin.site.register(DespojoNewsRun, DespojoNewsRunAdmin)

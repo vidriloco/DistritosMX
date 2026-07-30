@@ -11,15 +11,17 @@ import json
 import unicodedata
 
 from django.core.cache import cache
-from django.db.models import Count
+from django.db.models import Count, F
 from django.db.models.expressions import RawSQL
 from django.db.models.functions import ExtractMonth
 from django.http import HttpResponse, JsonResponse
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from world.models.felony import Felony
 from world.models.despojo_report import DespojoCaseReport
+from world.models.despojo_news import DespojoNewsItem, DespojoNewsSetting
 
 # The FGJ registry starts in January 2016. Rows with an earlier `anio_hecho`
 # are old events reported late — a handful of cases per year, not a trend.
@@ -251,10 +253,15 @@ def get_despojo_summary(request):
 
     partial = {}
     for year in decade:
-        n_months = len(months_by_year.get(year, ()))
+        observed = sorted(months_by_year.get(year, ()))
+        n_months = len(observed)
         if 0 < n_months < 12:
             partial[year] = {
                 'months': n_months,
+                # Which months, not just how many: "solo tiene enero" is a
+                # sharper thing to say than "1 de 12", and the panel should not
+                # have to guess that a single month means January.
+                'monthList': observed,
                 # Naive annualisation, labelled as such in the UI.
                 'projected': round(by_year[year] / n_months * 12),
             }
@@ -371,6 +378,81 @@ def get_despojo_boroughs(request):
         'classes': CHOROPLETH_CLASSES,
     }
     cache.set(BOROUGHS_CACHE_KEY, payload, BOROUGHS_CACHE_TTL)
+    return JsonResponse(payload)
+
+
+NEWS_CACHE_KEY = 'despojos:news:v1'
+# Short, unlike the rest of this module: the underlying table changes whenever
+# somebody approves an item in the admin, and waiting half a day to see that on
+# the map would make the review screen feel broken.
+NEWS_CACHE_TTL = 60 * 10
+
+def invalidate_news_cache():
+    """
+    Drop every cached page of the news rail.
+
+    Called from the panel: a ten-minute stale window is fine for a reader and
+    confusing for the person who just pressed "publicar", or who just changed
+    how many notes the rail shows. Cheap to be thorough — the key space is one
+    entry per allowed `limit`.
+    """
+    cache.delete_many([
+        f'{NEWS_CACHE_KEY}:{n}'
+        for n in range(DespojoNewsSetting.RAIL_LIMIT_MIN,
+                       DespojoNewsSetting.RAIL_LIMIT_MAX + 1)
+    ])
+
+
+@require_GET
+def get_despojo_news(request):
+    """
+    Approved press coverage for the rail on the despojos map.
+
+    Only items somebody has approved are served: `despojo_news_fetch` files
+    everything it finds as pending, and the queue is a working document, not a
+    publication. Shape matches the static fallback the front-end ships with, so
+    the rail renders the same either way.
+
+    How many notes come back is set in the panel. An explicit `limit` still
+    wins, within the same bounds, so the endpoint stays usable on its own.
+    """
+    default_limit = DespojoNewsSetting.load().rail_limit
+    try:
+        limit = int(request.GET.get('limit', default_limit))
+    except (TypeError, ValueError):
+        limit = default_limit
+    limit = max(DespojoNewsSetting.RAIL_LIMIT_MIN,
+                min(limit, DespojoNewsSetting.RAIL_LIMIT_MAX))
+
+    cache_key = f'{NEWS_CACHE_KEY}:{limit}'
+    cached = cache.get(cache_key)
+    if cached is not None and not request.GET.get('refresh'):
+        return JsonResponse(cached)
+
+    rows = (
+        DespojoNewsItem.objects
+        .filter(review_status=DespojoNewsItem.ReviewStatus.APPROVED)
+        .order_by(F('published_at').desc(nulls_last=True), '-fetched_at')[:limit]
+    )
+
+    items = [
+        {
+            'source': row.source,
+            'headline': row.headline,
+            # Local date, not UTC: a note published at 20:00 in Mexico City is
+            # dated the next day if the timestamp is read as it is stored.
+            'date': timezone.localtime(row.published_at).date().isoformat()
+                    if row.published_at else None,
+            'url': row.url,
+        }
+        for row in rows
+    ]
+
+    payload = {
+        'updated': items[0]['date'] if items else None,
+        'items': items,
+    }
+    cache.set(cache_key, payload, NEWS_CACHE_TTL)
     return JsonResponse(payload)
 
 

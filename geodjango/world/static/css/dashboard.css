@@ -1,0 +1,230 @@
+/*
+ * Staff panel at /dashboard.
+ *
+ * Borrows the despojos project palette so the panel reads as part of the same
+ * site, but stays deliberately plain: this is a working surface, not a page to
+ * be looked at. Density over decoration — the point is to triage a hundred rows
+ * without scrolling past the same card four times.
+ */
+
+:root {
+    --dsh-seal: #98122b;
+    --dsh-ink: #1a2027;
+    --dsh-dim: #4d5a5c;
+    --dsh-faint: #77827f;
+    --dsh-line: #dce0da;
+    --dsh-inset: #eef0ed;
+    --dsh-paper: #f7f8f6;
+    --dsh-amber: #a8700c;
+    --dsh-green: #2e6b46;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body.dsh {
+    margin: 0;
+    background: var(--dsh-paper);
+    color: var(--dsh-ink);
+    font-family: 'Ruda', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+a { color: var(--dsh-seal); }
+
+/* ---------------------------------------------------------------- chrome -- */
+
+.dsh-top {
+    background: #fff;
+    border-bottom: 1px solid var(--dsh-line);
+    position: sticky; top: 0; z-index: 20;
+}
+.dsh-top-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; gap: 20px; min-height: 56px;
+    flex-wrap: wrap;
+}
+.dsh-brand {
+    font-family: 'Oswald', sans-serif; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .1em; font-size: 13px;
+    color: var(--dsh-ink); text-decoration: none; white-space: nowrap;
+}
+.dsh-brand span { color: var(--dsh-seal); }
+
+.dsh-nav { display: flex; gap: 2px; flex-wrap: wrap; flex: 1; }
+.dsh-nav a {
+    padding: 8px 12px; border-radius: 3px; text-decoration: none;
+    color: var(--dsh-dim); font-size: 12.5px; font-weight: 600; white-space: nowrap;
+}
+.dsh-nav a:hover { background: var(--dsh-inset); color: var(--dsh-ink); }
+.dsh-nav a.is-current { background: var(--dsh-ink); color: #fff; }
+.dsh-nav .dsh-badge { margin-left: 6px; }
+
+.dsh-who { font-size: 12px; color: var(--dsh-faint); white-space: nowrap; }
+.dsh-who a { margin-left: 10px; }
+
+.dsh-main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 64px; }
+
+.dsh-title { margin: 0 0 4px; font-family: 'Oswald', sans-serif; font-size: 26px; font-weight: 600; }
+.dsh-lede { margin: 0 0 24px; color: var(--dsh-dim); max-width: 68ch; }
+
+.dsh-section { margin: 0 0 14px; font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 600; }
+.dsh-section:not(:first-child) { margin-top: 34px; }
+
+/* --------------------------------------------------------------- panels --- */
+
+.dsh-card {
+    background: #fff; border: 1px solid var(--dsh-line);
+    border-radius: 5px; padding: 18px; margin-bottom: 18px;
+}
+.dsh-card > :first-child { margin-top: 0; }
+.dsh-card > :last-child { margin-bottom: 0; }
+
+.dsh-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 28px; }
+.dsh-tile {
+    background: #fff; border: 1px solid var(--dsh-line); border-radius: 5px;
+    padding: 16px 18px; text-decoration: none; color: inherit; display: block;
+    border-left: 3px solid var(--dsh-line); transition: border-color .12s ease;
+}
+a.dsh-tile:hover { border-left-color: var(--dsh-seal); }
+.dsh-tile-n { font-family: 'Oswald', sans-serif; font-size: 34px; line-height: 1; font-weight: 600; }
+.dsh-tile-n.is-zero { color: var(--dsh-faint); }
+.dsh-tile-label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--dsh-faint); margin-top: 8px;
+}
+.dsh-tile-note { font-size: 12px; color: var(--dsh-dim); margin-top: 6px; }
+
+.dsh-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+
+/* --------------------------------------------------------------- tables --- */
+
+.dsh-table-wrap { overflow-x: auto; }
+table.dsh-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dsh-table th {
+    text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--dsh-line);
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--dsh-faint);
+    white-space: nowrap;
+}
+.dsh-table td { padding: 10px; border-bottom: 1px solid var(--dsh-line); vertical-align: top; }
+.dsh-table tr:hover td { background: #fbfcfa; }
+.dsh-table .dsh-num { font-variant-numeric: tabular-nums; text-align: right; }
+.dsh-table .dsh-nowrap { white-space: nowrap; }
+
+.dsh-mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+.dsh-muted { color: var(--dsh-faint); }
+.dsh-small { font-size: 12px; }
+
+/* --------------------------------------------------------------- pieces --- */
+
+.dsh-badge {
+    display: inline-block; padding: 2px 7px; border-radius: 10px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: .04em;
+    background: var(--dsh-inset); color: var(--dsh-dim); white-space: nowrap;
+}
+.dsh-badge.is-pending { background: #fdf1dc; color: var(--dsh-amber); }
+.dsh-badge.is-approved { background: #e2f0e8; color: var(--dsh-green); }
+.dsh-badge.is-rejected { background: var(--dsh-inset); color: var(--dsh-faint); }
+.dsh-badge.is-failed { background: #f7e0e4; color: var(--dsh-seal); }
+.dsh-badge.is-running { background: #e3edf2; color: #3c6478; }
+
+.dsh-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background: var(--dsh-seal); }
+
+/* ---------------------------------------------------------------- forms --- */
+
+.dsh-btn {
+    display: inline-block; font-family: inherit; font-size: 12px; font-weight: 700;
+    letter-spacing: .04em; padding: 8px 14px; border-radius: 3px; cursor: pointer;
+    border: 1px solid var(--dsh-line); background: #fff; color: var(--dsh-ink);
+    text-decoration: none; white-space: nowrap;
+}
+.dsh-btn:hover { background: var(--dsh-inset); }
+.dsh-btn.is-primary { background: var(--dsh-seal); border-color: var(--dsh-seal); color: #fff; }
+.dsh-btn.is-primary:hover { opacity: .9; background: var(--dsh-seal); }
+.dsh-btn.is-quiet { color: var(--dsh-faint); }
+.dsh-btn.is-danger:hover { border-color: var(--dsh-seal); color: var(--dsh-seal); background: #fff; }
+.dsh-btn.is-small { padding: 4px 9px; font-size: 11px; }
+
+.dsh-field { display: flex; flex-direction: column; gap: 5px; }
+.dsh-field > label {
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--dsh-faint);
+}
+.dsh-input, .dsh-select, .dsh-textarea {
+    font-family: inherit; font-size: 13px; padding: 7px 9px;
+    border: 1px solid var(--dsh-line); border-radius: 3px; background: #fff;
+    color: var(--dsh-ink); width: 100%;
+}
+.dsh-textarea { resize: vertical; min-height: 60px; }
+.dsh-input:focus, .dsh-select:focus, .dsh-textarea:focus {
+    outline: 2px solid rgba(152,18,43,.25); outline-offset: -1px; border-color: var(--dsh-seal);
+}
+
+.dsh-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.dsh-row > .dsh-field { flex: 1 1 160px; }
+
+.dsh-inline { display: inline; }
+
+/* --------------------------------------------------------------- filters -- */
+
+.dsh-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.dsh-filters a {
+    padding: 6px 11px; border-radius: 3px; text-decoration: none; font-size: 12px;
+    font-weight: 600; color: var(--dsh-dim); border: 1px solid var(--dsh-line); background: #fff;
+}
+.dsh-filters a:hover { background: var(--dsh-inset); }
+.dsh-filters a.is-current { background: var(--dsh-ink); border-color: var(--dsh-ink); color: #fff; }
+
+/* ------------------------------------------------------------- messages --- */
+
+.dsh-msgs { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+.dsh-msg {
+    padding: 11px 14px; border-radius: 4px; font-size: 13px;
+    background: #fff; border: 1px solid var(--dsh-line); border-left: 3px solid var(--dsh-faint);
+}
+.dsh-msg.is-success { border-left-color: var(--dsh-green); }
+.dsh-msg.is-warning { border-left-color: var(--dsh-amber); }
+.dsh-msg.is-error { border-left-color: var(--dsh-seal); }
+
+.dsh-note {
+    padding: 12px 14px; background: var(--dsh-inset); border-radius: 4px;
+    border-left: 3px solid var(--dsh-faint); font-size: 12.5px; color: var(--dsh-dim);
+    margin-bottom: 20px;
+}
+.dsh-note.is-warning { border-left-color: var(--dsh-amber); background: #fdf7ea; }
+
+.dsh-empty { padding: 36px 16px; text-align: center; color: var(--dsh-faint); }
+
+/* ------------------------------------------------------------------ log --- */
+
+.dsh-log {
+    white-space: pre-wrap; word-break: break-word; margin: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+    line-height: 1.65; background: var(--dsh-ink); color: #e8ece7;
+    padding: 16px; border-radius: 4px; max-height: 34em; overflow: auto;
+}
+
+/* ----------------------------------------------------------- pagination --- */
+
+.dsh-pager { display: flex; gap: 8px; align-items: center; margin-top: 18px; font-size: 12.5px; }
+.dsh-pager a { padding: 6px 11px; border: 1px solid var(--dsh-line); border-radius: 3px; background: #fff; text-decoration: none; }
+.dsh-pager .dsh-pager-at { color: var(--dsh-faint); }
+
+/* ------------------------------------------------------------- accounts --- */
+
+details.dsh-details summary { cursor: pointer; font-size: 12px; color: var(--dsh-seal); font-weight: 600; }
+details.dsh-details[open] summary { margin-bottom: 8px; }
+.dsh-account {
+    white-space: pre-wrap; background: var(--dsh-inset); padding: 12px;
+    border-radius: 4px; font-size: 12.5px; line-height: 1.6; margin: 0;
+    font-family: inherit;
+}
+
+/* The triage form sits inside a table cell and must not stretch it. */
+.dsh-triage { display: flex; flex-direction: column; gap: 6px; min-width: 200px; }
+.dsh-triage .dsh-textarea { min-height: 44px; font-size: 12px; }
+
+@media (max-width: 720px) {
+    .dsh-top-inner { min-height: 0; padding: 10px 14px; }
+    .dsh-main { padding: 18px 14px 48px; }
+}

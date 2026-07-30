@@ -171,7 +171,10 @@ function DespojoCaseForm({ open, onClose }) {
                             <span>
                                 Autorizo que Distritos MX me contacte por correo sobre este caso.
                                 Entiendo que mi testimonio <b>no se publica</b> ni aparece en el mapa
-                                salvo que lo autorice por separado y por escrito.
+                                salvo que lo autorice por separado y por escrito, conforme al{' '}
+                                {/* New tab on purpose: navigating away would discard
+                                    whatever they have already typed. */}
+                                <a href="/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.
                             </span>
                         </label>
 
@@ -183,6 +186,7 @@ function DespojoCaseForm({ open, onClose }) {
                             </button>
                             <span className="despojo-privacy">
                                 Tus datos se guardan para contactarte y no se comparten con terceros.
+                                Consulta los <a href="/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a>.
                             </span>
                         </div>
                     </form>

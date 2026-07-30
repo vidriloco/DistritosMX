@@ -1,0 +1,154 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>{% block page_title %}{% endblock %} — {{ site_name }}</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+    <meta name="description" content="{% block page_description %}{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="index, follow">
+
+    {% comment %}
+    Ruda is the app's typeface; these pages match it so the legal text does not
+    read as a different site.
+    {% endcomment %}
+    <link href="https://fonts.googleapis.com/css2?family=Ruda:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --lg-navy: #02013e;
+            --lg-ink: #1a2027;
+            --lg-dim: #4d5a5c;
+            --lg-faint: #77827f;
+            --lg-line: #dce0da;
+            --lg-inset: #f4f6f8;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Ruda', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--lg-ink);
+            background: #fff;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .legal-header {
+            background: var(--lg-navy);
+            padding: 20px 0;
+        }
+        .legal-header-inner {
+            max-width: 760px; margin: 0 auto; padding: 0 24px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .legal-header a.legal-home {
+            display: inline-flex; align-items: center;
+            color: #fff; text-decoration: none;
+            font-weight: 600; font-size: 15px;
+        }
+        .legal-header a.legal-home img { height: 26px; width: auto; display: block; }
+        .legal-header nav a {
+            color: rgba(255, 255, 255, 0.75); text-decoration: none;
+            font-size: 13.5px; font-weight: 500; margin-left: 18px;
+        }
+        .legal-header nav a:hover,
+        .legal-header nav a[aria-current="page"] { color: #fff; }
+
+        .legal-wrap {
+            max-width: 760px; margin: 0 auto; padding: 48px 24px 80px;
+        }
+
+        .legal-title {
+            font-size: 34px; font-weight: 700; line-height: 1.2;
+            margin: 0 0 8px; color: var(--lg-navy);
+        }
+        .legal-updated {
+            font-size: 12.5px; color: var(--lg-faint); margin: 0 0 32px;
+        }
+        .legal-lede {
+            font-size: 17px; color: var(--lg-dim); margin: 0 0 32px;
+        }
+
+        .legal-wrap h2 {
+            font-size: 19px; font-weight: 700; color: var(--lg-navy);
+            margin: 40px 0 10px; padding-top: 22px;
+            border-top: 1px solid var(--lg-line);
+        }
+        .legal-wrap h3 {
+            font-size: 15px; font-weight: 600; color: var(--lg-ink);
+            margin: 24px 0 6px;
+        }
+        .legal-wrap p { margin: 0 0 14px; font-size: 15px; }
+        .legal-wrap ul { margin: 0 0 14px; padding-left: 22px; }
+        .legal-wrap li { margin-bottom: 8px; font-size: 15px; }
+        .legal-wrap a { color: var(--lg-navy); text-decoration: underline; }
+        .legal-wrap strong { color: var(--lg-ink); font-weight: 600; }
+
+        .legal-callout {
+            background: var(--lg-inset); border-left: 3px solid var(--lg-navy);
+            border-radius: 4px; padding: 16px 18px; margin: 22px 0;
+            font-size: 14.5px; color: var(--lg-dim);
+        }
+        .legal-callout p:last-child { margin-bottom: 0; }
+
+        .legal-table {
+            width: 100%; border-collapse: collapse; margin: 16px 0 22px;
+            font-size: 14px;
+        }
+        .legal-table th, .legal-table td {
+            text-align: left; padding: 10px 12px;
+            border-bottom: 1px solid var(--lg-line); vertical-align: top;
+        }
+        .legal-table th {
+            font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em;
+            color: var(--lg-dim); font-weight: 700;
+        }
+
+        .legal-foot {
+            margin-top: 56px; padding-top: 22px;
+            border-top: 1px solid var(--lg-line);
+            font-size: 13px; color: var(--lg-faint);
+            display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between;
+        }
+        .legal-foot a { color: var(--lg-dim); }
+
+        @media (max-width: 600px) {
+            .legal-wrap { padding: 32px 20px 60px; }
+            .legal-title { font-size: 27px; }
+            .legal-header nav a { margin-left: 12px; font-size: 12.5px; }
+            /* Tables of data categories are wide; let them scroll rather than
+               squeezing the page. */
+            .legal-table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+    <header class="legal-header">
+        <div class="legal-header-inner">
+            <a class="legal-home" href="/">
+                <img src="{% static 'images/distritos-mx-logo.png' %}" alt="{{ site_name }}"
+                     onerror="this.style.display='none'; this.insertAdjacentText('afterend', '{{ site_name }}');">
+            </a>
+            <nav>
+                <a href="/privacidad" {% if active == 'privacidad' %}aria-current="page"{% endif %}>Privacidad</a>
+                <a href="/terminos" {% if active == 'terminos' %}aria-current="page"{% endif %}>Términos</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="legal-wrap">
+        {% block content %}{% endblock %}
+
+        <div class="legal-foot">
+            <span>{{ site_name }} — un proyecto de {{ company_name }}</span>
+            <span>
+                <a href="/privacidad">Aviso de Privacidad</a> ·
+                <a href="/terminos">Términos y Condiciones</a>
+            </span>
+        </div>
+    </main>
+</body>
+</html>

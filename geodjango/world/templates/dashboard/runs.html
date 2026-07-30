@@ -1,0 +1,60 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Ejecuciones{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Ejecuciones del buscador</h1>
+<p class="dsh-lede">
+    Una fila por corrida. No hay nada programado: cada una la inició una persona,
+    desde este panel, desde el admin o desde la terminal.
+</p>
+
+<div class="dsh-card">
+    {% include "dashboard/_run_form.html" %}
+</div>
+
+<div class="dsh-card" style="padding:0">
+    <div class="dsh-table-wrap">
+        <table class="dsh-table">
+            <thead>
+                <tr>
+                    <th>Cuándo</th>
+                    <th>Estado</th>
+                    <th>Origen</th>
+                    <th>Quién</th>
+                    <th class="dsh-num">Días</th>
+                    <th class="dsh-num">Fuentes</th>
+                    <th class="dsh-num">Entradas</th>
+                    <th class="dsh-num">Coinciden</th>
+                    <th class="dsh-num">Nuevas</th>
+                    <th class="dsh-num">Duración</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for run in page_obj %}
+                <tr>
+                    <td class="dsh-nowrap">{{ run.started_at|date:"d M Y H:i" }}</td>
+                    <td>{% include "dashboard/_run_status.html" with run=run %}</td>
+                    <td class="dsh-small">{{ run.get_trigger_display }}</td>
+                    <td class="dsh-small dsh-mono">{{ run.actor|default:"—" }}</td>
+                    <td class="dsh-num">{{ run.days }}</td>
+                    <td class="dsh-num">
+                        {{ run.feeds_read }}{% if run.feeds_failed %} <span class="dsh-badge is-failed">{{ run.feeds_failed }} caída{{ run.feeds_failed|pluralize:"s" }}</span>{% endif %}
+                    </td>
+                    <td class="dsh-num">{{ run.entries_read }}</td>
+                    <td class="dsh-num">{{ run.matched }}</td>
+                    <td class="dsh-num"><strong>{{ run.created }}</strong></td>
+                    <td class="dsh-num dsh-small">{% if run.duration_seconds %}{{ run.duration_seconds|floatformat:0 }} s{% else %}—{% endif %}</td>
+                    <td><a class="dsh-small" href="{% url 'dashboard_run' run.pk %}">Bitácora</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="11"><p class="dsh-empty">Todavía no se ha ejecutado ninguna búsqueda.</p></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% include "dashboard/_pager.html" %}
+{% endblock %}

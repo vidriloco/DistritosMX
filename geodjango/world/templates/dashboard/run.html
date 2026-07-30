@@ -1,0 +1,67 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Ejecución #{{ run.pk }}{% endblock %}
+
+{% block head %}
+    {% comment %}
+    A run in flight is worth re-reading; a finished one is not, so the refresh
+    is only emitted while it is still going.
+    {% endcomment %}
+    {% if autorefresh %}<meta http-equiv="refresh" content="5">{% endif %}
+{% endblock %}
+
+{% block content %}
+<p class="dsh-small"><a href="{% url 'dashboard_runs' %}">← Todas las ejecuciones</a></p>
+
+<h1 class="dsh-title">Ejecución #{{ run.pk }}</h1>
+<p class="dsh-lede">
+    {% include "dashboard/_run_status.html" with run=run %}
+    Iniciada el {{ run.started_at|date:"d M Y \a \l\a\s H:i" }}
+    por {{ run.actor|default:"—" }} ({{ run.get_trigger_display|lower }}),
+    sobre los últimos {{ run.days }} día{{ run.days|pluralize:"s" }}.
+    {% if autorefresh %}<br><em>Sigue en curso; esta página se recarga sola cada 5 segundos.</em>{% endif %}
+</p>
+
+<div class="dsh-tiles">
+    <div class="dsh-tile">
+        <div class="dsh-tile-n {% if not run.created %}is-zero{% endif %}">{{ run.created }}</div>
+        <div class="dsh-tile-label">Notas nuevas</div>
+    </div>
+    <div class="dsh-tile">
+        <div class="dsh-tile-n">{{ run.matched }}</div>
+        <div class="dsh-tile-label">Coincidieron</div>
+        <div class="dsh-tile-note">{{ run.duplicates }} ya estaban registradas</div>
+    </div>
+    <div class="dsh-tile">
+        <div class="dsh-tile-n">{{ run.entries_read }}</div>
+        <div class="dsh-tile-label">Entradas leídas</div>
+        <div class="dsh-tile-note">de {{ run.feeds_read }} fuente{{ run.feeds_read|pluralize:"s" }}</div>
+    </div>
+    <div class="dsh-tile">
+        <div class="dsh-tile-n {% if not run.feeds_failed %}is-zero{% endif %}">{{ run.feeds_failed }}</div>
+        <div class="dsh-tile-label">Fuentes caídas</div>
+        <div class="dsh-tile-note">
+            {{ run.undated }} sin fecha · {{ run.skipped }} por enlace
+        </div>
+    </div>
+</div>
+
+{% if run.feeds_failed %}
+    <p class="dsh-note is-warning">
+        {{ run.feeds_failed }} fuente{{ run.feeds_failed|pluralize:"s" }} no respondió.
+        El detalle está en la bitácora; una fuente caída no detiene al resto.
+        Revísalas en <a href="{% url 'dashboard_sources' %}">Fuentes y términos</a>.
+    </p>
+{% endif %}
+
+<h2 class="dsh-section">Bitácora</h2>
+<pre class="dsh-log">{{ run.log|default:"Sin líneas todavía." }}</pre>
+
+{% if run.created %}
+    <p style="margin-top:18px">
+        <a class="dsh-btn is-primary" href="{% url 'dashboard_news' %}?status=pending">
+            Revisar las notas nuevas →
+        </a>
+    </p>
+{% endif %}
+{% endblock %}

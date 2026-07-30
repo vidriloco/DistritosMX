@@ -1,0 +1,125 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Notas de prensa{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Notas de prensa</h1>
+<p class="dsh-lede">
+    Lo que el buscador encontró. Nada de esto aparece en el mapa hasta que se
+    publica desde aquí — las fuentes son búsquedas por palabra, y <em>despojo</em>
+    en español también cubre restos mortales y conflictos agrarios.
+</p>
+
+<div class="dsh-card">
+    {% include "dashboard/_run_form.html" %}
+</div>
+
+<div class="dsh-card">
+    <form method="post" class="dsh-row" style="align-items:flex-end">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="rail_limit">
+        <div class="dsh-field" style="flex:0 0 130px">
+            <label for="rail-limit">Notas en el mapa</label>
+            <input class="dsh-input" id="rail-limit" type="number" name="rail_limit"
+                   value="{{ rail_limit }}"
+                   min="{{ rail_limit_min }}" max="{{ rail_limit_max }}">
+        </div>
+        <button type="submit" class="dsh-btn">Guardar</button>
+        <p class="dsh-small dsh-muted" style="margin:0 0 8px">
+            Cuántas notas publicadas muestra el riel, de la más reciente hacia atrás.
+            Entre {{ rail_limit_min }} y {{ rail_limit_max }}. Aplica de inmediato.
+            {% if rail_available < rail_limit %}
+                <br><strong>Hay {{ rail_available }} nota(s) publicada(s)</strong> —
+                el riel no puede mostrar más de las que existen.
+            {% endif %}
+        </p>
+    </form>
+</div>
+
+<div class="dsh-filters">
+    {% include "dashboard/_filters.html" %}
+    {% if source %}
+        <a href="?{% if status %}status={{ status }}{% endif %}" class="is-current">Medio: {{ source }} ✕</a>
+    {% endif %}
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="dsh-card" style="padding:0">
+        <div class="dsh-table-wrap">
+            <table class="dsh-table">
+                <thead>
+                    <tr>
+                        <th style="width:28px"><input type="checkbox" onclick="document.querySelectorAll('input[name=items]').forEach(c => c.checked = this.checked)"></th>
+                        <th>Nota</th>
+                        <th>Medio</th>
+                        <th>Publicada</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in page_obj %}
+                    <tr>
+                        <td><input type="checkbox" name="items" value="{{ item.pk }}"></td>
+                        <td>
+                            <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.headline }}</a>
+                            {% if item.summary %}
+                                <div class="dsh-small dsh-muted" style="margin-top:4px">{{ item.summary|truncatechars:180 }}</div>
+                            {% endif %}
+                            <details class="dsh-details" style="margin-top:6px">
+                                <summary>Corregir titular o medio</summary>
+                                <div class="dsh-row" style="margin-top:6px">
+                                    <div class="dsh-field" style="flex:3 1 260px">
+                                        <label for="h{{ item.pk }}">Titular</label>
+                                        <input class="dsh-input" id="h{{ item.pk }}" form="edit{{ item.pk }}" name="headline" value="{{ item.headline }}" maxlength="400">
+                                    </div>
+                                    <div class="dsh-field" style="flex:1 1 140px">
+                                        <label for="s{{ item.pk }}">Medio</label>
+                                        <input class="dsh-input" id="s{{ item.pk }}" form="edit{{ item.pk }}" name="source" value="{{ item.source }}" maxlength="120">
+                                    </div>
+                                    <button class="dsh-btn is-small" form="edit{{ item.pk }}" type="submit">Guardar</button>
+                                </div>
+                            </details>
+                        </td>
+                        <td class="dsh-nowrap">
+                            <span class="dsh-dot"></span>
+                            <a href="?{% if status %}status={{ status }}&amp;{% endif %}source={{ item.source|urlencode }}">{{ item.source }}</a>
+                        </td>
+                        <td class="dsh-nowrap dsh-mono">{{ item.published_at|date:"Y-m-d"|default:"—" }}</td>
+                        <td>
+                            {% if item.review_status == 'approved' %}<span class="dsh-badge is-approved">Publicada</span>
+                            {% elif item.review_status == 'rejected' %}<span class="dsh-badge is-rejected">Descartada</span>
+                            {% else %}<span class="dsh-badge is-pending">Por revisar</span>{% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5"><p class="dsh-empty">No hay notas con este filtro.</p></td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if page_obj %}
+        <div class="dsh-row" style="margin-top:14px">
+            <button class="dsh-btn is-primary" type="submit" name="action" value="approve">Publicar seleccionadas</button>
+            <button class="dsh-btn" type="submit" name="action" value="reject">Descartar seleccionadas</button>
+            <button class="dsh-btn is-quiet" type="submit" name="action" value="reset">Devolver a revisión</button>
+        </div>
+    {% endif %}
+</form>
+
+{% comment %}
+Each row's correction form lives outside the bulk form: nested <form> is invalid
+HTML, so the inputs point at these by id with the form attribute.
+{% endcomment %}
+{% for item in page_obj %}
+    <form method="post" id="edit{{ item.pk }}" class="dsh-inline">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="edit">
+        <input type="hidden" name="item" value="{{ item.pk }}">
+    </form>
+{% endfor %}
+
+{% include "dashboard/_pager.html" %}
+{% endblock %}
