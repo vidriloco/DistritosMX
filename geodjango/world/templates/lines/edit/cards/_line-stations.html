@@ -1,0 +1,23 @@
+{% load static %}
+
+{% include 'lines/edit/cards/legend/_main.html' %}
+<div class="togglers">
+    <img src="{% static 'images/enable-visor.png' %}" alt="Capas de Información" id="visor-toggle" class="geo-visor-button hidden">
+</div>
+<div id="line-stations" class="card">
+    <div class="menu">
+        <div class="header-hidden" hx-get="{% url 'lines_stations' line_id=line.id %}" hx-target="#content-area-for-stations" hx-swap="outerHTML">
+            <h4 class="text">+ Estaciones</h4>
+        </div>
+
+        <div class="content container mb-3 mt-4" style="display: none;">
+            {% include 'lines/edit/cards/_list_of_stations.html' %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('#station-form input, #station-form textarea, #station-form select').forEach(function(input) {
+        input.addEventListener('input', enableStationSubmitButton);
+    });
+</script>

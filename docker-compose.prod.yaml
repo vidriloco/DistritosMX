@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: geodjango
+    environment:
+      PYTHONDONTWRITEBYTECODE: "no-write"
+      DJANGO_DEBUG: "false"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set it in .env.production}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?set it in .env.production}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-wikiando_db}
+      DB_USER: ${DB_USER:-wikirootcito}
+      DB_PASSWORD: ${DB_PASSWORD:?set it in .env.production}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-wikiando}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-2}
+    ports:
+      - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8000}:8000"
+    depends_on:
+      - db
+    # Single line: in a YAML folded block the deeper-indented flag lines keep
+    # literal newlines, which silently truncates the gunicorn arguments
+    command: bash -c "cd geodjango && python3 manage.py collectstatic --noinput && gunicorn geodjango.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} --timeout 120"
+    restart: always
+
+  db:
+    image: postgis/postgis:14-3.1-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-wikiando_db}
+      POSTGRES_USER: ${DB_USER:-wikirootcito}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set it in .env.production}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - 5432
+    restart: always
+
+volumes:
+  pgdata:

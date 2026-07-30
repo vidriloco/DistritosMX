@@ -1,0 +1,51 @@
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Sincronizar datos de transporte público</h1>
+            
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">Presiona el botón para sincronizar los datos de transporte público con la base de datos.</p>
+                    <button id="syncButton" class="btn btn-primary" onclick="syncTransit()">
+                        <i class="fas fa-sync"></i> Sincronizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function syncTransit() {
+    const button = document.getElementById('syncButton');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+    
+    fetch('/transit/sync', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Sincronización completada exitosamente');
+        } else {
+            alert('Error durante la sincronización: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Error al conectar con el servidor');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-sync"></i> Sincronizar';
+    });
+}
+</script>
+{% endblock %}

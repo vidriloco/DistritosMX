@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>Propuestas políticas 2024 - Wikiando: La movilidad de todos</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Mapa interactivo con las propuestas de nuevas líneas de Metro y Tren Ligero de los candidatos a la jefatura de gobierno de la CDMX 2024">
+    <meta name="keywords" content="movilidad, elecciones 2024, ciudad de méxico, transporte público, metros, tren ligero, transportes eléctricos, tren suburbano">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/megalopolis/futuro/metro-horizonte-2018-2030" />
+
+    <meta property="og:title" content="Propuestas políticas 2024 - Wikiando: La movilidad de todos">
+    <meta property="og:description" content="Mapa interactivo con las propuestas de nuevas líneas de Metro y Tren Ligero de los candidatos a la jefatura de gobierno de la CDMX 2024">
+    <meta property="og:image" content="https://wikiando.mx/static/images/red-del-futuro.jpg">
+    <meta property="og:url" content="https://wikiando.mx/megalopolis/futuro/metro-horizonte-2018-2030">
+
+    <meta name="twitter:title" content="Propuestas políticas 2024 - Wikiando: La movilidad de todos">
+    <meta name="twitter:description" content="Mapa interactivo con las propuestas de nuevas líneas de Metro y Tren Ligero de los candidatos a la jefatura de gobierno de la CDMX 2024">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/red-del-futuro.jpg">
+
+    {% include '_shared_css.html' %}
+    {% include '_shared_except_css.html' %}
+</head>
+<body>
+    {% with active_tab="politics" title="Metro" caption="Propuestas Elección 2024" %}
+        {% include '_shared_navbar.html' %}
+    {% endwith %}
+
+    <!-- Map container -->
+    <div id='map' style='width: 100%; height: calc(100vh - 56px);'></div>
+    
+    <!-- Bootstrap JS and Mapbox JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+    {% include '_js_definitions.html' %}
+    {% if is_minified == True %}
+    <script type="text/javascript" src="{% static 'js/all_politics.min.js' %}"></script>
+    {% else %}
+    <script type="text/javascript" src="{% static 'js/shared.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boot_politics.js' %}"></script>
+    {% endif %}
+
+    <div class="card-container">
+        <div id="layer-menu-options" class="card hidden">
+
+            <div class="container card-body">
+                <p class="m-3">Selecciona alguno de los partidos listados para ver sus propuestas en el mapa.</p>
+
+                <div class="container mt-4">
+                    <p class="subtitle subtitle-first">Morena</p>
+                    <div class="list-group">
+                        <a href="javascript:void(0);" id="morena" class="list-group-item list-group-item-action">
+                            <img src="{% static 'images/morena.png' %}" alt="Metro" class="political-item-icon">
+                        </a>
+                    </div>
+
+                    <p class="subtitle">Fuerza y Corazón por México</p>
+                    <div class="list-group mt-3">
+                        <a href="#" id="va-x-mx" class="list-group-item list-group-item-action">
+                            <img src="{% static 'images/va-por-mexico.png' %}" alt="Metrobús" class="political-item-icon">
+                        </a>
+                    </div>
+
+                    <p class="subtitle">Movimiento Ciudadano</p>
+                    <div class="list-group mt-3">
+                        <a href="#" id="mov-ciudadano" class="list-group-item list-group-item-action">
+                            <img src="{% static 'images/movimiento.png' %}" alt="Sistema de Transportes Eléctricos" class="political-item-icon">
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="should-display-menu" class="card">
+            <div id="map-layer-button" class="menu">
+                <img src="{% static 'images/layer-menu-icon.png' %}" alt="Propuestas políticas" class="icon">
+                <h4>Propuestas políticas</h4>
+            </div>
+            <div id="close-panel-button" class="menu hidden">
+                <img src="{% static 'images/close-menu-icon.png' %}" alt="Cerrar panel" class="icon">
+                <h4>Cerrar Panel</h4>
+            </div>
+        </div>
+        <div id="should-hide-selected-point-details" class="card hidden">
+            <div id="close-details-button" class="menu">
+                <img src="{% static 'images/close-menu-icon.png' %}" alt="Cerrar detalles" class="icon">
+                <h4>Cerrar</h4>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

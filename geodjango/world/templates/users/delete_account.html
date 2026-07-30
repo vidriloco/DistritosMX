@@ -1,0 +1,68 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load allauth account %}
+{% load static %}
+{% block head_title %}
+    {% trans "Wikiando MX: Iniciar sesión" %}
+{% endblock head_title %}
+{% block content %}
+<h1 class="mb-3">Eliminar cuenta</h1>
+<p class="card-text">
+    Nos entristece que quieras eliminar tu cuenta, pero estás en todo tu derecho de hacerlo.
+</p>
+
+{% if user.is_authenticated %}
+<p>
+    Por favor sigue los pasos siguientes para eliminar tu cuenta:
+</p>
+<ul>
+    <li>
+       Da click en el botón <b>Ajustes</b> en esta pantalla.
+    </li>
+    <li>
+        En la sección de <b>Ajustes</b>, da click en el botón <b>Eliminar cuenta</b> que aparece en la parte inferior izquierda.
+    </li>
+    <li>
+        Finalmente, <b>confirma</b> la eliminación de tu cuenta.
+    </li>
+</ul>
+{% else %}
+<p>
+    Si deseas eliminar tu cuenta, por favor inicia sesión y sigue los pasos siguientes:
+</p>
+<ul>
+    <li>
+       Da click en el botón derecho en la barra de navegación.
+    </li>
+    <li>
+        A continuación, da click en <b>Ajustes</b>.
+    </li>
+    <li>
+        En la sección de <b>Ajustes</b>, da click en el botón <b>Eliminar cuenta</b> que aparece en la parte inferior izquierda.
+    </li>
+    <li>
+        Finalmente, <b>confirma</b> la eliminación de tu cuenta.
+    </li>
+</ul>
+{% endif %}
+<hr/>
+{% if user.is_authenticated %}
+<ul class="text-center list-inline pt-1">
+    <li class="list-inline-item">
+        <a href="{% url 'settings' %}">Ajustes</a>
+    </li>
+</ul>
+{% else %}
+<ul class="text-center list-inline pt-1">
+    <li class="list-inline-item">
+        <a href="{% url 'account_login' %}">Iniciar sesión</a>
+    </li>
+</ul>
+{% endif %}
+{% endblock content %}
+{% block extra_body %}
+    {{ block.super }}
+    {% if PASSKEY_LOGIN_ENABLED %}
+        {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
+    {% endif %}
+{% endblock %}

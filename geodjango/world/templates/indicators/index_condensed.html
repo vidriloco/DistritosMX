@@ -1,0 +1,40 @@
+{% load static %}
+
+<div id="radius-300" class="hidden" hx-get="{% url 'line_station_barrio_details' line_id=line.id station_id=station.id radius=300  %}" hx-trigger="stationSelected" hx-target="#left-card-container"></div>
+<div id="radius-500" class="hidden" hx-get="{% url 'line_station_barrio_details' line_id=line.id station_id=station.id radius=500  %}" hx-trigger="stationSelected" hx-target="#left-card-container"></div>
+<div id="radius-1000" class="hidden" hx-get="{% url 'line_station_barrio_details' line_id=line.id station_id=station.id radius=1000  %}" hx-trigger="stationSelected" hx-target="#left-card-container"></div>
+<div id="radius-2000" class="hidden" hx-get="{% url 'line_station_barrio_details' line_id=line.id station_id=station.id radius=2000  %}" hx-trigger="stationSelected" hx-target="#left-card-container"></div>
+
+<div class="m-3 mb-0 legend">
+    <div class="ms-2 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Datos de barrio</h5>
+        <p class="small mb-0">El impacto de esta estación</p>
+    </div>
+    <hr/>
+    <div class="px-4" style="overflow-y: auto; max-height: 120px;">
+        {% for indicator in indicators %}
+        <div class="row indicator my-2">
+            <div class="col-6 p-0 section-title d-flex align-items-center">
+                <p class="title title-r small mb-1">{{ indicator.title }}</p>
+            </div>
+            <div class="col-6 p-0 text-end">
+                <h4 class="value">{{ indicator.stats }}</h4>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<hr/>
+<div class="text-end" style="font-size: small;">
+    <p class="d-inline-block p-0 me-1">Radios disponibles: </p>
+    <select class="form-select d-inline-block" aria-label="Selecciona un radio" style="width: auto;" onchange="handleRadiusChange(this.value)">
+        <option value="300" {% if radius == 300 %}selected{% endif %}>300 metros</option>
+        <option value="500" {% if radius == 500 %}selected{% endif %}>500 metros</option>
+        <option value="1000" {% if radius == 1000 %}selected{% endif %}>1000 metros</option>
+        <option value="2000" {% if radius == 2000 %}selected{% endif %}>2000 metros</option>
+    </select>
+
+    <button href="javascript:void(0);" class="btn btn-light" data-bs-toggle="popover" data-bs-title="¿Cómo entender estos datos?" data-bs-content="En este panel mostramos indicadores del impacto de la estación en el barrio haciendo una sumatoria de todos los lugares para cada categoría dentro del radio seleccionado. Para el caso de la población se hace un calculo proporcional del area de cada AGEB atrapado dentro del radio. Fuente de datos: INEGI">
+        <img src="{% static 'images/question-icon.png' %}" width="30" height="30" class="d-inline-block align-middle" alt="">
+    </button>
+</div>

@@ -1,0 +1,54 @@
+{% load static %}
+<div id="general-info" class="card" hx-swap-oob="true">
+    <div class="menu">
+        <div class="header-hidden">
+            <h4 class="text">+ Información de ruta</h4>
+        </div>
+        <div class="content container mb-3 mt-4" style="display: none;">
+            {% if operation == 'line-updated' %}
+                {% if operation_succeeded %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Los cambios se guardaron correctamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        No se pudieron guardar los cambios. <br/>Revisa por favor la información ingresada.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div id="line-info-loading-indicator" class="loading-indicator-area hidden">
+                <div class="d-flex align-items-center">
+                    <strong role="status">Guardando cambios...</strong>
+                    <div class="spinner-grow spinner-grow-sm ms-auto" aria-hidden="true"></div>
+                  </div>
+            </div>
+            <form id="line-form" hx-encoding='multipart/form-data' hx-post="{% url 'line_edit_page' line_id=form.instance.id %}" onSubmit="showLoadingIndicator('updating-line-info')">
+                <div id="replaceable-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-dark" id="submit-line-form-button" hx-target="#general-info" hx-swap="outerHTML" disabled>Guardar cambios</button>
+                </div>
+            </form>
+
+            <script>
+
+                {% if operation == 'line-updated' %}
+                    userClickedOnHeader($('#general-info .header-hidden'));
+                    registerEvents();
+                {% endif %}
+
+                function enableSubmitButton() {
+                    document.getElementById('submit-line-form-button').disabled = false;
+                }
+
+                document.querySelectorAll('#line-form input, #line-form textarea, #line-form select').forEach(function(input) {
+                    input.addEventListener('input', enableSubmitButton);
+                });
+            </script>
+        </div>
+    </div>
+</div>

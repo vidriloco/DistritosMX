@@ -1,0 +1,65 @@
+{% load static %}
+<style>
+    .station-details, .connection-details {
+        width: 400px;
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        background-color: white;
+        padding: 20px 40px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .station-details .header {
+        margin-top: -80px;
+    }
+
+    .station-details .name, .connection-details .title {
+        font-size: 25px;
+        font-weight: bold;
+        line-height: 28px;
+        margin-bottom: 10px;
+    }
+
+    .station-details .line {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    .station-details .system {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .station-details .system-icon {
+        width: 80%;
+        position: relative;
+        transform: translateY(-50%);
+    }
+
+    .political-item-icon {
+        height: 60px;
+    }
+
+    .list-group-item p {
+        font-size: 15px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .container .subtitle {
+        font-size: 20px;
+        font-weight: bold;
+        margin-top: 20px;
+        color: rgb(170, 170, 170);
+    }
+
+    .card-container .card-body {
+        height: 550px;
+    }
+</style>

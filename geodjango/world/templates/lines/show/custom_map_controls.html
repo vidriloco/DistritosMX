@@ -1,0 +1,46 @@
+{% load static %}
+
+<div id="wikiando-map-custom-controls" class="hidden">
+    <div class="mapboxgl-ctrl mapboxgl-ctrl-group">
+        <button class="wikiando-animate-route" type="button" aria-label="Controla la animación de la ruta">
+            <img id="route-play" src="{% static "images/play-icon-dark.png" %}" style="width: 20px;">
+            <img id="route-stop" src="{% static "images/pause-icon-dark.png" %}" style="width: 20px;" class="hidden">
+        </button>
+        <button id="wikiando-animate-route-reset" type="button" aria-label="Reiniciar animación" class="hidden">
+            <img src="{% static "images/reset-icon-dark.png" %}" style="width: 20px;">
+        </button>
+    </div>
+</div>
+
+<div id="wikiando-network-layer-custom-controls" class="hidden">
+    <div class="mapboxgl-ctrl mapboxgl-ctrl-group">
+        <button id="wikiando-network-layer-custom-controls-selector" type="button" aria-label="Selecciona qué redes son visibles">
+            <img class="map-asp" src="{% static "images/transit-control-map-button.png" %}" alt="Mapa Asfalto" style="width: 30px; height: 30px;" class="hidden" />
+        </button>
+    </div>
+</div>
+
+<div id="wikiando-map-theme-custom-controls" class="hidden">
+    <div class="mapboxgl-ctrl mapboxgl-ctrl-group">
+        <button id="wikiando-colour-map-selector" type="button" aria-label="Controla la animación de la ruta">
+            <img class="map-ate" src="{% static "images/pink-map-button.png" %}" alt="Mapa Atenea" style="width: 30px; height: 30px;" />
+            <img class="map-blu" src="{% static "images/blue-map-button.png" %}" alt="Mapa Marina" style="width: 30px; height: 30px;" class="hidden" />
+            <img class="map-sta" src="{% static "images/map-sta-button.png" %}" alt="Mapa Standard" style="width: 30px; height: 30px;" class="hidden" />
+            <img class="map-sat" src="{% static "images/map-sat-button.png" %}" alt="Mapa Satélite" style="width: 30px; height: 30px;" class="hidden" />
+            <img class="map-dar" src="{% static "images/map-dark-button.png" %}" alt="Mapa Obscuridad" style="width: 30px; height: 30px;" class="hidden" />
+            <img class="map-ocr" src="{% static "images/map-ocr-button.png" %}" alt="Mapa Ocre" style="width: 30px; height: 30px;" class="hidden" />
+            <img class="map-asp" src="{% static "images/map-asp-button.png" %}" alt="Mapa Asfalto" style="width: 30px; height: 30px;" class="hidden" />
+        </button>
+    </div>
+</div>
+
+<div id="wikiando-map-3d-custom-controls" class="hidden">
+    <div class="mapboxgl-ctrl mapboxgl-ctrl-group">
+        <button id="wikiando-3d-map-off" type="button" aria-label="Desactiva mapa en 3D">
+            <img src="{% static "images/3d-icon-off.png" %}" style="width: 20px;">
+        </button>
+        <button id="wikiando-3d-map-on" class="hidden" type="button" aria-label="Activa mapa en 3D">
+            <img id="route-play" src="{% static "images/3d-icon-on.png" %}" style="width: 20px;">
+        </button>
+    </div>
+</div>

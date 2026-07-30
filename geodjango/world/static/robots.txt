@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://distritos.mx/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /static/admin/
+Disallow: /media/
+Disallow: /backups/
+Disallow: /venv/
+Disallow: /scripts/
+Disallow: /docker-compose.yaml
+Disallow: /Dockerfile
+Disallow: /requirements.txt
+Disallow: /runtime.txt
+Disallow: /organize_*.py
+Disallow: /prepare.sh

@@ -1,0 +1,21 @@
+{% load static %}
+<div id="tags-container" class="tags-list">
+    <ul class="list-inline">
+        <li class="list-inline-item"><b>Tags:</b></li>
+        {% if current_tags|length == 0 %}
+            <li class="list-inline-item">No hay tags</li>
+        {% else %}
+            {% for tag in current_tags %}
+                <li class="list-inline-item badge bg-dark">{{ tag.name }}</li>
+            {% endfor %}
+        {% endif %}
+        
+        {% if edit_mode == True %}
+        <li class="list-inline-item">
+            <a href="" hx-get="{% url 'tags_line_edit' line_id=line.id %}" hx-target="#tags-container" hx-swap="innerHTML">
+                <img src="{% static 'images/edit-icon.png' %}" width="25" height="25" alt="Modificar" class="me-1">
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</div>

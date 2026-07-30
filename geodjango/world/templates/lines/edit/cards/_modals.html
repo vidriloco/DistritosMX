@@ -1,0 +1,18 @@
+{% load static %}
+<div class="modal fade" id="prompt-disable-geo-layer" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">¿Ocultar datos de barrio?</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small">Puedes activar y desactivar la capa de datos de barrio en cualquier momento haciendo click en el icono de ojo que aparece arriba del formulario de estación.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-dark" data-bs-dismiss="modal" onclick="disableGeolayers()">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>

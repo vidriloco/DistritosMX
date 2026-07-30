@@ -1,0 +1,19 @@
+{% extends "wikiando/layouts/base_simple_js.html" %}
+{% load static %}
+{% load vite %}
+
+{% block extra_head %}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="{% static 'css/map-admin.css' %}" />
+{% endblock %}
+
+{% block content %}
+    <div id="root"></div>
+    
+    <script>
+        window.MIXPANEL_TOKEN = "{{ mixpanel_token }}";
+        // Any other global configuration can go here
+    </script>
+    
+    {% vite_asset 'main' %}
+{% endblock %}

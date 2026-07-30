@@ -1,0 +1,139 @@
+{% load static %}
+<div id="content-area-for-stations" hx-swap-oob="true">
+    {% if stations.count > 0 %}
+    <div id="add-new-station-area" class="text-end">
+        <button type="button" class="btn btn-light btn-sm" disabled>Esta ruta contiene {{ stations.count }} estaciones</button>
+        <button onclick="showStationForm(); return false;" class="btn btn-dark" role="button">Añadir</button>
+    </div>
+    {% endif %}
+    <div id="station-area-content">
+        {% if stations.count == 0 %}
+        <div class="m-4 text-center">
+            <img src="{% static 'images/empty-icon.png' %}" width="50%" alt="No hay estaciones registradas">
+            <h5>Esta ruta no tiene estaciones</h5>
+            <p class="text-muted">Comienza añadiendo la primera</p>
+            <button onclick="showStationForm(); return false;" class="btn btn-dark" role="button">Añadir</button>
+        </div>
+        {% else %}
+            {% for station in stations %}
+            <div id="station-{{ station.id }}-edit" station-id="{{ station.id }}" class="station-card hidden">
+                <div class="station-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <img src="{{ station.get_icon_url }}" alt="Image" class="icon">
+                        <p class="title">Modificar estación</p>
+                    </div>
+                </div>
+                <div class="station-body">
+                    <form hx-post="{% url 'lines_station_update' line_id=line.id station_id=station.id %}" hx-encoding="multipart/form-data" hx-target="this" hx-swap="outerHTML">
+                        {% csrf_token %}
+                        <p>
+                        {{ station_update_form.name.label_tag }}
+                        <input type="text" name="name" class="form-control" style="max-width: 100%;" placeholder="Ej: Tasqueña" maxlength="100" required="" id="id_name" value="{{ station.name }}">
+                        </p>
+                        <p>
+                        {{ station_update_form.station_number.label_tag }}
+                        <input type="text" name="station_number" class="form-control" style="max-width: 100%;" placeholder="Ej: 1" maxlength="100" required="" id="id_station_number" value="{{ station.station_number }}">
+                        </p>
+                        <p>
+                        {{ station_update_form.station_icon.label_tag }}
+                        <input type="file" name="icon" class="form-control" accept="image/*" id="id_icon">
+                        {% if station.icon %}
+                        <div class="mt-2 d-flex align-items-center">
+                            <img src="{{ station.get_icon_url }}" alt="Current Icon" class="img-thumbnail me-2" style="max-width: 45px;">
+                            <div>
+                                <p class="mb-0">{{ station.icon_filename }}</p>
+                                <p class="small m-0">Icono actual</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                        </p>
+                        <p>
+                            {{ station_update_form.description.label_tag }}
+                            <textarea name="description" cols="40" rows="10" class="form-control" style="max-width: 100%; height: 100px;" placeholder="Detalles de esta estación" id="id_description">{{ station.description|default_if_none:"" }}</textarea>
+                        </p>
+                        <div class="d-flex justify-content-end mt-3">
+                            <a href="javascript:void(0);" class="btn btn-default me-2" onclick="cancelStationEdit({{ station.id }})" class="station-toggle-cancel-edit">Cancelar</a>
+                            <button type="submit" class="btn btn-dark">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div id="station-{{ station.id }}" station-id="{{ station.id }}" class="station-card">
+                <div class="station-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex">
+                        <div class="station-data" data-id="{{ station.id }}" data-icon="{{ station.get_icon_url }}" data-name="{{ station.get_icon_url }}" data-coordinates="{{ station.coordinates.geojson }}"></div>
+                        <img src="{{ station.get_icon_url }}" alt="Image" class="icon">
+                        <div><p class="title">{{ station.name }}</p><p class="m-0 badge text-bg-secondary">{{ station.station_key }}</p></div>
+                    </div>
+                </div>
+                <div class="station-body hidden"></div>
+            </div>
+            <div id="station-{{ station.id }}-controls" class="hidden station-controls">
+                <div class="d-flex justify-content-end">
+                    <a class="d-flex align-items-center me-2" href="javascript:void(0);" hx-delete="{% url 'lines_station_delete' line_id=line.id station_id=station.id %}" hx-confirm="¿Estás seguro de que deseas eliminar esta estación?" hx-target="#content-area-for-stations" hx-swap="outerHTML" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        <img src="{% static 'images/delete-icon.png' %}" width="25" height="25" alt="Eliminar">
+                        <span>Eliminar</span>
+                    </a>
+                    <a href="javascript:void(0);" onclick="showStationEditForm('{{ station.id }}')" class="d-flex align-items-center">
+                        <img src="{% static 'images/edit-icon.png' %}" width="25" height="25" alt="Modificar" class="me-1">
+                        <span>Modificar</span>
+                    </a>
+                </div>
+            </div>
+
+            {% endfor %}
+        {% endif %}
+    </div>
+    
+    {% if operation == "stations-refreshed" %}
+    <script>registerEvents();</script>
+    {% endif %}
+
+    {% if operation == "station-failed" %}
+    <script>
+        alert('{{ message }}');
+        stationOperationFailed();
+    </script>
+    {% endif %}
+
+    {% if operation == "station-created" or operation == "station-updated" %}
+    <script>
+        didCreateStation({{ station_id }}); 
+        registerEvents();
+        alert('{{ message }}');
+    </script>
+    {% endif %}
+
+    {% if operation == "station-deleted" %}
+    <script>
+        didDeleteStation({{ station_id }}); 
+        alert('Estación eliminada exitosamente.');
+        registerEvents();
+    </script>
+    {% endif %}
+
+    <div id="station-loading-indicator" class="loading-indicator-area hidden">
+        <div class="d-flex align-items-center">
+            <strong role="status">Guardando estación...</strong>
+            <div class="spinner-grow spinner-grow-sm ms-auto" aria-hidden="true"></div>
+          </div>
+    </div>
+
+    <div id="station-form-placeholder" class="hidden">
+        <form id="station-form" hx-encoding='multipart/form-data' hx-post="{% url 'lines_station_create' line_id=line.id %}" onsubmit="showLoadingIndicator('creating-station')">
+            {% csrf_token %}
+            {{ station_form.as_p }}
+
+            <div class="form-group mb-3">
+                <label>Dirección:</label>
+                <p class="address small">No has seleccionado ningún punto en el mapa.</p>
+            </div>
+
+            <div class="text-end">
+                <a href="#" class="btn btn-default" onclick="hideStationForm(); return false;">Cancelar</a>
+                <button type="submit" class="btn btn-dark" id="submit-station-button" hx-target="#content-area-for-stations" hx-swap="outerHTML">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+

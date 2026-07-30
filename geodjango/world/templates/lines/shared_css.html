@@ -1,0 +1,225 @@
+<style>
+    .line-container {
+        position: absolute;
+        bottom: 0px !important;
+        left: 0px;
+        padding: 10px;
+        right: 0px;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .scrollable {
+        overflow-y: scroll; 
+        overflow-x: hidden; 
+        z-index: 999; 
+        -ms-overflow-style: none; 
+        scrollbar-width: none; 
+    }
+
+    .station-card {
+        padding: 20px;
+        margin: 20px 0;
+        border-radius: 5px;
+        border: 2px solid #eeeeee;
+    }
+
+    .station-active .station-toggle-edit {
+        display: none !important;
+    }
+
+    .edit-station {
+        pointer-events: none;
+    }
+
+    .station-card .icon {
+        width: 55px !important;
+        height: 55px !important;
+        margin-right: 10px;
+    }
+
+    .station-card .title {
+        font-weight: bold;
+        font-size: 18px;
+        vertical-align: bottom;
+        margin: 0;
+    }
+
+    .station-card .station-body {
+        margin-top: 20px;
+    }
+
+    .station-controls a {
+        color: #F57923;
+        text-decoration: none;
+        font-size: 15px;
+        vertical-align: middle;
+    }
+
+    .station-card:hover {
+        border: 2px solid #fce8db;
+        border-radius: 5px;
+        background-color: rgb(255, 248, 243);
+    }
+
+    .station-active {
+        border: 2px solid #ffc299;
+        border-radius: 5px;
+        background-color: rgb(255, 248, 243);
+        margin-bottom: 10px !important;
+    }
+
+    .selectable-container {
+        padding: 10px 10px 1px 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 10px;
+    }
+
+    .selectable-container.selected {
+        background-color: rgba(227, 95, 0, 0.3); /* Light orange color */
+    }
+
+    .selectable-container p {
+        margin-bottom: 10px;
+    }
+
+    .section-title {
+        text-transform: uppercase;
+        font-weight: bold;
+        color: gray;
+    }
+
+    .loading-indicator-area {
+        background-color: rgb(86, 86, 86);
+        padding: 15px;
+        border-radius: 7px;
+        color: white;
+    }
+
+    .legend .main-title {
+        color: rgb(255, 111, 0);
+    }
+
+    .legend .entry-list .row .title {
+        font-size: 0.9em;
+    }
+
+    .legend .subtitle {
+        color: rgb(153, 153, 153) !important;
+        font-size: 1em;
+    }
+
+    .legend .entry-list .stats {
+        border: 2px solid rgb(255, 237, 216);
+        border-radius: 5px;
+    }
+
+    .legend .entry-list .selected, .legend .entry-list .indicator:hover {
+        background-color: rgb(255, 234, 213);
+        cursor: pointer;
+    }
+
+    .legend .entry-list .border {
+        color: white; 
+        font-size: 0.8em; 
+        height: 100%; 
+        width: 20%; 
+        font-weight: bold;
+    }
+
+    .preview-button {
+        background-color: rgb(5, 5, 5); 
+        color: white; 
+        padding: 15px 20px; 
+        text-align: right; 
+        margin-top: 10px; 
+        border-radius: 8px; 
+        font-weight: bold; 
+        cursor: pointer;
+        border: 4px solid black;
+    }
+
+    .preview-button:hover {
+        border: 4px solid #e35f00;
+    }
+
+    .stations-chooser .selected {
+        border: 2px solid #ffc299;
+        padding: 4px;
+    }
+
+    .card-container .header {
+        background-color: #e35f00;
+    }
+
+    .floating-nav {
+        position: fixed; 
+        top: 10px; 
+        left: 10px;
+        z-index: 9999;
+    }
+
+    .floating-nav .compact-content .shrinking-button {
+        opacity: 0.3 !important;
+    }
+
+    .floating-nav .compact-content .shrinking-button:hover {
+        opacity: 1 !important;
+    }
+
+    .floating-nav .compact {
+        display: flex; 
+        align-items: center; 
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgb(251, 251, 251);
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        margin-right: 10px;
+    }
+
+    .floating-nav .content {
+        display: flex; 
+        align-items: center; 
+        background-color: white;
+        border: 1px solid rgb(247, 104, 10);
+        box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        margin-right: 10px;
+    }
+
+    .floating-nav .content-fixed-height {
+        height: 60px;
+    }
+
+    .floating-nav .separator {
+        height: 30px; 
+        width: 2px; 
+        background-color: rgb(221, 221, 221);
+    }
+
+    .floating-nav a {
+        text-decoration: none; 
+        color: gray;
+    }
+
+    .floating-nav a:hover {
+        color: black;
+    }
+
+    .floating-nav .btn-clear {
+        background-color: white; 
+        border: none;
+    }
+
+    .profile-pic {
+        border: 3px solid rgb(255, 98, 0)
+    }
+
+    .mapboxgl-ctrl-top-right {
+        margin-top: 80px !important;
+    }
+
+    .line-network-button {
+        z-index: 9999 !important;
+    }
+</style>

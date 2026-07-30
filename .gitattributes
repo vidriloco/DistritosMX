@@ -1,0 +1,4 @@
+*.geojson filter=lfs diff=lfs merge=lfs -text
+*.sketch filter=lfs diff=lfs merge=lfs -text
+designs/Assets.sketch filter=lfs diff=lfs merge=lfs -text
+geodjango/data/denue/yucatan.geojson filter=lfs diff=lfs merge=lfs -text

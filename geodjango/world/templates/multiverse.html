@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>La red que deberíamos tener - Wikiando: La movilidad de todos</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Mapa interactivo con las rutas de transporte público que deberíamos de tener actualmente de acuerdo a diferentes planes maestros formulados a lo largo de la historia de la ciudad.">
+    <meta name="keywords" content="movilidad, transporte público, trenes, ciclovias, metros, tren ligero, transportes eléctricos, tren suburbano">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/megalopolis/la-red-que-deberiamos-tener/metro-y-tren-ligero-horizonte-1996" />
+
+    <meta property="og:title" content="La red que deberíamos tener - Wikiando: La movilidad de todos">
+    <meta property="og:description" content="Mapa interactivo con las rutas de transporte público que deberíamos de tener actualmente de acuerdo a diferentes planes maestros formulados a lo largo de la historia de la ciudad.">
+    <meta property="og:image" content="https://wikiando.mx/static/images/red-multiverso.jpg">
+    <meta property="og:url" content="https://wikiando.mx/megalopolis/la-red-que-deberiamos-tener/metro-y-tren-ligero-horizonte-1996">
+
+    <meta name="twitter:title" content="La red que deberíamos tener - Wikiando: La movilidad de todos">
+    <meta name="twitter:description" content="Mapa interactivo con las rutas de transporte público que deberíamos de tener actualmente de acuerdo a diferentes planes maestros formulados a lo largo de la historia de la ciudad.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/red-multiverso.jpg">
+
+    {% include '_shared_css.html' %}
+    {% include '_shared_except_css.html' %}
+</head>
+<body>
+    {% with active_tab="multiverse" title="Metro y Tren Ligero" caption="(Horizonte 1996)" %}
+        {% include '_shared_navbar.html' %}
+    {% endwith %}
+
+    <!-- Map container -->
+    <div id='map' style='width: 100%; height: calc(100vh - 56px);'></div>
+    
+    <!-- Bootstrap JS and Mapbox JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+    {% include '_js_definitions.html' %}
+    {% if is_minified == True %}
+    <script type="text/javascript" src="{% static 'js/all_multiverse.min.js' %}"></script>
+    {% else %}
+    <script type="text/javascript" src="{% static 'js/shared.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boot_multiverse.js' %}"></script>
+    {% endif %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="legend" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Servicios de transporte disponibles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="m-3">Selecciona los servicios de transporte que deseas visualizar en el mapa: </p>
+                    <div class="container mt-4">
+                        <div class="list-group">
+                            <a href="javascript:void(0);" id="metro" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/metro-logo.png' %}" alt="Metro" class="item-icon">
+                                Metro
+                            </a>
+                        </div>
+
+                        <div class="list-group mt-3">
+                            <a href="#" id="metrobus" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/metrobus-logo.png' %}" alt="Metrobús" class="item-icon">
+                                Metrobús
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="ste" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/transportes-electricos-logo.png' %}" alt="Sistema de Transportes Eléctricos" class="item-icon">
+                                Transportes Eléctricos
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="cablebus" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/cablebus-logo.png' %}" alt="Cablebús" class="item-icon">
+                                Cablebús
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="rtp" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/rtp-logo.png' %}" alt="RTP" class="item-icon">
+                                RTP
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="corredores" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/concesionados-logo.png' %}" alt="Red de Autobuses CDMX" class="item-icon">
+                                Transporte Concesionado
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="interurbano" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/insurgente-logo.png' %}" alt="Tren Interurbano" class="item-icon">
+                                Tren Interurbano
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="suburbano" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/suburbano-logo.png' %}" alt="Tren Suburbano" class="item-icon">
+                                Tren Suburbano
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="mexibus" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/mexibus-logo.png' %}" alt="Mexibús" class="item-icon">
+                                Mexibús
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="mexicable" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/mexicable-logo.png' %}" alt="MexiCable" class="item-icon">
+                                MexiCable
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

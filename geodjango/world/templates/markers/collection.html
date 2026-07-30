@@ -1,0 +1,46 @@
+{% load static %}
+<div id="content-area-for-markers">
+    {% if markers.count > 0 %}
+    <div id="add-new-station-area" class="text-end">
+        <button type="button" class="btn btn-light btn-sm" disabled>Esta ruta contiene {{ markers.count }} marcadores</button>
+        <button class="btn btn-dark" role="button" hx-get="{% url 'line_markers_form' line_id=line.id %}" hx-swap="innerHTML" hx-target="#content-area-for-markers">Añadir</button>
+    </div>
+    {% endif %}
+    <div id="marker-area-content">
+        {% if markers.count == 0 %}
+        <div class="m-4 text-center">
+            <img src="{% static 'images/empty-marker-icon.png' %}" width="50%" alt="No hay marcadores registrados">
+            <h5>Esta ruta aún no tiene marcadores</h5>
+            <p class="text-muted">Comienza añadiendo el primero</p>
+            <button class="btn btn-dark" role="button" hx-get="{% url 'line_markers_form' line_id=line.id %}" hx-swap="innerHTML" hx-target="#content-area-for-markers">Añadir</button>
+        </div>
+        {% else %}
+            {% for marker in markers %}
+            <div id="marker-{{ marker.id }}" class="station-card mb-2" onclick="highlightMarker({{ marker.id }})">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex">
+                        <div class="marker-data" data-id="{{ marker.id }}" data-icon="{{ marker.get_icon_url }}" data-coordinates="{{ marker.coordinates.geojson }}"></div>
+                        <img src="{{ marker.icon.image.url }}" alt="{{ marker.icon.name }}" class="icon">
+                        <div><p class="title">{{ marker.name }}</p><p class="m-0">{{ marker.description }}</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="station-controls">
+                <div class="d-flex justify-content-end">
+                    <a class="d-flex align-items-center me-2" href="javascript:void(0);" hx-delete="{% url 'line_markers_delete' line_id=line.id marker_id=marker.id %}" hx-confirm="¿Estás seguro de que deseas eliminar esta estación?" hx-target="#content-area-for-markers" hx-swap="outerHTML" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+                        <img src="{% static 'images/delete-icon.png' %}" width="25" height="25" alt="Eliminar">
+                        <span>Eliminar</span>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        updateSimpleMarkersInMap();
+        disableSimpleMarkerDrawing();
+    });
+</script>

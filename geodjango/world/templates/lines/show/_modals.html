@@ -1,0 +1,61 @@
+{% load static %}
+<div class="modal fade" id="choose-map-theme" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Establece un tema predeterminado</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small">Personaliza tu ruta aún más con un mapa de color basado en alguno de los <b>siete</b> temas siguientes:</p>
+                <form>
+                    <input type="hidden" id="map_theme" name="map-theme">
+                    <div class="list-group" style="max-height: 210px; overflow-y: auto;">
+                        <label id="sta" class="list-group-item d-flex justify-content-between align-items-center active" onclick="userDidChangeTheme(this, 'sta')">
+                            Standard
+                            <img src="{% static 'images/map-streets.png' %}" style="width: 100px;">
+                        </label>
+                        <label id="dar" class="list-group-item d-flex justify-content-between align-items-center" onclick="userDidChangeTheme(this, 'dar')">
+                            Obscuridad
+                            <img src="{% static 'images/map-negro.png' %}" style="width: 100px;">
+                        </label>
+                        <label id="ate" class="list-group-item d-flex justify-content-between align-items-center" onclick="userDidChangeTheme(this, 'ate')">
+                            Atenea
+                            <img src="{% static 'images/map-atenea.png' %}" style="width: 100px;">
+                        </label>
+                        <label id="blu" class="list-group-item d-flex justify-content-between align-items-center" onclick="userDidChangeTheme(this, 'blu')">
+                            Azul profundo
+                            <img src="{% static 'images/map-blue.png' %}" style="width: 100px;">
+                        </label>
+                        <label id="asp" class="list-group-item d-flex justify-content-between align-items-center" onclick="userDidChangeTheme(this, 'asp')">
+                            Jungla de Asfalto
+                            <img src="{% static 'images/map-concrete.png' %}" style="width: 100px;">
+                        </label>
+                        <label id="ocr" class="list-group-item d-flex justify-content-between align-items-center" onclick="userDidChangeTheme(this, 'ocr')">
+                            Ocre
+                            <img src="{% static 'images/map-ocre.png' %}" style="width: 100px;">
+                        </label>
+                        <label id="sat" class="list-group-item d-flex justify-content-between align-items-center" onclick="userDidChangeTheme(this, 'sat')">
+                            Satelite
+                            <img src="{% static 'images/map-sat.png' %}" style="width: 100px;">
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                <div id="line-theme-saving" class="hidden">
+                    <button class="btn btn-dark" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Guardando...</span>
+                    </button>
+                </div>
+                <button id="line-theme-apply" class="btn btn-dark" onclick="enableMapThemeSwitcherModal({{ line.id }})">Aplicar tema</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'lines/_transit_layer_modal.html' %}
+{% include 'lines/_line_edit_while_published_modal.html' %}
+{% include 'lines/_line_details_mobile.html' %}

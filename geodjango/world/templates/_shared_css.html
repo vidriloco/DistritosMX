@@ -1,0 +1,390 @@
+{% load static %}
+<style>
+    .hidden {
+        display: none !important;
+    }
+    .custom-marker, .item-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .custom-marker img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .active > a, .selected {
+        font-weight: bold;
+        color: black;
+    }
+    
+    .card-body .title {
+        font-size: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .card-body .caption {
+        color: #6b6b6b;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    .description {
+        padding: 10px 10px 0 10px;
+    }
+
+    .spacer-20 {
+        margin-right: 20px !important;
+    }
+
+    .list-group-item {
+        padding: 25px;
+    }
+
+    .item-icon {
+        margin-right: 10px;
+    }
+
+    @media (max-width: 991.98px) {
+        .main-app-sections li {
+            margin: 5px 0 !important;
+        }
+
+        .main-app-sections {
+            margin: 20px 0 30px 0 !important;
+        }
+
+        .navbar-nav .nav-item.spacer-20 {
+            margin: 10px 0;
+            width: 100% !important;
+        }
+    }
+
+    .modal {
+        z-index: 9999;
+    }
+
+    .right-menu-container {
+        position: absolute;
+        bottom: 60px;
+        right: 60px;
+        z-index: 9998;
+        text-align: right;
+    }
+
+    .right-menu-container img {
+        width: 65px;
+        height: 65px;
+
+        border-radius: 40px;
+        box-shadow: 0 0 10px rgba(1, 1, 1, 0.4);
+        border: 6px solid rgb(21, 238, 234);
+    }
+
+    .list-group-item {
+        padding: 10px;
+        text-align: left;
+        font-size: 13px;
+    }
+
+    .loading-indicator-small {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    .loading-indicator-medium {
+        width: 40px !important;
+        height: 40px !important;
+    }
+
+    .informative-image {
+        width: 200px !important;
+        height: 200px !important;
+    }
+
+    .decorative-image {
+        width: 300px !important;
+    }
+
+    .rounded-pill {
+        font-size: 12px;
+    }
+
+    .tiny-text {
+        font-size: 10px;
+    }
+
+    .intro img {
+        width: 100%;
+    }
+
+    .intro .title {
+        font-weight: bold;
+        font-size: 30px;
+    }
+
+    .intro .description {
+        font-size: 16px;
+        margin: 0px 0px 20px 0px;
+        padding-left: 0px;
+    }
+
+    .intro .actions {
+        margin-left: auto;
+        margin-right: auto;
+        width: 80%;
+        margin-bottom: 10px;
+    }
+    
+    .special-text {
+        color: rgb(71, 71, 71);
+        font-size: 14px;
+        font-weight: bold;
+        margin: 30px;
+    }
+
+    .btn-close-over-image {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+    }
+
+    .card-container {
+        position: absolute;
+        bottom: 30px;
+        left: 10px;
+        padding: 10px;
+    }
+
+    .card-container .button {
+        width: 100%;
+        background-color: #e35f00;
+        border-radius: 12px;
+        border-color: none;
+        border-width: 0;
+        box-shadow: none;
+        
+        padding: 10px;
+        font-size: 16px;
+        color: white;
+        font-weight: bold;
+    }
+
+    .card-container .back-link {
+        text-align: center;
+        display: block;
+        width: 100%;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: none !important;
+        color: rgb(93, 93, 93) !important;
+    }
+
+    .card-container .button:hover {
+        background-color: #b64d02;
+    }
+
+    .card {
+        background-color: white;
+        padding: 15px;
+        border: 2px solid #e35f00;
+    }
+
+    .card-container .card {
+        margin-top: 10px;
+        width: 450px;
+        z-index: 999;
+    }
+
+    .card-container .header, .card-container .header-hidden {
+        width: 100%;
+        border-radius: 5px;
+    }
+
+    .card-container .header-hidden {
+        background-color: none;
+    }
+
+    .card-container .header {
+        padding: 15px;
+    }
+
+    .card-container .header .text {
+        color: white !important;
+    }
+
+    .card-container .header-hidden .text {
+        color: #e35f00;
+    }
+
+    .card-container .card .menu {
+        cursor: pointer;
+    }
+
+    .card-container .card .menu > * {
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: top;
+    }
+
+    .card-container .card .menu h4 {
+        margin: 0px;
+        font-size: 19px;
+        color: rgb(237, 110, 7);
+    }
+
+    .card-container .card .menu .icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .card-container .card-body {
+        height: 60vh; 
+        overflow-y: scroll;
+    }
+
+    .card .transport-agencies-list {
+        overflow-y: auto; 
+        max-height: 400px;
+    }
+
+    @media only screen and (max-width: 600px) {
+        .card-container .card-body {
+            height: 20vh;
+        }
+
+        .card-container .card {
+            width: 90vw;
+        }
+
+        .card-container {    
+            bottom: 0px;
+        }
+
+        .card-container .connection-details .connections-space {
+            max-height: 180px;
+        }
+    }
+
+    @media only screen and (min-width: 601px) {
+        .card-container .connection-details .connections-space {
+            max-height: 300px;
+        }
+    }
+
+    .card-container .station-details .system-icon {
+        margin-top: 30px;
+        width: 5vh;
+        margin-bottom: 20px;
+    }
+
+    .card-container .station-details .name, .connection-details .title {
+        font-size: 25px;
+        font-weight: bold;
+        line-height: 28px;
+        margin-bottom: 10px;
+    }
+
+    .card-container .station-details .line {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+
+    .card-container .station-details .system {
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .card-container .connections-space {
+        border-top: 1px solid #e0e0e0;
+        border-bottom: 1px solid #e0e0e0;
+        max-height: 200px;
+        overflow: scroll;
+    }
+
+    .card-container .togglers {
+        display: flex; 
+        justify-content: flex-end;
+    }
+
+    .card-container .togglers .toggle-button {
+        text-align: center;
+        background-color: rgb(237, 110, 7);
+        font-weight: bold;
+        width: auto;
+        padding: 5px 15px;
+        border-radius: 20px;
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+        margin-bottom: 5px;
+    }
+
+    .card-container .togglers .geo-visor-button {
+        height: 35px;
+    }
+
+    .card-container .togglers .map-colors-button {
+        height: 35px;
+        opacity: 0.5;
+        margin-top: 7px;
+    }
+
+    .card-container .togglers .map-colors-button:hover, .card-container .togglers .geo-visor-button:hover {
+        opacity: 1;
+        cursor: pointer;
+    }
+
+    .card-container .map-theme-button {
+        width: 100px;
+        height: 100px;
+        cursor: pointer;    
+    }
+
+    .preview {
+        height: 40px;
+        margin-right: 10px; 
+        vertical-align: middle; 
+        border-radius: 7px;
+    }
+
+    .preview .span {
+        font-weight: bold;
+    }
+
+    .card-container .map-color-option .blue {
+        background-color: rgb(19, 19, 130); 
+    }
+
+    .card-container .map-color-option .green {
+        background-color: rgb(0, 135, 74); 
+    }
+
+    .card-container .map-color-option .concrete {
+        background-color: rgb(164, 164, 164); 
+    }
+
+    .card-container .map-color-option .dark {
+        background-color: rgb(38, 38, 38); 
+    }
+
+    .card-container .map-color-option > span {
+        vertical-align: middle;
+    }
+
+    .custom-tooltip {
+        background-color: black;
+        border: none;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+</style>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
+
+<script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>

@@ -1,0 +1,52 @@
+{% load static %}
+<div hx-get="{% url 'line_station_barrio_details' line_id=line.id station_id=station.id radius=300 %}" hx-swap="innerHTML" hx-target="#left-card-container" class="togglers">
+    <p class="toggle-button">
+        <span class="loading-btn hidden"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Cargando</span>
+        <span class="action-btn">Ver Datos de Barrio</span>
+    </p>
+</div>
+<div id="station-details" class="station-details card text-center">
+    <div>
+        <img src="{{ station.get_icon_url }}" alt="{{ station.name }}" class="mt-4" style="max-height: 100px;">
+        <p class="name mt-4">{{ station.name }}</p>
+        <p class="address sm">{{ line.named_identifier }}: {{ line.route }}</p>
+        <div class="d-flex justify-content-center align-items-center mb-5">
+            <img src="{% static 'images/' %}{{ line.icon }}" alt="Metrobús" class="me-2" style="max-height: 25px;">
+            <p class="mb-0 ml-2"><b>{{ line.system_name }}</b></p>
+        </div>
+        {% if station.description != None and station.description.trim|length > 0 %}
+            <hr/>
+            <div id="station-id-{{ station.id }}">
+                <p class="description mb-5">{{ station.description|truncatechars:90 }} <span class="badge rounded-pill bg-light text-dark">Leer más</span></p>
+                <div class="description-container hidden mb-5" style="max-height: 200px; overflow-y: auto;">
+                    <p class="description">{{ station.description }}</p>
+                    <span class="badge rounded-pill bg-light text-dark">Leer menos</span>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div style="position: absolute; bottom: 0px; right: 0px;">
+        <p class="badge text-bg-dark mb-2 me-2">{{ line.get_operative_status }}</p>
+    </div>
+</div>
+<div class="card" onclick="closeStationDetails({{ station.id }})">
+    <div id="close-details-button" class="menu">
+        <img src="/static/images/close-menu-icon.png" alt="Cerrar detalles" class="icon">
+        <h4>Cerrar</h4>
+    </div>
+</div>
+<script>
+    clearRadius();
+
+    $(document).ready(function() {
+        $('#station-id-{{ station.id }}').click(function() {
+            $(this).children('.description').toggleClass('hidden');
+            $(this).children('.description-container').toggleClass('hidden');
+        });
+
+        $('.toggle-button').click(function() {
+            $(this).children('.loading-btn').removeClass('hidden');
+            $(this).children('.action-btn').addClass('hidden');
+        });
+    });
+</script>

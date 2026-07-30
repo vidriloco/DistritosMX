@@ -1,0 +1,41 @@
+{
+  "subdirectories": {
+    "US": {
+      "count": 150,
+      "files": [
+        "file1.geojson",
+        "file2.geojson",
+        "file3.geojson"
+      ]
+    },
+    "CA": {
+      "count": 75,
+      "files": [
+        "file4.geojson",
+        "file5.geojson"
+      ]
+    },
+    "BR": {
+      "count": 200,
+      "files": [
+        "file6.geojson",
+        "file7.geojson",
+        "file8.geojson"
+      ]
+    },
+    "MX": {
+      "count": 500,
+      "files": [
+        {"file9.geojson": {
+            "start": "2025-06-05 02:15:11.000",
+            "end": "2025-06-05 12:58:25.000"
+          }},
+        {"file10.geojson": {
+            "start": "2025-06-05 13:00:00.000",
+            "end": "2025-06-05 23:59:59.000"
+          }}
+      ]
+    }
+  }
+}
+

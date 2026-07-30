@@ -1,0 +1,89 @@
+{% load static %}
+<div id="line-path" class="card" hx-swap-oob="true">
+    <div class="menu">
+        <div class="header-hidden">
+            <h4 class="text">+ Detalles del Trazo</h4>
+        </div>
+        
+        <div class="content container mb-3 mt-4" style="display: none;">
+            {% if operation == 'line-updated' %}
+                {% if operation_succeeded %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        Los cambios se guardaron correctamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        No se pudieron guardar los cambios. <br/>Revisa por favor la información ingresada.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+            {% endif %}
+            <div id="line-path-loading-indicator" class="loading-indicator-area hidden">
+                <div class="d-flex align-items-center">
+                    <strong role="status">Guardando cambios...</strong>
+                    <div class="spinner-grow spinner-grow-sm ms-auto" aria-hidden="true"></div>
+                </div>
+            </div>
+            <form id="line-path-form" hx-encoding='multipart/form-data' hx-post="{% url 'lines_path_edit' line_id=form_path.instance.id %}" onSubmit="showLoadingIndicator('updating-line-path')">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Color:</label><br>
+                    <input class="form-control" type="color" name="color" value="{{ form_path.color.value }}" maxlength="7" required="" id="id_color">    
+                </div>
+                <div>
+                    <label class="form-label">Trazo:</label><br>
+                    {{ form_path.geom }}
+                </div>
+                
+                <div class="form-group mb-3">
+                    {% if not form_path.expose_geom %}
+                    <textarea id="geojson-input" class="form-control" style="width:100%; height:150px;" placeholder="Edita tu GEOJSON"></textarea>
+                    {% else %}
+                    <textarea id="geojson-input" class="form-control" style="width:100%; height:150px;">{{ form_path.expose_geom }}</textarea>
+                    {% endif %}
+                </div>
+                <div class="text-end">
+                    <button type="submit" class="btn btn-dark" id="submit-line-path-button" hx-target="#line-path" hx-swap="outerHTML" disabled>Guardar cambios</button>
+                </div>
+            </form>
+
+            <script>
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'style') {
+                            var content = document.querySelector('#line-path .content');
+                            if (content.style.display == 'block') {
+                                enableLinePathDrawControl();
+                            } else {
+                                disableLinePathDrawControl();
+                            }
+                        }
+                    });
+                });
+
+                var existingObserver = document.querySelector('#line-path .content').observer;
+                if (existingObserver) {
+                    existingObserver.disconnect();
+                }
+                observer.observe(document.querySelector('#line-path .content'), { attributes: true });
+                document.querySelector('#line-path .content').observer = observer;
+
+                function enableLinePathSubmitButton() {
+                    document.getElementById('submit-line-path-button').disabled = false;
+                    document.getElementById('id_geom').value = $('#geojson-input').val();
+                }
+
+                document.querySelectorAll('#line-path-form input, #line-path-form textarea, #line-path-form select, #id_color').forEach(function(input) {
+                    input.addEventListener('input', enableLinePathSubmitButton);
+                });
+
+                {% if operation == 'line-updated' %}
+                    userClickedOnHeader($('#line-path .header-hidden'));
+                    registerEvents();
+                {% endif %}
+            </script>
+        </div>
+    </div>
+</div>

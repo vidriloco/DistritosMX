@@ -1,0 +1,34 @@
+{% load static %}
+<div hx-get="{% url 'line_station_details' line_id=line.id station_id=station.id %}" hx-swap="innerHTML" hx-target="#left-card-container" class="togglers">
+    <p class="toggle-button">Ocultar Datos de Barrio</p>
+</div>
+<div id="barrio-details" class="station-details card">
+    {% include 'indicators/index_condensed.html' %}
+</div>
+<div id="station-details" class="station-details card">
+    <div class="d-flex align-items-start">
+        <div class="me-3 mt-1">            
+            <img src="{{ station.get_icon_url }}" alt="{{ station.name }}" style="max-height: 80px;">
+        </div>
+
+        <div>
+            <p class="name mt-2 mb-1">{{ station.name }}</p>
+            <p class="badge text-bg-secondary mb-1" style="font-size: 14px; background-color: {{ line.color }} !important;">{{ line.named_identifier }}</p>
+            <p class="address sm mb-0">{{ line.route }}</p>
+        </div>
+        <div class="ms-auto">
+            <img src="{% static 'images/' %}{{ line.icon }}" alt="Metrobús" class="mb-2" style="max-height: 30px;">
+        </div>
+    </div>
+</div>
+<div class="card" onclick="closeStationDetails({{ station.id }})">
+    <div id="close-details-button" class="menu">
+        <img src="/static/images/close-menu-icon.png" alt="Cerrar detalles" class="icon">
+        <h4>Cerrar</h4>
+    </div>
+</div>
+
+<script>
+    loadEvents();
+    drawStationCircle({{ radius }}, {{ station.coordinate_formatted }});
+</script>

@@ -1,0 +1,70 @@
+{% extends "account/base_entrance.html" %}
+{% load allauth i18n %}
+{% block head_title %}
+    {% trans "Wikiando MX: Registro" %}
+{% endblock head_title %}
+{% block content %}
+    <h1>Regístrate</h1>
+    {% setvar link %}
+        <a href="{{ login_url }}">
+        {% endsetvar %}
+        {% setvar end_link %}
+        </a>
+    {% endsetvar %}
+    <p class="mb-5">¿Ya tienes una cuenta? Entonces <b>{{ link }}Inicia sesión{{ end_link }}</b>.</p>
+    {% if not SOCIALACCOUNT_ONLY %}
+        {% url 'account_signup' as action_url %}
+        <form method="post" action="/accounts/signup/">
+            {% csrf_token %}
+            <p>
+                <label for="id_username">Nombre de usuario:</label>
+                <input class="form-control" type="text" name="username" placeholder="Tu nombre de usuario" autocomplete="username" minlength="1" maxlength="150" required="" id="id_username">
+            </p>
+
+            <p>
+                <label for="id_email">Correo electrónico: </label>
+                <input class="form-control" type="email" name="email" placeholder="Correo electrónico" autocomplete="email" maxlength="320" id="id_email">
+            </p>
+
+            <p>
+                <label for="id_password1">Contraseña:</label>
+                <input class="form-control" type="password" name="password1" placeholder="Contraseña" autocomplete="new-password" required="" id="id_password1">
+                <span class="helptext"></span>
+            </p>
+
+            <p>
+                <label for="id_password2">Confirmación de Contraseña:</label>
+                <input class="form-control" type="password" name="password2" placeholder="Confirmación de Contraseña" autocomplete="new-password" required="" id="id_password2">
+            </p>
+            
+            <div class="d-flex justify-content-end pb-3">
+                <a href="{% url 'account_login' %}" class="btn btn-light me-2">Atrás</a>
+                <div id="registering-account-button" class="hidden">
+                    <button class="btn btn-dark" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Creando cuenta...</span>
+                    </button>
+                </div>
+                <button id="register-account-button" class="btn btn-dark">Crear cuenta</button>
+            </div>
+        </form>
+
+    {% endif %}
+    {% if PASSKEY_SIGNUP_ENABLED %}
+        {% element hr %}
+        {% endelement %}
+        {% element button href=signup_by_passkey_url tags="prominent,signup,outline,primary" %}
+            {% trans "Sign up using a passkey" %}
+        {% endelement %}
+    {% endif %}
+    {% if SOCIALACCOUNT_ENABLED %}
+        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+    {% endif %}
+
+    <script>
+        $('form').on('submit', function() {
+            $('#registering-account-button').removeClass('hidden');
+            $('#register-account-button').addClass('hidden');
+        });
+    </script>
+{% endblock content %}

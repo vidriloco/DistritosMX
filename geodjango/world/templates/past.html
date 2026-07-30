@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>La red del ayer - Wikiando: La movilidad de todos</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Mapa interactivo histórico con las rutas de transporte público que prestaron su servicio en la ciudad en diversos momentos del pasado. | Wikiando : La movilidad de todos">
+    <meta name="keywords" content="transporte público, metro, ruta 100, trolebús, tren ligero, red troncal de transporte">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/megalopolis/pasado/ruta-100-y-metro-1986" />
+
+    <meta property="og:title" content="La red del ayer - Wikiando: La movilidad de todos">
+    <meta property="og:description" content="Mapa interactivo histórico con las rutas de transporte público que prestaron su servicio en la ciudad en diversos momentos del pasado.">
+    <meta property="og:image" content="https://wikiando.mx/static/images/red-del-ayer.jpg">
+    <meta property="og:url" content="https://wikiando.mx/megalopolis/pasado/ruta-100-y-metro-1986">
+
+    <meta name="twitter:title" content="La red del ayer - Wikiando: La movilidad de todos">
+    <meta name="twitter:description" content="Mapa interactivo histórico con las rutas de transporte público que prestaron su servicio en la ciudad en diversos momentos del pasado.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/red-del-ayer.jpg">
+
+    {% include '_shared_css.html' %}
+    {% include '_shared_except_css.html' %}
+</head>
+<body>
+    {% with active_tab="past" title="Ruta 100 y Metro" caption="(1986)" %}
+        {% include '_shared_navbar.html' %}
+    {% endwith %}
+
+    <!-- Map container -->
+    <div id='map' style='width: 100%; height: calc(100vh - 56px);'></div>
+    
+    <!-- Bootstrap JS and Mapbox JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    
+    {% include '_js_definitions.html' %}
+
+    {% if is_minified == True %}
+    <script type="text/javascript" src="{% static 'js/all_past.min.js' %}"></script>
+    {% else %}
+    <script type="text/javascript" src="{% static 'js/shared.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boot_past.js' %}"></script>
+    {% endif %}
+
+    <!-- Modal -->
+    <div class="modal fade" id="legend" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Servicios de transporte disponibles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="m-3">Selecciona los servicios de transporte que deseas visualizar en el mapa: </p>
+                    <div class="container mt-4">
+                        <div class="list-group">
+                            <a href="javascript:void(0);" id="metro" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/metro-logo.png' %}" alt="Metro" class="item-icon">
+                                Metro
+                            </a>
+                        </div>
+
+                        <div class="list-group mt-3">
+                            <a href="#" id="metrobus" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/metrobus-logo.png' %}" alt="Metrobús" class="item-icon">
+                                Metrobús
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="ste" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/transportes-electricos-logo.png' %}" alt="Sistema de Transportes Eléctricos" class="item-icon">
+                                Transportes Eléctricos
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="cablebus" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/cablebus-logo.png' %}" alt="Cablebús" class="item-icon">
+                                Cablebús
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="rtp" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/rtp-logo.png' %}" alt="RTP" class="item-icon">
+                                RTP
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="corredores" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/concesionados-logo.png' %}" alt="Red de Autobuses CDMX" class="item-icon">
+                                Transporte Concesionado
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="interurbano" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/insurgente-logo.png' %}" alt="Tren Interurbano" class="item-icon">
+                                Tren Interurbano
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="suburbano" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/suburbano-logo.png' %}" alt="Tren Suburbano" class="item-icon">
+                                Tren Suburbano
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="mexibus" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/mexibus-logo.png' %}" alt="Mexibús" class="item-icon">
+                                Mexibús
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="mexicable" class="list-group-item list-group-item-action">
+                                <img src="{% static 'images/mexicable-logo.png' %}" alt="MexiCable" class="item-icon">
+                                MexiCable
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

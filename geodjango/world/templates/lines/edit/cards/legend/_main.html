@@ -1,0 +1,24 @@
+{% load static %}
+
+<div id="geozones-legend-panel" class="card hidden">
+    
+    <div class="container legend">
+        <div class="text-center">
+            <h5 class="main-title p-0 m-1">¿Cómo ayudaría esta estación?</h5>
+            <p class="text-muted subtitle p-0 m-0">Visualiza los datos del barrio</p>
+        </div>
+        <hr/>
+        <div class="entry-intro text-center">
+            <img class="mb-3" src="{% static 'images/set-map-icon.png' %}" width="50%" alt="No hay estaciones registradas">
+            <p class="text-muted my-2">Da click en algún punto del mapa para colocar la estación y ver el impacto que tendría.</p>
+            <hr/>
+            <div class="d-flex justify-content-end align-items-center my-2">
+                <p class="mb-0 small me-2">¿Prefieres no mostrar esta información?</p>
+                <button class="btn btn-dark btn-sm" data-bs-target="#prompt-disable-geo-layer" data-bs-toggle="modal">Ocultar</button>
+            </div>
+        </div>
+        <div class="entry-list hidden">
+            {% include 'indicators/index.html' %}
+        </div>
+    </div>
+</div>

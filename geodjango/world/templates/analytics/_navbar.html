@@ -1,0 +1,36 @@
+{% include '_shared_ga.html' %}
+{% load static %}
+<nav class="navbar border-bottom border-body navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <img src="{% static 'images/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+      Wikiando <span class="badge rounded-pill bg-warning text-dark">Analytics</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 main-app-sections"></ul>
+      <div class="d-flex" role="search">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item dropdown active">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Validaciones MI
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item active" href="/megalopolis">15 minutos</a>
+              <a class="dropdown-item" href="/megalopolis">30 minutos</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#change-city-legend">Más</a>
+            </div>
+          </li>
+          <li class="nav-item dropdown active"></li>
+            <a class="nav-link" href="/" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Wikiando Home
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

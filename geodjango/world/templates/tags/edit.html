@@ -1,0 +1,59 @@
+{% load static %}
+
+<div class="d-flex align-items-center mt-2 mt-md-0">
+    <textarea class="editor-tags" name='tags' placeholder='Agregar'>
+        [{% for tag in current_tags %}
+            {"value": "{{ tag.name }}"}{% if not forloop.last %}, {% endif %}
+        {% endfor %}]
+    </textarea>
+    <button class="btn btn-light ms-2" hx-get="{% url 'tags_line_list' line_id=line.id %}" hx-target="#tags-container" hx-swap="innerHTML">
+        Cerrar
+    </button>
+
+    <form hx-post="{% url 'tags_line_update' line_id=line.id %}" hx-target="#tags-container" hx-swap="innerHTML" class="ms-2">
+        {% csrf_token %}
+        <input type="hidden" id="line_added_tags" name="line_added_tags">
+        <input type="hidden" id="line_removed_tags" name="line_removed_tags">
+        <button class="btn btn-dark" type="submit" onclick="markButtonAsSaving()">
+            Guardar
+        </button>
+        <div id="line-tags-saving" class="hidden">
+            <button class="btn btn-dark" type="button" disabled>
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span role="status">Guardando...</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    var whitelist = [{{ all_tags_str|safe }}];
+    var input = document.querySelector('textarea');
+
+    var newTags = [];
+    var removedTags = [];
+
+    var tagify = new Tagify(input, {
+            enforceWhitelist: true,
+            delimiters: null,
+            keepInvalidTags: true,
+            editTags: false,
+            whitelist: whitelist,
+            callbacks: {
+                add: function(tag) {
+                    newTags.push(tag.detail.data.value);
+                    $('#line_added_tags').val(newTags.join(','));
+                },  
+                remove: function(tag) {
+                    removedTags.push(tag.detail.tag.__tagifyTagData.value);
+                    $('#line_removed_tags').val(removedTags.join(','));
+                }
+            }
+    });
+
+    function markButtonAsSaving() {
+        $('#line-tags-saving').removeClass('hidden');
+        $('button[type="submit"]').addClass('hidden');
+    }
+</script>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>La red a futuro - Wikiando: La movilidad de todos</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Mapa interactivo con las rutas de transporte público actuales y las que tendremos en el futuro cercano en la ciudad.">
+    <meta name="keywords" content="movilidad, transporte público, trenes, ciclovias, metros, tren ligero, transportes eléctricos, tren suburbano">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/megalopolis/futuro/metro-horizonte-2018-2030" />
+
+    <meta property="og:title" content="La red a futuro - Wikiando: La movilidad de todos">
+    <meta property="og:description" content="Mapa interactivo con las rutas de transporte público actuales y las que tendremos en el futuro cercano en la ciudad.">
+    <meta property="og:image" content="https://wikiando.mx/static/images/red-del-futuro.jpg">
+    <meta property="og:url" content="https://wikiando.mx/megalopolis/futuro/metro-horizonte-2018-2030">
+
+    <meta name="twitter:title" content="La red a futuro - Wikiando: La movilidad de todos">
+    <meta name="twitter:description" content="Mapa interactivo con las rutas de transporte público actuales y las que tendremos en el futuro cercano en la ciudad.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/red-del-futuro.jpg">
+
+    {% include '_shared_css.html' %}
+    {% include '_shared_except_css.html' %}
+</head>
+<body>
+    {% with active_tab="future" title="Metro" caption="(Horizonte 2018-2030)" %}
+        {% include '_shared_navbar.html' %}
+    {% endwith %}
+
+    <!-- Map container -->
+    <div id='map' style='width: 100%; height: calc(100vh - 56px);'></div>
+    
+    <!-- Bootstrap JS and Mapbox JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+    {% include '_js_definitions.html' %}
+    {% if is_minified == True %}
+    <script type="text/javascript" src="{% static 'js/all_future.min.js' %}"></script>
+    {% else %}
+    <script type="text/javascript" src="{% static 'js/shared.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/boot_future.js' %}"></script>
+    {% endif %}
+</body>
+</html>

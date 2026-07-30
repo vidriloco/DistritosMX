@@ -1,0 +1,31 @@
+{% load static %}
+
+{% if line.flyer and line.flyer.url != None %}
+<div class="border border-3 border-gray rounded-3 text-center d-flex justify-content-center" style="background-color: #ffffff;">
+    <img src="{{ line.flyer.url }}" class="img-fluid m-1 ms-2" alt="Carátula de tu ruta" style="max-height: 400px; object-fit: contain;">
+</div>
+{% elif user.is_authenticated and line.user == user and edit_mode == True %}
+<div class="border border-3 border-gray rounded-3 p-5 text-center" style="background-color: #ffffff;">
+    <h5 class="mt-3">Aquí puedes añadir una foto ó esquema de estaciones para complementar tu ruta.</h5>
+    <button type="button" class="btn btn-dark my-3" hx-get="{% url 'line_flyer_form' line_id=line.id %}">
+        Subir imagen
+    </button>
+</div>
+{% endif %}
+
+{% if user.is_authenticated and line.user == user and edit_mode == True and line.flyer.url != None %}
+    <div class="d-flex justify-content-end mt-3">
+        <div id="line-flyer-deleting" class="hidden me-2">
+            <button class="btn btn-dark btn-sm" type="button" disabled>
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span role="status">Eliminando imagen...</span>
+            </button>
+        </div>
+        <a id="line-flyer-delete-button" type="button" class="btn btn-danger me-2 btn-sm" hx-get="{% url 'line_flyer_delete' line_id=line.id %}" hx-confirm="¿Estás seguro de que deseas eliminar esta imagen?">
+            Eliminar imagen
+        </a>
+        <a type="button" class="btn btn-dark btn-sm" hx-get="{% url 'line_flyer_form' line_id=line.id %}">
+            Cambiar imagen
+        </a>
+    </div>
+{% endif %}

@@ -1,0 +1,28 @@
+{% load static %}<div class="station-details text-center theme-aware-popup">
+    <img src="{logo}" class="system-icon"></img>
+    <div class="header">
+        <p class="name popup-title">{title}</p>
+        <p class="line" id="line-name">
+            <img  class="loading-indicator-small" src="{% static "images/loader-indicator.gif" %}">
+        </p>
+        <p class="system popup-subtitle">{system}</p>
+        <p id="station-details-additions" class="hidden">
+            <span class="badge rounded-pill text-bg-primary">{additions}</span>
+        </p>
+    </div>
+    <div id="connections" class="connections-space hidden">
+        <img id="loading-connections" class="loading-indicator-medium mt-3 mb-3" src="{% static "images/loader-indicator.gif" %}">
+        <div id="connections-body" class="container mt-3 mb-3 hidden">
+            <p class="h6 mb-2 popup-section-title"><span>Conexiones disponibles</span></p>
+            <div class="list-group"></div>
+        </div>
+    </div>
+    <div id="popup-bottom-section" class="d-grid gap-2 d-md-block mt-3 inlined">
+        <ul class="list-inline">
+            <li class="list-inline-item" id="close-item"><button id="hide-popup" class="btn btn-light popup-button" type="button">Cerrar</button></li>
+            {% if 1 == 2 %}
+            <li class="list-inline-item" id="report-item"><button class="btn btn-primary popup-button" type="button">Reportar</button></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

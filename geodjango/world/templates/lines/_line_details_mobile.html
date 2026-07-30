@@ -1,0 +1,34 @@
+{% load static %}
+<div class="modal fade" id="line-details-mobile-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Detalles de esta Linea/Ruta</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mt-5">
+                    <div id="line-flyer" class="text-center">
+                        {% if line.flyer and line.flyer.url != None %}
+                            <img src="{{ line.flyer.url }}" alt="Carátula de tu ruta" class="img-fluid" style="max-width: 100%;">
+                        {% endif %}
+                    </div>
+                    
+                    {% include 'lines/show/_description.html' %}
+                    
+                    <div class="d-md-none ms-auto text-center mt-5">
+                        <img src="{{ line.user.user_details.get_user_pic_url }}" alt="{{ line.creator.name }}" class="rounded-circle me-4" style="width: 70px; height: 70px;">
+                        <p class="mb-0 mt-2">Creada por <a href="{% url 'profile_page' line.user.username %}"><b>{{ line.user.username }}</b></a></p>
+                        <p class="mb-0 small">Ultima actualización {{ line.updated_at|date:"F j, Y" }}</p>
+                        {% if line.user == user %}
+                            <a href="{% url 'line_edit_page' line_id=line.id %}" class="btn btn-dark mt-2">Editar ruta</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-dark" data-bs-dismiss="modal">Ocultar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,95 @@
+<!-- line_edit.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wikiando MX: Editando ruta (Trazo y ubicaciones)</title>
+    {% load leaflet_tags %}
+    {% leaflet_js %}
+    {% leaflet_css %}
+
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>Wikiando MX - {{ seo_title }}</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="{{ seo_description }}">
+    <meta name="keywords" content="{{ seo_keywords }}">
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+    <meta name="keywords" content="movilidad, transporte público, trenes, ciclovias, metros, tren ligero, transportes eléctricos, tren suburbano, cablebús, mexibús, metrobús, tren suburbano, tren interburbano, el insurgente">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS/JS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Mapbox CSS/JS -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+
+    <script src="https://unpkg.com/mapbox-gl-leaflet/leaflet-mapbox-gl.js"></script>
+    
+    <!-- Leaflet.draw CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+
+    <!-- JQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+
+    <link rel="canonical" href="{{ seo_url }}" />
+
+    <meta property="og:title" content="{{ seo_title }}">
+    <meta property="og:description" content="{{ seo_description }}">
+    <meta property="og:image" content="{{ seo_image }}">
+    <meta property="og:url" content="{{ seo_url }}">
+
+    <meta name="twitter:title" content="{{ seo_title }}">
+    <meta name="twitter:description" content="{{ seo_description }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ seo_image }}">
+
+    <script type="text/javascript" src="{% static 'js/community/show.min.js' %}"></script>
+
+    {% include '_shared_css.html' %}
+    {% include '_shared_except_css.html' %}
+</head>
+</head>
+<body>
+    {% with active_tab="step-1" %}
+        {% include 'lines/_navbar.html' %}
+    {% endwith %}
+
+    <!-- Map container -->
+    <div id='map' style='width: 100%; height: 100vh;'></div>
+
+    {% include 'lines/shared_css.html' %}
+    {% include 'lines/edit_js.html' %}
+
+    <div class="card-container" style="bottom: 10px; left: 10px; max-height: 100vh; overflow-y: scroll; z-index: 999; -ms-overflow-style: none; scrollbar-width: none; ">
+        <style>
+            .card-container::-webkit-scrollbar {
+                display: none;
+            }
+        </style>
+        <div style="height: 200px"></div>
+        {% include 'lines/edit/cards/_general-info.html' %}
+        {% include 'lines/edit/cards/_line-path.html' %}
+        {% include 'lines/edit/cards/_line-stations.html' %}
+        {% include 'markers/index.html' %}
+    </div>
+    
+    {% include 'lines/edit/cards/_modals.html' %}
+    {% include 'lines/_transit_layer_modal.html' %}
+    {% include 'lines/_line_edit_while_published_modal.html' %}
+</body>
+</html>

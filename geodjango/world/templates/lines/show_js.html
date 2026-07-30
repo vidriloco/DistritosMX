@@ -1,0 +1,36 @@
+{% load static %}
+<script>
+    const AnimationState = {
+        ANIMATING: 1,
+        PAUSED: 0,
+        RESET: -1
+    };
+
+    var center = [-99.133209, 19.432608];
+    var zoom = 12;
+    var map;
+    var lineData;
+    var isAnimating = AnimationState.PAUSED;
+    var mapThemeURL = 'mapbox://styles/vidriloco/clx4dzh6902so01qphb9efd0f';
+    var mapThemeID = 'sta';
+    var mapPitch;
+    var lastZoom;
+    var canChooseTheme = {% if user.is_authenticated and user == line.user and edit_mode == True %}true{% else %}false{% endif %};
+    var lineID = {{ line.id }};
+    var lastAnimationPhase;
+
+    mapboxgl.accessToken = 'pk.eyJ1Ijoidmlkcmlsb2NvIiwiYSI6Ik1QRzIwZmcifQ.BzdjvFURAZ8uJ6kNovrrDA';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        readThemeColor();
+        setupMap();
+        addPlayRouteToMapControls();
+        addTransitLayerTogglerMapControl();
+        addMapThemeChooserMapControl();
+        add3DMapControl();
+        enableShrinkingNavbar();
+
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    });
+</script>

@@ -1,0 +1,81 @@
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+            {% if line.published %}
+                <h1 class="modal-title fs-5">¿Delistar esta ruta?</h1>
+            {% else %}
+                <h1 class="modal-title fs-5">¿Publicar esta ruta?</h1>
+            {% endif %}
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <div class="issues-found">
+                {% if line.published %}
+                    <p>Si delistas esta ruta, dejará de estar disponible para el público.</p>
+                {% else %}
+                    <p>Al publicar esta ruta, cualquier persona podrá consultarla.</p>
+
+                    {% if line.ready_for_publish %}
+                        {% if line.ready_for_save %}
+                            <p>Esta ruta está lista para ser publicada.</p>
+                        {% else %}
+                            <p class="small">Te sugerimos verificar que asignaste <b>tags</b> y una <b>descripción</b>. Esto facilitará que otros usuarios puedan encontrarla y tener un contexto informativo sobre ella.</p>
+                        {% endif %}
+                    {% else %}
+                        <p class="small">Antes de publicar esta ruta es necesario validar lo siguiente:</p>
+                        <ul id="form-checklist">
+                            {% if not line.is_geom_valid %}
+                                <li class="small">El trazo de la ruta parece no estar bien</li>
+                            {% endif %}
+                            {% if not line.has_stations %}
+                                <li class="small">Debe tener más de una estación</li>
+                            {% endif %}
+                            {% if not line.is_route_valid %}
+                                <li class="small">Debe tener un nombre</li>
+                            {% endif %}
+                            {% if not line.is_system_valid %}
+                                <li class="small">Asígnala algún sistema de transporte</li>
+                            {% endif %}
+                            {% if not line.is_identifier_valid %}
+                                <li class="small">Debe tener un identificador corto</li>
+                            {% endif %}
+                            {% if not line.is_operative_status_valid %}
+                                <li class="small">Selecciona su estado de operación</li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+        <div class="modal-footer">
+            {% if line.ready_for_publish %}
+            <button class="btn btn-light" data-bs-dismiss="modal">Cerrar</button>
+            <div id="line-mode-update-saving" class="hidden">
+                <button class="btn btn-dark" type="button" disabled>
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span role="status">Guardando...</span>
+                </button>
+            </div>
+            <a id="line-mode-update-button" href="javascript:void(0);" hx-get="{% url 'line_change_publish_state' line_id=line.id %}" hx-target="#line-change-publish-status" hx-swap="innerHTML" class="btn btn-dark">
+                {% if line.published %}
+                    Delistar
+                {% else %}
+                    Publicar
+                {% endif %}
+            </a>
+            {% else %}
+            <button class="btn btn-dark" data-bs-dismiss="modal">Cerrar</button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#line-change-publish-status').modal('show');
+
+    $('#line-mode-update-button').click(function() {
+        $('#line-mode-update-saving').removeClass('hidden');
+        $('#line-mode-update-button').addClass('hidden');
+    });
+</script>

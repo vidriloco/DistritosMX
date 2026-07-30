@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>La red que tenemos - Wikiando: La movilidad de todos</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+    <meta name="keywords" content="movilidad, transporte público, trenes, ciclovias, metros, tren ligero, transportes eléctricos, tren suburbano, cablebús, mexibús, metrobús, tren suburbano, tren interburbano, el insurgente">
+
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/megalopolis" />
+
+    <meta property="og:title" content="La red que tenemos - Wikiando: La movilidad de todos">
+    <meta property="og:description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+    <meta property="og:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+    <meta property="og:url" content="https://wikiando.mx/megalopolis">
+
+    <meta name="twitter:title" content="La red que tenemos - Wikiando: La movilidad de todos">
+    <meta name="twitter:description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+    <script async src="https://tally.so/widgets/embed.js"></script>
+
+    {% include '_shared_css.html' %}
+</head>
+<body>
+    <!-- Map container -->
+    <div id='map' class="mobile" style='width: 100%; height: calc(100vh);'></div>
+    
+    <!-- Bootstrap JS and Mapbox JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.2/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.2/mapbox-gl.js"></script>
+
+    {% include '_js_definitions.html' %}
+
+    <script type="text/javascript" src="{% static 'js/shared.js' %}"></script>
+
+    <style>
+        .card-container .card {
+            border: 2px solid #b50808 !important;
+        }
+
+        .card-container .button:hover {
+            background-color: #fd5e5e !important;
+        }
+
+        .card-container .card .menu h4 {
+            color: #b50808 !important;
+        }
+
+        .active {
+            background-color: #fc9e9e !important;
+            border: 2px solid #b50808 !important;
+        }
+
+        .togglers .toggle-button {
+            background-color: #b50808 !important;
+        }
+    </style>
+
+    <div class="card-container">
+        <div id="toggle-connections" class="togglers hidden"><p class="toggle-button">Mostrar conexiones</p></div>
+        <div id="selected-point-details" class="card hidden"></div>
+        <div id="layer-menu-options" class="card hidden" style="height: 400px;">
+            <h6 class="m-3">Activa uno o más sistemas de transporte:</h6>
+            <div class="container card-body">
+                <div class="list-group">
+                    <a href="javascript:void(0);" id="metro" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/metro-logo.png' %}" alt="Metro" class="item-icon">
+                        Metro
+                    </a>
+                </div>
+
+                <div class="list-group mt-3">
+                    <a href="#" id="metrobus" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/metrobus-logo.png' %}" alt="Metrobús" class="item-icon">
+                        Metrobús
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="ste" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/transportes-electricos-logo.png' %}" alt="Sistema de Transportes Eléctricos" class="item-icon">
+                        Transportes Eléctricos
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="cablebus" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/cablebus-logo.png' %}" alt="Cablebús" class="item-icon">
+                        Cablebús
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="ecobici" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/ecobici-logo.png' %}" alt="Ecobici" class="item-icon">
+                        Ecobici
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="rtp" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/rtp-logo.png' %}" alt="RTP" class="item-icon">
+                        RTP
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="peseros" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/peseros-logo.png' %}" alt="Peseros y Combis" class="item-icon">
+                        Peseros y Combis
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="corredores" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/concesionados-logo.png' %}" alt="Red de Autobuses CDMX" class="item-icon">
+                        Transporte Concesionado
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="interurbano" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/insurgente-logo.png' %}" alt="Tren Interurbano" class="item-icon">
+                        Tren Interurbano
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="suburbano" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/suburbano-logo.png' %}" alt="Tren Suburbano" class="item-icon">
+                        Tren Suburbano
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="mexibus" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/mexibus-logo.png' %}" alt="Mexibús" class="item-icon">
+                        Mexibús
+                    </a>
+                </div>
+                <div class="list-group mt-3">
+                    <a href="#" id="mexicable" class="list-group-item list-group-item-action">
+                        <img src="{% static 'images/mexicable-logo.png' %}" alt="MexiCable" class="item-icon">
+                        MexiCable
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div id="registration-form-card" class="card hidden">
+            <h4 class="m-3">Mejoremos la movilidad</h4>
+            
+            <div class="container mb-3">
+                <p>Se parte de nuestra comunidad y colaboremos juntos para tener un mejor transporte público para todos.</p>
+                <div class="d-flex justify-content-end">
+                    <a href="#tally-open=mDvE0l&tally-layout=modal&tally-width=450&tally-hide-title=1&tally-emoji-text=👋&tally-emoji-animation=wave" class="btn btn-primary btn-lg" style="background-color: #b50808; border: none;">Registrarse</a>
+                </div>
+            </div>
+        </div>
+        <div id="map-colors-card" class="card hidden">
+            <h6 class="m-3">Dale más color a tu movilidad, selecciona un color para el mapa: </h6>
+            <div class="container mb-3">
+                <div class="row">
+                    <div class="col">
+                        <div class="list-group mt-3">
+                            <a href="#" id="street" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-streets.png' %}" alt="Mapa Calles" class="preview"><span>Estándar</span>
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="ocre" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-ocre.png' %}" alt="Mapa Ocre" class="preview"><span>Ocre</span>
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="dark" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-negro.png' %}" alt="Mapa Nocturno" class="preview"><span>Nocturno</span>
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="atenea" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-atenea.png' %}" alt="Mapa Nocturno" class="preview"><span>Atenea</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="list-group mt-3">
+                            <a href="#" id="satelite" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-sat.png' %}" alt="Mapa Satelital" class="preview"><span>Satelital</span>
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="concrete" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-concrete.png' %}" alt="Mapa Concreto" class="preview"><span>Concreto</span>
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="blue" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-blue.png' %}" alt="Mapa Nocturno" class="preview"><span>Azul</span>
+                            </a>
+                        </div>
+                        <div class="list-group mt-3">
+                            <a href="#" id="humedales" class="list-group-item list-group-item-action map-color-option">
+                                <img src="{% static 'images/map-cielito.png' %}" alt="Mapa Nocturno" class="preview"><span>Humedal</span>
+                            </a>
+                        </div>
+                    </div>
+                  </div>
+            </div>
+        </div>
+        <div class="togglers">
+            <img src="{% static 'images/passengers-icon-mb.png' %}" alt="Crear cuenta" id="registration-form-toggle" class="map-colors-button" style="left: 20px !important; position: fixed">
+            <img src="{% static 'images/3d-icon-mb.png' %}" alt="Capas de Información" id="3d-buttons-toggle" class="map-colors-button">
+            <img src="{% static 'images/palete-colorful-icon-mb.png' %}" alt="Capas de Información" id="map-colors-toggle" class="map-colors-button">
+        </div>
+        <div id="should-display-menu" class="card" style="margin-bottom: 10px;">
+            <div id="map-layer-button" class="menu">
+                <img src="{% static 'images/layer-menu-icon-mb.png' %}" alt="Capas de Información" class="icon">
+                <h4>Sistemas de transporte</h4>
+            </div>
+            <div id="close-panel-button" class="menu hidden">
+                <img src="{% static 'images/close-menu-icon-mb.png' %}" alt="Cerrar panel" class="icon">
+                <h4>Cerrar Panel</h4>
+            </div>
+        </div>
+        <div id="should-hide-selected-point-details" class="card hidden" style="margin-bottom: 10px;">
+            <div id="close-details-button" class="menu">
+                <img src="{% static 'images/close-menu-icon-mb.png' %}" alt="Cerrar detalles" class="icon">
+                <h4>Cerrar</h4>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="{% static 'js/boot_now.js' %}"></script>
+</body>
+</html>

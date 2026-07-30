@@ -1,0 +1,151 @@
+.state-showcaser {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.map-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.5s ease;
+}
+
+.map-container.fading {
+    opacity: 0;
+}
+
+.state-info {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    padding: 2rem;
+    border-radius: 1rem;
+    background-color: rgba(0, 0, 0, 0.7);
+    max-width: 600px;
+    width: 90%;
+    transition: opacity 0.5s ease;
+}
+
+.state-info.fading {
+    opacity: 0;
+}
+
+.state-info.intro {
+    background-color: transparent;
+}
+
+.state-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.state-title {
+    font-size: 2.5rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.state-description {
+    font-size: 1.2rem;
+    margin: 1rem 0;
+    line-height: 1.5;
+}
+
+.explorar-link,
+.explorar-link-case {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-primary, #2196f3);
+    color: white;
+    text-decoration: none;
+    border-radius: 2rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.explorar-link:hover,
+.explorar-link-case:hover {
+    background-color: var(--color-active-background, #1976d2);
+    transform: translateY(-2px);
+}
+
+.chevron-right {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+}
+
+.explorar-link:hover .chevron-right,
+.explorar-link-case:hover .chevron-right {
+    transform: translateX(4px);
+}
+
+.state-nav-arrows {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2rem;
+    pointer-events: none;
+}
+
+.state-nav-arrow {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    pointer-events: auto;
+}
+
+.state-nav-arrow:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.state-indicator {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+}
+
+.indicator-dot {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.indicator-dot:hover {
+    transform: scale(1.2);
+}
+
+.indicator-dot.active {
+    transform: scale(1.2);
+}

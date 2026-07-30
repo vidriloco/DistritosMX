@@ -1,0 +1,1726 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Map Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <link href="{% static 'css/map-admin.css' %}" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #root {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+        .map-admin-container {
+            width: 100%;
+            height: calc(100vh);
+            position: relative;
+        }
+        .map-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .control-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1;
+            width: 300px;
+            overflow: hidden;
+        }
+        .card {
+            border-bottom: 1px solid #eee;
+            position: absolute;
+            bottom: 35px;
+            left: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1;
+            width: 450px;
+            min-width: 450px;
+            max-width: 450px;
+            overflow: hidden;
+        }
+        .card:last-child {
+            border-bottom: none;
+        }
+        .header {
+            padding: 12px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .upload-container {
+            position: relative;
+        }
+        .upload-button {
+            background: #4CAF50;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .upload-button:hover {
+            background: #45a049;
+        }
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .collections-list {
+            max-height: calc(100vh - 200px);
+            overflow-y: auto;
+        }
+        .collection-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .collection-item:last-child {
+            border-bottom: none;
+        }
+        .collection-info {
+            flex: 1;
+        }
+        .collection-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+            font-size: 0.95em;
+        }
+        .collection-count {
+            font-size: 0.85em;
+            color: #666;
+        }
+        .collection-controls {
+            display: flex;
+            gap: 8px;
+        }
+        .control-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .control-button:hover {
+            background: #f5f5f5;
+        }
+        .control-button.delete {
+            color: #dc3545;
+        }
+        .control-button.view {
+            color: #007bff;
+        }
+        .mapboxgl-popup {
+            max-width: 300px;
+        }
+        .mapboxgl-popup-content {
+            padding: 15px;
+        }
+        .systems-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1;
+            width: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 3px solid #FFA500;
+        }
+        .systems-panel h2 {
+            margin: 0;
+            padding: 12px 15px;
+            font-size: 1.1em;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-icon {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.2s;
+        }
+        .search-icon:hover {
+            color: #FFA500;
+        }
+        .system-item {
+            padding: 18px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 10px 10px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+        }
+        .system-item.selected {
+            background-color: #FFF3E0;
+            border: 2px solid #FFA500;
+        }
+        .system-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+        .system-icon {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+        .system-name {
+            font-size: 1em;
+            color: #333;
+            text-transform: capitalize;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: #4CAF50;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+        .menu {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 10px 10px 0 0;
+        }
+        .menu:hover {
+            background-color: #f5f5f5;
+        }
+        .icon {
+            width: 28px;
+            height: 28px;
+        }
+        .menu h4 {
+            margin: 0;
+            font-size: 1.1em;
+            color: #333;
+            flex: 1;
+        }
+        .panel-content {
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .panel-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+        .panel-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+        .system-list {
+            padding: 10px 0;
+            max-height: calc(400px - 60px);
+            overflow-y: auto;
+            flex: 1;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .search-dialog {
+            background: white;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 600px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .search-dialog-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .search-dialog-title {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+        .close-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        .search-dialog-content {
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .search-input-container {
+            padding: 0;
+            position: relative;
+            border-bottom: 1px solid #eee;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: none;
+            font-size: 1em;
+            color: #333;
+            background-color: #f8f8f8;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        .search-input:focus {
+            outline: none;
+            background-color: white;
+        }
+        .search-icon-input {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            pointer-events: none;
+            width: 16px;
+            height: 16px;
+        }
+        .transport-section {
+            margin-bottom: 0;
+        }
+        .transport-section-title {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #666;
+            margin: 0;
+            padding: 8px 20px;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #eee;
+        }
+        .line-item {
+            padding: 12px 20px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            margin: 0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+        }
+        .line-item:hover {
+            background-color: #f8f8f8;
+        }
+        .line-item.selected {
+            background-color: #FFF3E0;
+            border-left: 3px solid #FFA500;
+        }
+        .line-name {
+            font-size: 1em;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        .line-number {
+            font-weight: 500;
+            color: #007AFF;
+            margin-right: 8px;
+            min-width: 50px;
+        }
+        .floating-info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 2;
+            width: 450px;
+            min-width: 450px;
+            max-width: 450px;
+            overflow: hidden;
+            border: 3px solid #FFA500;
+        }
+        .info-panel-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+        .info-panel-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+        .info-panel-content {
+            padding: 20px;
+        }
+        .info-line {
+            margin-bottom: 15px;
+        }
+        .info-route {
+            font-weight: bold;
+            color: #353535;
+            margin-bottom: 5px;
+            font-size: 1.4em;
+        }
+        .info-number {
+            font-weight: bold;
+            color: #9a9a9a;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        .info-value {
+            color: #333;
+        }
+        .close-info-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        .close-info-button:hover {
+            color: #FFA500;
+        }
+        .station-list {
+            margin-top: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .station-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        .station-item:last-child {
+            border-bottom: none;
+        }
+
+        .station-marker {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+        }
+
+        .station-marker.metro { background-color: #FF0000; }
+        .station-marker.metrobus { background-color: #FFA500; }
+        .station-marker.trolebus { background-color: #008000; }
+        .station-marker.cablebus { background-color: #800080; }
+        .station-marker.ecobici { background-color: #00FF00; }
+        .station-marker.rtp { background-color: #0000FF; }
+        .station-marker.peseros { background-color: #FF00FF; }
+        .station-marker.concesionados { background-color: #00FFFF; }
+        .station-marker.interurbano { background-color: #FF4500; }
+        .station-marker.suburbano { background-color: #4B0082; }
+        .station-marker.mexibus { background-color: #FFD700; }
+        .station-marker.mexicable { background-color: #8B4513; }
+        .station-marker.tren-ligero { background-color: #FF69B4; }
+
+        .station-name {
+            font-size: 0.95em;
+            color: #333;
+        }
+
+        .station-identifier {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .no-stations {
+            color: #666;
+            font-style: italic;
+            text-align: center;
+            padding: 15px 0;
+        }
+        .info-panel-header-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-panel-icon {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+        
+        .station-details-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 2;
+            width: 300px;
+            min-width: 300px;
+            max-width: 300px;
+            overflow: hidden;
+            border: 3px solid #FFA500;
+        }
+        
+        .station-details-header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            background: white;
+        }
+        
+        .station-details-title {
+            margin: 0;
+            font-size: 1.2em;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .close-station-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #666;
+            font-size: 1.2em;
+        }
+        
+        .close-station-button:hover {
+            color: #FFA500;
+        }
+        
+        .station-details-content {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .station-icon {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+        
+        .station-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .station-system {
+            font-size: 1em;
+            color: #666;
+            text-transform: capitalize;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        function LinesNavigator({ transportData, transportSystems, onClose, map, onLineSelect, setIsClosePanelVisible }) {
+            const [searchQuery, setSearchQuery] = React.useState('');
+            const [selectedLine, setSelectedLine] = React.useState(null);
+
+            // Sort function for systems and lines
+            const sortTransportData = (data) => {
+                // Sort systems alphabetically
+                const sortedSystems = Object.keys(data).sort((a, b) => {
+                    const nameA = (transportSystems[a] && transportSystems[a].name) || a;
+                    const nameB = (transportSystems[b] && transportSystems[b].name) || b;
+                    return nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+                });
+
+                // Sort lines within each system
+                const sortedData = {};
+                sortedSystems.forEach(system => {
+                    sortedData[system] = [...data[system]].sort((a, b) => {
+                        // Get line numbers as strings
+                        const lineNumA = String(a.line_number || '');
+                        const lineNumB = String(b.line_number || '');
+                        
+                        // Check if both are numbers
+                        const isNumA = !isNaN(parseInt(lineNumA));
+                        const isNumB = !isNaN(parseInt(lineNumB));
+                        
+                        if (isNumA && isNumB) {
+                            // Both are numbers, sort numerically
+                            return parseInt(lineNumA) - parseInt(lineNumB);
+                        } else if (isNumA) {
+                            // A is number, B is letter - numbers come first
+                            return -1;
+                        } else if (isNumB) {
+                            // A is letter, B is number - numbers come first
+                            return 1;
+                        } else {
+                            // Both are letters, sort alphabetically
+                            return lineNumA.localeCompare(lineNumB, 'es', { sensitivity: 'base' });
+                        }
+                    });
+                });
+
+                return sortedData;
+            };
+
+            // Sort initial data
+            const sortedInitialData = React.useMemo(() => {
+                return sortTransportData(transportData);
+            }, [transportData, transportSystems]);
+
+            const filteredData = React.useMemo(() => {
+                if (!searchQuery) return sortedInitialData;
+
+                const query = searchQuery.toLowerCase();
+                const filtered = {};
+
+                Object.entries(sortedInitialData).forEach(([system, lines]) => {
+                    if (!lines || !Array.isArray(lines)) return;
+
+                    const systemInfo = transportSystems[system];
+                    const systemName = systemInfo ? systemInfo.name : system;
+                    
+                    if (systemName.toLowerCase().includes(query)) {
+                        filtered[system] = lines;
+                    } else {
+                        const matchingLines = lines.filter(line => {
+                            if (!line) return false;
+                            const composed_name = line.name + ': ' + line.route;
+                            return composed_name.toLowerCase().includes(query);
+                        });
+                        
+                        if (matchingLines.length > 0) {
+                            filtered[system] = matchingLines;
+                        }
+                    }
+                });
+
+                return sortTransportData(filtered);
+            }, [sortedInitialData, transportSystems, searchQuery]);
+
+            // Check if transportData is loaded
+            if (!transportData || Object.keys(transportData).length === 0) {
+                return (
+                    <div className="overlay">
+                        <div className="search-dialog">
+                            <div className="search-dialog-header">
+                                <h3 className="search-dialog-title">Buscar Líneas</h3>
+                                <button className="close-button" onClick={onClose}>×</button>
+                            </div>
+                            <div className="search-dialog-content">
+                                <div className="loading-message">Cargando datos de transporte...</div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const handleLineClick = (system, line) => {
+                setSelectedLine({ system, line });
+                
+                // Calculate bounds of the line
+                const bounds = new mapboxgl.LngLatBounds();
+                line.paths.forEach(path => {
+                    path.coordinates.forEach(coord => {
+                        bounds.extend(coord);
+                    });
+                });
+
+                // Add some padding around the bounds
+                const padding = {
+                    top: 50,
+                    bottom: 50,
+                    left: 50,
+                    right: 50
+                };
+
+                // Center map on the line
+                map.current.fitBounds(bounds, {
+                    padding: padding,
+                    duration: 1000
+                });
+                
+                // Hide all lines except the selected one
+                Object.entries(transportData).forEach(([currentSystem, currentLines]) => {
+                    currentLines.forEach(currentLine => {
+                        const lineId = `${currentSystem}-line-${currentLine.id}`;
+                        const stationsId = `${currentSystem}-stations-${currentLine.id}`;
+                        
+                        if (map.current.getLayer(lineId)) {
+                            if (currentSystem === system && currentLine.id === line.id) {
+                                // Show selected line
+                                map.current.setLayoutProperty(lineId, 'visibility', 'visible');
+                                map.current.setLayoutProperty(stationsId, 'visibility', 'visible');
+                            } else {
+                                // Hide other lines
+                                map.current.setLayoutProperty(lineId, 'visibility', 'none');
+                                map.current.setLayoutProperty(stationsId, 'visibility', 'none');
+                            }
+                        }
+                    });
+                });
+
+                // Notify parent component about line selection
+                if (onLineSelect) {
+                    onLineSelect({ system, line });
+                }
+                
+                // Collapse the transport systems menu
+                if (setIsClosePanelVisible) {
+                    setIsClosePanelVisible(false);
+                }
+                
+                // Minimize the search dialog
+                onClose();
+            };
+
+            const handleClose = () => {
+                // Reset all line opacities when closing
+                Object.entries(transportData).forEach(([system, lines]) => {
+                    lines.forEach(line => {
+                        const lineId = `${system}-line-${line.id}`;
+                        const stationsId = `${system}-stations-${line.id}`;
+                        
+                        if (map.current.getLayer(lineId)) {
+                            map.current.setLayoutProperty(lineId, 'visibility', 'visible');
+                            map.current.setLayoutProperty(stationsId, 'visibility', 'visible');
+                        }
+                    });
+                });
+                setSelectedLine(null);
+                onClose();
+            };
+
+            return (
+                <div className="overlay">
+                    <div className="search-dialog">
+                        <div className="search-dialog-header">
+                            <h3 className="search-dialog-title">Buscar</h3>
+                            <button className="close-button" onClick={handleClose}>×</button>
+                        </div>
+                        <div className="search-input-container">
+                            <svg 
+                                className="search-icon-input"
+                                xmlns="http://www.w3.org/2000/svg" 
+                                width="16" 
+                                height="16" 
+                                viewBox="0 0 24 24" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                stroke-width="2" 
+                                stroke-linecap="round" 
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Buscar líneas y sistemas..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                autoFocus
+                            />
+                        </div>
+                        <div className="search-dialog-content">
+                            {Object.entries(filteredData).length === 0 ? (
+                                <div className="no-results">No se encontraron resultados</div>
+                            ) : (
+                                Object.entries(filteredData).map(([system, lines]) => {
+                                    const systemInfo = transportSystems[system];
+                                    const systemName = systemInfo ? systemInfo.name : system;
+                                    
+                                    return (
+                                        <div key={system} className="transport-section">
+                                            <div className="transport-section-title">
+                                                {systemName}
+                                            </div>
+                                            {lines.map(line => {
+                                                const lineNumber = parseInt(line.line_number);
+                                                const displayNumber = lineNumber && lineNumber !== 0 ? lineNumber : line.line_number;
+                                                const isSelected = selectedLine && 
+                                                    selectedLine.system === system && 
+                                                    selectedLine.line.id === line.id;
+                                                
+                                                return (
+                                                    <div 
+                                                        key={line.id} 
+                                                        className={`line-item ${isSelected ? 'selected' : ''}`}
+                                                        onClick={() => handleLineClick(system, line)}
+                                                    >
+                                                        <span className="line-name">
+                                                            <span className="line-number">Línea {displayNumber}: {line.route}</span>
+                                                            {line.name}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function LineInfoPanel({ selectedLine, transportSystems, onClose }) {
+            if (!selectedLine) return null;
+
+            const { system, line } = selectedLine;
+            const systemInfo = transportSystems[system];
+            const systemName = systemInfo ? systemInfo.name : system;
+            const systemIcon = systemInfo ? systemInfo.icon : 'no-transports.png';
+            const lineNumber = parseInt(line.line_number);
+            const displayNumber = lineNumber && lineNumber !== 0 ? lineNumber : line.line_number;
+
+            return (
+                <div className="floating-info-panel">
+                    <div className="info-panel-header">
+                        <div className="info-panel-header-content">
+                            <img src={systemIcon} alt={system} className="info-panel-icon" />
+                            <h3 className="info-panel-title">{systemName}</h3>
+                        </div>
+                        <button className="close-info-button" onClick={onClose}>×</button>
+                    </div>
+                    <div className="info-panel-content">
+                        <div className="info-line">
+                            <div className="info-number">Línea {displayNumber}</div>
+                            <div className="info-route">{line.route}</div>
+                        </div>
+                        <div className="info-line">
+                            {line.stations && line.stations.length > 0 ? (
+                                <div className="station-list">
+                                    {line.stations.map((station, index) => (
+                                        <div key={station.id || index} className="station-item">
+                                            <div className={`station-marker ${system}`} />
+                                            <span className="station-name">{station.name}</span>
+                                            {station.identifier && (
+                                                <span className="station-identifier">({station.identifier})</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="no-stations">No hay estaciones disponibles para esta línea</div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function LayerInfoPanel({ transportData, visibleSystems, toggleSystemVisibility, transportSystems, map, showSearchDialog, setShowSearchDialog, onLineSelect }) {
+            const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+            const [isClosePanelVisible, setIsClosePanelVisible] = React.useState(false);
+            
+            const handleSystemClick = (system) => {
+                toggleSystemVisibility(system);
+            };
+
+            const handleSearchClick = () => {
+                if (!transportData || Object.keys(transportData).length === 0) {
+                    alert('Los datos de transporte aún se están cargando. Por favor espere un momento.');
+                    return;
+                }
+                setShowSearchDialog(true);
+            };
+
+            const handleCloseSearch = () => {
+                setShowSearchDialog(false);
+            };
+
+            const getSystemDisplayName = (system) => {
+                const systemInfo = transportSystems[system];
+                return systemInfo ? systemInfo.name : system;
+            };
+
+            const getSystemIcon = (system) => {
+                const systemInfo = transportSystems[system];
+                return systemInfo ? systemInfo.icon : 'no-transports.png';
+            };
+
+            const toggleMenu = () => {
+                setIsMenuOpen(!isMenuOpen);
+                setIsClosePanelVisible(!isClosePanelVisible);
+            };
+
+            return (
+                <div id="should-display-menu" className="card">
+                    {!isClosePanelVisible ? (
+                        <div id="map-layer-button" className="menu" onClick={toggleMenu}>
+                            <img src="{% static 'images/layer-menu-icon.png' %}" alt="Movilidad" className="icon" />
+                            <h4>Movilidad</h4>
+                        </div>
+                    ) : (
+                        <div className="panel-content">
+                            <div className="panel-header">
+                                <h3 className="panel-title">Sistemas de Transporte</h3>
+                                <svg 
+                                    className="search-icon" 
+                                    onClick={handleSearchClick}
+                                    xmlns="http://www.w3.org/2000/svg" 
+                                    viewBox="0 0 24 24" 
+                                    fill="none" 
+                                    stroke="currentColor" 
+                                    stroke-width="2" 
+                                    stroke-linecap="round" 
+                                    stroke-linejoin="round"
+                                >
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                </svg>
+                            </div>
+                            <div className="system-list">
+                                {Object.keys(transportSystems).map(system => (
+                                    <div 
+                                        key={system} 
+                                        className={`system-item ${visibleSystems[system] ? 'selected' : ''}`}
+                                        onClick={() => handleSystemClick(system)}
+                                    >
+                                        <div className="system-info">
+                                            <img src={getSystemIcon(system)} alt={system} className="system-icon" />
+                                            <span className="system-name">{getSystemDisplayName(system)}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div id="close-panel-button" className="menu" onClick={toggleMenu}>
+                                <img src="{% static 'images/close-menu-icon.png' %}" alt="Cerrar panel" className="icon" />
+                                <h4>Cerrar Panel</h4>
+                            </div>
+                        </div>
+                    )}
+                    {showSearchDialog && (
+                        <LinesNavigator 
+                            transportData={transportData}
+                            transportSystems={transportSystems}
+                            onClose={handleCloseSearch}
+                            map={map}
+                            onLineSelect={onLineSelect}
+                            setIsClosePanelVisible={setIsClosePanelVisible}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        function App() {
+            const mapContainer = React.useRef(null);
+            const map = React.useRef(null);
+            const [transportData, setTransportData] = React.useState({});
+            const [selectedStation, setSelectedStation] = React.useState(null);
+            
+            // Initialize visibleSystems based on transportSystems.selected values
+            const [visibleSystems, setVisibleSystems] = React.useState(() => {
+                const initialVisible = {};
+                const transportSystems = {
+                    'metro': { 
+                        name: 'STC Metro', 
+                        selected: true,
+                        icon: "{% static 'images/metro-logo.png' %}"
+                    },
+                    'metrobus': { 
+                        name: 'Metrobús', 
+                        selected: true,
+                        icon: "{% static 'images/metrobus-logo.png' %}"
+                    },
+                    'trolebus': { 
+                        name: 'Trolebús', 
+                        selected: false,
+                        icon: "{% static 'images/transportes-electricos-logo.png' %}"
+                    },
+                    'cablebus': { 
+                        name: 'Cablebús', 
+                        selected: false,
+                        icon: "{% static 'images/cablebus-logo.png' %}"
+                    },
+                    'ecobici': { 
+                        name: 'Ecobici', 
+                        selected: false,
+                        icon: "{% static 'images/ecobici-logo.png' %}"
+                    },
+                    'rtp': { 
+                        name: 'Red de Transporte de Pasajeros', 
+                        selected: false,
+                        icon: "{% static 'images/rtp-logo.png' %}"
+                    },
+                    'peseros': { 
+                        name: 'Peseros y Combis', 
+                        selected: false,
+                        icon: "{% static 'images/peseros-logo.png' %}"
+                    },
+                    'concesionados': { 
+                        name: 'Transporte Concesionado', 
+                        selected: false,
+                        icon: "{% static 'images/concesionados-logo.png' %}"
+                    },
+                    'interurbano': { 
+                        name: 'Tren Interurbano', 
+                        selected: false,
+                        icon: "{% static 'images/insurgente-logo.png' %}"
+                    },
+                    'suburbano': { 
+                        name: 'Tren Suburbano', 
+                        selected: false,
+                        icon: "{% static 'images/suburbano-logo.png' %}"
+                    },
+                    'mexibus': { 
+                        name: 'Mexibús', 
+                        selected: false,
+                        icon: "{% static 'images/mexibus-logo.png' %}"
+                    },
+                    'mexicable': { 
+                        name: 'MexiCable', 
+                        selected: false,
+                        icon: "{% static 'images/mexicable-logo.png' %}"
+                    },
+                    'tren-ligero': { 
+                        name: 'Tren Ligero', 
+                        selected: false,
+                        icon: "{% static 'images/tren-ligero-old.png' %}"
+                    }
+                };
+                
+                Object.entries(transportSystems).forEach(([system, info]) => {
+                    initialVisible[system] = info.selected;
+                });
+                
+                return initialVisible;
+            });
+            
+            const [showSearchDialog, setShowSearchDialog] = React.useState(false);
+            const [selectedLine, setSelectedLine] = React.useState(null);
+            const [isLayerPanelCollapsed, setIsLayerPanelCollapsed] = React.useState(false);
+
+            const transportSystems = {
+                'metro': { 
+                    name: 'STC Metro', 
+                    selected: true,
+                    icon: "{% static 'images/metro-logo.png' %}"
+                },
+                'metrobus': { 
+                    name: 'Metrobús', 
+                    selected: true,
+                    icon: "{% static 'images/metrobus-logo.png' %}"
+                },
+                'trolebus': { 
+                    name: 'Trolebús', 
+                    selected: false,
+                    icon: "{% static 'images/transportes-electricos-logo.png' %}"
+                },
+                'cablebus': { 
+                    name: 'Cablebús', 
+                    selected: false,
+                    icon: "{% static 'images/cablebus-logo.png' %}"
+                },
+                'ecobici': { 
+                    name: 'Ecobici', 
+                    selected: false,
+                    icon: "{% static 'images/ecobici-logo.png' %}"
+                },
+                'rtp': { 
+                    name: 'Red de Transporte de Pasajeros', 
+                    selected: false,
+                    icon: "{% static 'images/rtp-logo.png' %}"
+                },
+                'peseros': { 
+                    name: 'Peseros y Combis', 
+                    selected: false,
+                    icon: "{% static 'images/peseros-logo.png' %}"
+                },
+                'concesionados': { 
+                    name: 'Transporte Concesionado', 
+                    selected: false,
+                    icon: "{% static 'images/concesionados-logo.png' %}"
+                },
+                'interurbano': { 
+                    name: 'Tren Interurbano', 
+                    selected: false,
+                    icon: "{% static 'images/insurgente-logo.png' %}"
+                },
+                'suburbano': { 
+                    name: 'Tren Suburbano', 
+                    selected: false,
+                    icon: "{% static 'images/suburbano-logo.png' %}"
+                },
+                'mexibus': { 
+                    name: 'Mexibús', 
+                    selected: false,
+                    icon: "{% static 'images/mexibus-logo.png' %}"
+                },
+                'mexicable': { 
+                    name: 'MexiCable', 
+                    selected: false,
+                    icon: "{% static 'images/mexicable-logo.png' %}"
+                },
+                'tren-ligero': { 
+                    name: 'Tren Ligero', 
+                    selected: false,
+                    icon: "{% static 'images/tren-ligero-old.png' %}"
+                }
+            };
+
+            React.useEffect(() => {
+                if (!mapContainer.current) return;
+
+                mapboxgl.accessToken = 'pk.eyJ1Ijoidmlkcmlsb2NvIiwiYSI6Ik1QRzIwZmcifQ.BzdjvFURAZ8uJ6kNovrrDA';
+                
+                map.current = new mapboxgl.Map({
+                    container: mapContainer.current,
+                    style: 'mapbox://styles/vidriloco/cm9pfw0i4013h01qu0m3d7c22',
+                    center: [-99.1332, 19.4326],
+                    zoom: 11
+                });
+
+                map.current.on('load', () => {
+                    // Try to load DIN Offc Pro Bold font
+                    const fontUrl = 'https://fonts.gstatic.com/s/dinpro/v1/7aO_9LJRQoyO-ZW2jOQQSqJXaKXk.ttf';
+                    fetch(fontUrl)
+                        .then(response => response.arrayBuffer())
+                        .then(fontData => {
+                            try {
+                                map.current.addFont('DIN Offc Pro Bold', fontData);
+                                console.log('DIN Offc Pro Bold font loaded successfully');
+                            } catch (error) {
+                                console.warn('Could not add DIN Offc Pro Bold font:', error);
+                            }
+                        })
+                        .catch(error => {
+                            console.warn('Could not load DIN Offc Pro Bold font:', error);
+                        });
+                    
+                    // Initially hide all transport layers
+                    const transportLayers = [
+                        'all-lines',
+                        'all-lines-under-construction',
+                        'all-lines-names',
+                        'all-stations',
+                        'all-stations-names',
+                        'all-stations-ecobici',
+                        'all-stations-ecobici-names'
+                    ];
+
+                    transportLayers.forEach(layerId => {
+                        if (map.current.getLayer(layerId)) {
+                            map.current.setLayoutProperty(layerId, 'visibility', 'none');
+                        }
+                    });
+
+                    fetchTransportData();
+                });
+
+                return () => {
+                    if (map.current) {
+                        map.current.remove();
+                    }
+                };
+            }, []);
+
+            const processTransportData = (data) => {
+                if (!map.current) return;
+
+                // Process each system's data
+                Object.entries(data).forEach(([system, geojson]) => {
+                    if (!geojson || !geojson.features) return;
+
+                    // Separate features by type
+                    const lines = geojson.features.filter(f => f.properties.type === 'line');
+                    const stations = geojson.features.filter(f => f.properties.type === 'station');
+
+                    // Debug: Log first station to see its properties
+                    if (stations.length > 0) {
+                        console.log('First station properties:', stations[0].properties);
+                    }
+
+                    // Create a map of line numbers to line colors for this system
+                    const lineColorMap = {};
+                    lines.forEach(line => {
+                        lineColorMap[line.properties.line_number] = line.properties.color;
+                    });
+
+                    console.log('Line color map:', lineColorMap);
+
+                    // Add line color to station properties
+                    stations.forEach(station => {
+                        // Try multiple approaches to get the line color
+                        let lineColor = null;
+                        
+                        // Approach 1: Check lines_serving array
+                        if (station.properties.lines_serving && station.properties.lines_serving.length > 0) {
+                            const firstLineNumber = station.properties.lines_serving[0];
+                            lineColor = lineColorMap[firstLineNumber];
+                        }
+                        // Approach 2: Check line_number
+                        else if (station.properties.line_number) {
+                            lineColor = lineColorMap[station.properties.line_number];
+                        }
+                        // Approach 3: Check if station has its own color that matches a line color
+                        else if (station.properties.color && lineColorMap[station.properties.color]) {
+                            lineColor = station.properties.color;
+                        }
+                        
+                        // Set the line color, fallback to station color
+                        station.properties.line_color = lineColor || station.properties.color;
+                        
+                        console.log(`Station ${station.properties.name}: line_color = ${station.properties.line_color}`);
+                    });
+
+                    // Create or update sources
+                    if (!map.current.getSource('all-lines')) {
+                        map.current.addSource('all-lines', {
+                            type: 'geojson',
+                            data: {
+                                type: 'FeatureCollection',
+                                features: []
+                            }
+                        });
+                    }
+
+                    if (!map.current.getSource('all-stations')) {
+                        map.current.addSource('all-stations', {
+                            type: 'geojson',
+                            data: {
+                                type: 'FeatureCollection',
+                                features: []
+                            }
+                        });
+                    }
+
+                    // Update sources with new data
+                    const currentLines = map.current.getSource('all-lines')._data.features;
+                    const currentStations = map.current.getSource('all-stations')._data.features;
+
+                    // Add system property to features
+                    lines.forEach(line => {
+                        line.properties.system = system;
+                        if (!currentLines.some(l => l.properties.id === line.properties.id)) {
+                            currentLines.push(line);
+                        }
+                    });
+
+                    stations.forEach(station => {
+                        station.properties.system = system;
+                        if (!currentStations.some(s => s.properties.id === station.properties.id)) {
+                            currentStations.push(station);
+                        }
+                    });
+
+                    // Update sources
+                    map.current.getSource('all-lines').setData({
+                        type: 'FeatureCollection',
+                        features: currentLines
+                    });
+
+                    map.current.getSource('all-stations').setData({
+                        type: 'FeatureCollection',
+                        features: currentStations
+                    });
+
+                    // Add layers if they don't exist
+                    if (!map.current.getLayer('all-lines')) {
+                        // Active lines layer
+                        map.current.addLayer({
+                            id: 'all-lines',
+                            type: 'line',
+                            source: 'all-lines',
+                            filter: ['all', ['==', 'type', 'line'], ['==', 'status', 'active']],
+                            paint: {
+                                'line-color': ['get', 'color'],
+                                'line-width': ['get', 'stroke']
+                            }
+                        });
+
+                        // Under construction lines layer
+                        map.current.addLayer({
+                            id: 'all-lines-under-construction',
+                            type: 'line',
+                            source: 'all-lines',
+                            filter: ['all', ['==', 'type', 'line'], ['==', 'status', 'under-construction']],
+                            paint: {
+                                'line-color': ['get', 'color'],
+                                'line-width': ['get', 'stroke'],
+                                'line-dasharray': [2, 1.5]
+                            }
+                        });
+                    }
+
+                    if (!map.current.getLayer('all-stations')) {
+                        // Regular stations layer
+                        map.current.addLayer({
+                            id: 'all-stations',
+                            type: 'circle',
+                            source: 'all-stations',
+                            filter: ['all', ['==', 'type', 'station'], ['!=', 'system', 'ecobici']],
+                            paint: {
+                                'circle-color': ['get', 'color'],
+                                'circle-radius': ['interpolate', ['linear'], ['zoom'],
+                                    10, 2,
+                                    14, 5,
+                                    18, 8
+                                ],
+                                'circle-stroke-color': 'white',
+                                'circle-stroke-width': 2
+                            }
+                        });
+
+                        // Station names layer
+                        map.current.addLayer({
+                            id: 'all-stations-names',
+                            type: 'symbol',
+                            source: 'all-stations',
+                            filter: ['all', ['==', 'type', 'station'], ['!=', 'system', 'ecobici']],
+                            layout: {
+                                'text-field': ['get', 'name'],
+                                'text-size': ['interpolate', ['linear'], ['zoom'],
+                                    13, 11,
+                                    16, 13
+                                ],
+                                'text-allow-overlap': false,
+                                'text-ignore-placement': false,
+                                'text-anchor': 'top',
+                                'text-offset': [0, 1.2],
+                                'text-padding': 2,
+                                'text-font': ['DIN Offc Pro Bold', 'Open Sans Bold']
+                            },
+                            paint: {
+                                'text-color': ['get', 'color'],
+                                'text-halo-color': 'white',
+                                'text-halo-width': 2
+                            }
+                        });
+                        
+                        // Add zoom event listener to control station names visibility
+                        map.current.on('zoom', () => {
+                            const currentZoom = map.current.getZoom();
+                            const visibility = currentZoom >= 13 ? 'visible' : 'none';
+                            if (map.current.getLayer('all-stations-names')) {
+                                map.current.setLayoutProperty('all-stations-names', 'visibility', visibility);
+                            }
+                        });
+                    }
+
+                    // After all data is loaded, update visibility based on selected systems
+                    updateLayerVisibility();
+                });
+            };
+
+            // Function to update layer visibility based on visibleSystems state
+            const updateLayerVisibility = () => {
+                if (!map.current) return;
+
+                try {
+                    // Create a filter that includes all visible systems
+                    const lineFilter = ['any'];
+                    Object.entries(visibleSystems).forEach(([system, isVisible]) => {
+                        if (isVisible) {
+                            lineFilter.push(['==', ['get', 'system'], system]);
+                        }
+                    });
+
+                    // If no systems are visible, hide everything
+                    if (lineFilter.length === 1) {
+                        lineFilter.push(['==', ['get', 'system'], 'none']);
+                    }
+
+                    console.log('Applying filter to layers:', lineFilter);
+
+                    // Apply the filter to all relevant layers
+                    const layers = [
+                        'all-lines',
+                        'all-lines-under-construction',
+                        'all-lines-names',
+                        'all-stations',
+                        'all-stations-names',
+                        'all-stations-ecobici',
+                        'all-stations-ecobici-names'
+                    ];
+
+                    layers.forEach(layerId => {
+                        if (map.current.getLayer(layerId)) {
+                            map.current.setLayoutProperty(layerId, 'visibility', 'visible');
+                            map.current.setFilter(layerId, lineFilter);
+                            console.log(`Layer ${layerId} is visible and filtered`);
+                        } else {
+                            console.log(`Layer ${layerId} not found`);
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error updating layer visibility:', error);
+                }
+            };
+
+            const toggleSystemVisibility = (system) => {
+                if (!map.current) return;
+
+                setVisibleSystems(prev => {
+                    const newState = {
+                        ...prev,
+                        [system]: !prev[system]
+                    };
+                    
+                    // Update the system's selected state in transportSystems
+                    transportSystems[system].selected = newState[system];
+                    
+                    return newState;
+                });
+            };
+
+            const CACHE_KEY = 'transport_lines_cache';
+            const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+            const fetchTransportLines = async (system) => {
+                const url = UrlUtils.getTransportUrl(system);
+                
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    
+                    // Update transport data state
+                    setTransportData(prev => ({
+                        ...prev,
+                        [system]: data
+                    }));
+
+                    // Process the data to update the map
+                    processTransportData({ [system]: data });
+                } catch (err) {
+                    console.error('Error fetching transport lines:', err);
+                }
+            };
+
+            const fetchTransportData = async () => {
+                ['rtp', 'metro', 'metrobus', 'trolebus', 'cablebus', 'ecobici', 'concesionados', 'tren-interurbano', 'tren-suburbano', 'mexibus', 'mexicable', 'tren-ligero'].forEach(async (system) => {
+                    await fetchTransportLines(system);
+                });
+            };
+
+            const handleLineSelect = (lineInfo) => {
+                setSelectedLine(lineInfo);
+                setIsLayerPanelCollapsed(true);
+            };
+
+            const handleCloseLineInfo = () => {
+                setSelectedLine(null);
+                // Reset visibility for enabled transport systems
+                updateLayerVisibility();
+            };
+
+            const showStationDetails = (stationProperties) => {
+                // Hide line details if they're showing
+                setSelectedLine(null);
+                
+                // Hide the layer panel
+                setIsLayerPanelCollapsed(true);
+                
+                const systemInfo = transportSystems[stationProperties.system];
+                setSelectedStation({
+                    name: stationProperties.name,
+                    system: stationProperties.system,
+                    icon: systemInfo && systemInfo.icon ? systemInfo.icon : 'no-transports.png'
+                });
+            };
+
+            const handleCloseStationDetails = () => {
+                setSelectedStation(null);
+                // Restore layer panel visibility
+                setIsLayerPanelCollapsed(false);
+            };
+
+            // Add click handlers for lines and stations
+            const addMapEventHandlers = () => {
+                if (!map.current) return;
+
+                // Remove existing handlers to avoid duplicates
+                map.current.off('click', 'all-lines');
+                map.current.off('click', 'all-stations');
+                map.current.off('mouseenter', 'all-lines');
+                map.current.off('mouseleave', 'all-lines');
+                map.current.off('mouseenter', 'all-stations');
+                map.current.off('mouseleave', 'all-stations');
+
+                map.current.on('click', 'all-lines', (e) => {
+                    if (!e.features || e.features.length === 0) return;
+                    const feature = e.features[0];
+                    if (feature.properties) {
+                        console.log(feature.properties.line_number);
+                        // Find all stations for this line
+                        const lineStations = Object.values(transportData)
+                            .flatMap(geojson => geojson.features || [])
+                            .filter(f => f.properties.type === 'station')
+                            .filter(s => 
+                                s.properties.lines_serving && 
+                                s.properties.lines_serving.includes(feature.properties.line_number) &&
+                                s.properties.system === feature.properties.system
+                            );
+
+                        // Set the selected line in state
+                        setSelectedLine({
+                            system: feature.properties.system,
+                            line: {
+                                id: feature.properties.id,
+                                line_number: feature.properties.line_number,
+                                route: feature.properties.route,
+                                name: feature.properties.name,
+                                stations: lineStations.map(s => ({
+                                    id: s.properties.id,
+                                    name: s.properties.name,
+                                    identifier: s.properties.identifier
+                                }))
+                            }
+                        });
+
+                        // Create a filter to show only the selected line and its stations
+                        const lineFilter = [
+                            'any',
+                            ['all',
+                                ['==', ['get', 'type'], 'line'],
+                                ['==', ['get', 'line_number'], feature.properties.line_number],
+                                ['==', ['get', 'system'], feature.properties.system]
+                            ],
+                            ['all',
+                                ['==', ['get', 'type'], 'station'],
+                                ['==', ['get', 'line_number'], feature.properties.line_number],
+                                ['==', ['get', 'system'], feature.properties.system]
+                            ]
+                        ];
+
+                        // Apply the filter to all relevant layers
+                        const layers = [
+                            'all-lines',
+                            'all-lines-under-construction',
+                            'all-lines-names',
+                            'all-stations',
+                            'all-stations-names',
+                            'all-stations-ecobici',
+                            'all-stations-ecobici-names'
+                        ];
+
+                        layers.forEach(layerId => {
+                            if (map.current.getLayer(layerId)) {
+                                map.current.setFilter(layerId, lineFilter);
+                            }
+                        });
+
+                        // Center the map on the selected line
+                        const bounds = new mapboxgl.LngLatBounds();
+                        feature.geometry.coordinates.forEach(coord => {
+                            bounds.extend(coord);
+                        });
+
+                        // Add padding for better view
+                        const padding = {
+                            top: 50,
+                            bottom: 50,
+                            left: 50,
+                            right: 50
+                        };
+
+                        map.current.fitBounds(bounds, {
+                            padding: padding,
+                            duration: 1000
+                        });
+                    }
+                });
+
+                map.current.on('click', 'all-stations', (e) => {
+                    if (!e.features || e.features.length === 0) return;
+                    const feature = e.features[0];
+                    if (feature.properties) {
+                        // Display station details
+                        showStationDetails(feature.properties);
+                    }
+                });
+
+                // Add hover effects
+                map.current.on('mouseenter', 'all-lines', () => {
+                    map.current.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.current.on('mouseleave', 'all-lines', () => {
+                    map.current.getCanvas().style.cursor = '';
+                });
+
+                map.current.on('mouseenter', 'all-stations', () => {
+                    map.current.getCanvas().style.cursor = 'pointer';
+                });
+
+                map.current.on('mouseleave', 'all-stations', () => {
+                    map.current.getCanvas().style.cursor = '';
+                });
+            };
+
+            // Update layer visibility when visibleSystems changes
+            React.useEffect(() => {
+                updateLayerVisibility();
+            }, [visibleSystems]);
+
+            // Add event handlers when transport data is loaded
+            React.useEffect(() => {
+                if (Object.keys(transportData).length > 0) {
+                    addMapEventHandlers();
+                }
+            }, [transportData]);
+
+            return (
+                <div className="map-admin-container">
+                    <div ref={mapContainer} className="map-container" />
+                    <LayersListPanel 
+                        transportData={transportData}
+                        visibleSystems={visibleSystems}
+                        toggleSystemVisibility={toggleSystemVisibility}
+                        transportSystems={transportSystems}
+                        map={map}
+                        showSearchDialog={showSearchDialog}
+                        setShowSearchDialog={setShowSearchDialog}
+                        onLineSelect={handleLineSelect}
+                    />
+                    {selectedLine && (
+                        <LayersListPanel 
+                            selectedLine={selectedLine}
+                            transportSystems={transportSystems}
+                            onClose={handleCloseLineInfo}
+                        />
+                    )}
+                    {selectedStation && (
+                        <div className="station-details-container">
+                            <div className="station-details-header">
+                                <h3 className="station-details-title">Detalles de la Estación</h3>
+                                <button className="close-station-button" onClick={handleCloseStationDetails}>×</button>
+                            </div>
+                            <div className="station-details-content">
+                                <img src={selectedStation.icon} alt={selectedStation.system} className="station-icon" />
+                                <h4 className="station-name">{selectedStation.name}</h4>
+                                <p className="station-system">Sistema: {selectedStation.system}</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

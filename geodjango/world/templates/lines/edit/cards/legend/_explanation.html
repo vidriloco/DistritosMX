@@ -1,0 +1,13 @@
+<div class="row stats">
+    <div class="text-center">
+        <div style="width: 0; height: 0; border: 10px solid transparent; border-bottom-color: orange; margin: 0 auto;"></div>
+    </div>
+    <div class="text-center px-2 pb-3 my-1">
+        <p class="text-muted small p-0">Espectro de valores para este atributo</b></p>
+        <div class="d-flex flex-row">
+            {% for rank in rankings %}
+                <div class="p-1 border rank-entry text-center" style="color: black; background-color: {{ rank.color }};">{{ rank.number_up }}</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

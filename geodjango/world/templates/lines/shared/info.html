@@ -1,0 +1,79 @@
+{% load static %}
+
+<div id="line-details" class="m-0" style="pointer-events: auto;">
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <div id="line-header" class="ps-4 pb-4 rounded mx-2 d-flex align-items-center justify-content-start d-none d-md-flex d-md-none d-lg-flex">
+                <img src="{% static 'images/' %}{{ line.icon }}" alt="Metrobús" class="me-4" style="max-width: 70px;">
+                <div>
+                    <h1 class="m-0 rounded px-3 mb-2 mt-2" style="font-size: calc(0.6rem + 1vw); background-color: rgba(255, 255, 255, 0.8);">{{ line.route }}</h1>
+                    <h1 class="badge text-bg-dark" style="font-size: 14px;">{{ line.get_operative_status }}</h1>
+                    <h1 class="badge text-bg-secondary" style="font-size: 14px; background-color: {{ line.color }} !important;">{{ line.named_identifier }}</h1>
+                    <h1 class="ms-2 badge text-bg-dark hidden" style="font-size: 14px;">Longitud: <span class="line-length"></span> kms</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 d-flex mt-3 mt-md-0 justify-content-end">
+            <div class="scroll-bar-hidden" style="white-space: nowrap; overflow-x: scroll;">
+                <style>
+                    .scroll-bar-hidden::-webkit-scrollbar {
+                    display: none;
+                    }
+                </style>
+                <div class="stations-chooser">
+                    {% for station in line.stations.all|dictsort:"station_number" %}
+                        <img id="station-{{ station.id }}" hx-get="{% url 'line_station_details' line_id=line.id station_id=station.id %}" hx-swap="innerHTML" hx-trigger="stationSelected" hx-target="#left-card-container" onclick="flyToStation({{ station.coordinate_formatted}}, {{ station.id }})" src="{{ station.get_icon_url }}" alt="{{ station.name }}" class="me-2" style="max-width: 80px;" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="{{  station.name }}" data-bs-trigger="hover">
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- for Mobile -->
+    <div class="col-12 d-md-none ms-auto mt-3">
+        <div class="d-flex align-items-center rounded px-4 py-3" style="background-color: white;">
+            <img src="{% static 'images/' %}{{ line.icon }}" alt="Metrobús" class="me-4" style="max-width: 40px;">
+            <div class="pb-2">
+                <h1 class="m-0" style="font-size: calc(1rem + 1vw);">{{ line.route }}</h1>
+                <h1 class="badge text-bg-dark" style="font-size: calc(0.4rem + 1vw);">{{ line.get_operative_status }}</h1>
+                <h1 class="badge text-bg-secondary" style="font-size: calc(0.4rem + 1vw); background-color: {{ line.color }} !important;">{{ line.named_identifier }}</h1>
+                <h1 class="badge text-bg-dark hidden" style="font-size: calc(0.4rem + 1vw);">Longitud: <span class="line-length"></span> kms</h1>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center align-items-center rounded px-4 py-3 mt-2 mb-2" style="background-color: white;">
+            <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#line-details-mobile-modal">
+                Leer descripción
+            </button>
+        </div>
+    </div>
+    
+    <div class="mt-3 p-5 pt-2 rounded d-none d-md-block" style="background-color: white">
+        <div class="m-5">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    {% include 'tags/list.html' %}
+                </div>
+                <!-- for Mobile -->
+                <div class="col-12 col-md-6 d-flex mt-3 mt-md-0">
+                    <div class="ms-auto d-flex align-items-center d-none d-md-flex">
+                        <div class="d-flex flex-column align-items-end">
+                            <p class="mb-0">Creada por <a href="{% url 'profile_page' line.user.username %}"><b>{{ line.user.username }}</b></a></p>
+                            <p class="mb-0 small">Ultima actualización {{ line.updated_at|date:"F j, Y" }}</p>
+                        </div>
+                        <img src="{{ line.user.user_details.get_user_pic_url }}" alt="{{ line.creator.name }}" class="rounded-circle ms-4" width="50" height="50">
+                        {% if line.user == user and edit_mode == None %}
+                        <a href="{% url 'line_edit_page' line_id=line.id %}" class="btn btn-dark ms-5">Editar ruta</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="mt-5">
+                <div id="line-flyer" hx-target="this" hx-swap="innerHTML">
+                    {% include 'lines/show/_flyer.html' %}
+                </div>
+                <div id="line-description" hx-target="this" hx-swap="innerHTML">
+                    {% include 'lines/show/_description.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

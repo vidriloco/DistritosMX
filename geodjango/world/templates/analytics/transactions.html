@@ -1,0 +1,136 @@
+
+{% extends "wikiando/layouts/analytics.html" %}
+{% load static %}
+
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+{% endblock head %}
+
+{% block body %}
+<div class="card-container main-container">
+        
+    <div class="information-card">
+        <div class="card mb-3">
+            <a href="/" class="d-flex align-items-center logo-style mb-3" alt="Regresar a la página principal">
+                <img src="{% static 'images/logo.png' %}" alt="Wikiando logo" class="img-fluid" width="50" height="50">
+                <h3 class="ms-3 mb-0">Wikiando <span class="badge rounded-pill bg-warning text-dark">Beta</span></h3>
+            </a>
+        </div>
+        <div id="info-card" class="card mb-3 hidden">
+            <div class="position-relative">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-2" aria-label="Close" onclick="mapVisualization.hideInfoCard()"></button>
+                <div class="ml-4 system">
+                    <img src="{% static 'images/metro-logo.png' %}" alt="MI Logo" class="metro-logo hidden" width="50px" height="50px">
+                    <img src="{% static 'images/metrobus-logo.png' %}" alt="MI Logo" class="metrobus-logo hidden" width="50px" height="50px">
+                    <img src="{% static 'images/transportes-electricos-logo.png' %}" alt="MI Logo" class="tren-ligero-logo hidden" width="50px" height="50px">
+                    <h4 class="title mt-3" id="station-name"></h4>
+                    <p class="small">Datos de transacciones en un rango de 15 minutos</p>
+                </div>
+            </div>
+            <div id="info-card-content-closed">
+                <div class="h-100 pt-3 px-3 pb-1 text-bg-dark rounded-3 m-3">
+                    <h4>Estación cerrada</h4>
+                    <p>No hay datos disponibles para este horario</p>
+                    <p class="small">Horario de servicio: 4:30 am - 12:00 am</p>
+                </div>
+            </div>
+            <div id="info-card-content">
+                <div class="mt-4 ml-4">
+                    <h5 class="subtitle ml-1">Recargas <span class="value">(<span id="recharge-count">--</span> en total)</span></h5>
+                    <div class="row main-indicators">
+                        <div class="col-6">
+                            <div id="recharge-amount-container" class="selectable-container selected" onclick="mapVisualization.selectContainer('recharge-amount')">
+                                <h4 class="fw-bold mb-0 fs-3 text-body-emphasis symbols">$ <span id="recharge-amount" class="value">--</span> MXN</h4>
+                                <p class="text-muted small">Total ingresos</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div id="recharge-average-container" class="selectable-container" onclick="mapVisualization.selectContainer('recharge-average')">
+                                <h4 class="fw-bold mb-0 fs-3 text-body-emphasis symbols">$ <span id="recharge-average" class="value">--</span> MXN</h4>
+                                <p class="text-muted small">Valor promedio</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="mt-4 ml-4">
+                    <h5 class="subtitle ml-1">Débito <span class="value">(<span id="debit-count">--</span> en total)</span></h5>
+                    <div class="row main-indicators">
+                        <div class="col-6">
+                            <div id="debit-amount-container" class="selectable-container" onclick="mapVisualization.selectContainer('debit-amount')">
+                                <h4 class="fw-bold mb-0 fs-3 text-body-emphasis symbols">$ <span id="debit-amount" class="value">--</span> MXN</h4>
+                                <p class="text-muted small">Total ingresos</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div id="debit-average-container" class="selectable-container" onclick="mapVisualization.selectContainer('debit-average')">
+                                <h4 class="fw-bold mb-0 fs-3 text-body-emphasis symbols">$ <span id="debit-average" class="value">--</span> MXN</h4>
+                                <p class="text-muted small">Valor promedio</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="mt-4 ml-4">
+                    <h5 class="subtitle ml-1">Otros indicadores</h5>
+                    <div class="row special-indicators">
+                        <div class="col-6">
+                            <div id="free-count-container" class="selectable-container" onclick="mapVisualization.selectContainer('free-count')">
+                                <h4 class="fw-bold mb-0 fs-3 text-body-emphasis symbols"><span id="free-count" class="value">--</span></h4>
+                                <p class="text-muted small">Gratuidad</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div id="transfer-count-container" class="selectable-container" onclick="mapVisualization.selectContainer('transfer-count')">
+                                <h4 class="fw-bold mb-0 fs-3 text-body-emphasis symbols"><span id="transfer-count" class="value">--</span></h4>
+                                <p class="text-muted small">Transbordo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="control-panel" class="control-panel hidden">
+            <span id="current-time-day" class="day"></span>
+            <span id="current-time-time" class="time"></span>
+        </div>
+    </div>
+    
+    <!-- New loading indicator component -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span class="loading-text">Cargando datos...</span>
+    </div>
+
+    <div class="animation-controls mt-3" id="animation-controls">
+        <div class="centered">
+            <span id="rotate-map">
+                <img src="{% static 'images/rotate-play-icon.png' %}" alt="around button" id="rotate-play" class="circle control-image" />
+                <img src="{% static 'images/rotate-stop-icon.png' %}" alt="around button" id="rotate-stop" class="circle control-image hidden" />
+            </span>
+            <span id="play-pause">
+                <img src="{% static 'images/play-icon.png' %}" alt="play button" class="play control-image" />
+                <img src="{% static 'images/pause-icon.png' %}" alt="pause button" class="stop control-image hidden" />
+            </span>
+            <span id="play-forward">
+                <img src="{% static 'images/forward-icon.png' %}" alt="play button" class="forward-1x control-image" onclick="mapVisualization.setSpeed(500)" />
+                <img src="{% static 'images/forward-2x-icon.png' %}" alt="play button" class="forward-2x control-image hidden" onclick="mapVisualization.setSpeed(100)" />
+                <img src="{% static 'images/forward-3x-icon.png' %}" alt="play button" class="forward-3x control-image hidden" onclick="mapVisualization.setSpeed(700)" />
+            </span>
+        </div>
+        <input type="range" id="time-slider" min="0" max="100" value="0" class="slider">
+    </div>
+</div>
+{% endblock body %}
+
+{% block scripts %}
+<script>
+    var mapVisualization;
+    var timingOptions = { 'intervalMinutes': 15, 'delay': 700 };
+    $(document).ready(function() {
+        mapVisualization = new MapVisualization(timingOptions, 'transactions');
+    });
+</script>
+{% endblock scripts %}

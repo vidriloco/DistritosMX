@@ -1,0 +1,30 @@
+{
+  "_comment": "Curated by hand: no reliable public API exists for the Mexican press. Review weekly and keep the four most relevant items. Newest first.",
+  "updated": "2026-07-29",
+  "items": [
+    {
+      "source": "La Jornada",
+      "headline": "Asegura la FGJ tener identificadas las redes de despojo que operan en CDMX",
+      "date": "2026-07-29",
+      "url": "https://www.jornada.com.mx/2026/07/29/capital/028n1cap"
+    },
+    {
+      "source": "La Crónica de Hoy",
+      "headline": "Identifica FGJCDMX redes criminales y objetivos prioritarios de despojadores",
+      "date": "2026-07-28",
+      "url": "https://www.cronica.com.mx/metropoli/2026/07/28/identifica-fgjcdmx-redes-criminales-y-objetivos-prioritarios-de-despojadores/"
+    },
+    {
+      "source": "Publimetro",
+      "headline": "Fiscalía investiga redes de despojo de inmuebles con participación de policías",
+      "date": "2026-07-28",
+      "url": "https://www.publimetro.com.mx/noticias/2026/07/28/fiscalia-investiga-redes-de-despojo-de-inmuebles-con-participacion-de-policias/"
+    },
+    {
+      "source": "Excélsior",
+      "headline": "Identifican redes de despojo y objetivos prioritarios en CDMX",
+      "date": "2026-07-28",
+      "url": "https://www.excelsior.com.mx/ciudad-de-mexico/identifican-redes-despojo-cdmx"
+    }
+  ]
+}

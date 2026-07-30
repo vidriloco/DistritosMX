@@ -1,0 +1,48 @@
+{% load static %}
+
+<h3 class="my-5">Modificar descripción:</h3>
+
+<form method="post" hx-post="{% url 'line_description_update' line_id=line.id %}" hx-target="#line-description" hx-swap="innerHTML">
+    {% csrf_token %}
+    {{ line_form.description }}
+    
+    <div id="description-edit" class="editor-style">{{ line.description|safe }}</div>
+    <div class="d-flex justify-content-end mt-3">
+        <button id="description-error" class="btn btn-danger me-2 btn-sm hidden" disabled>No pudimos guardar tus cambios. Por favor, intenta de nuevo.</button>
+
+        <button class="btn btn-light me-2" hx-get="{% url 'line_description_show' line_id=line.id %}">Cancelar</button>
+        <div id="line-description-update-saving" class="hidden">
+            <button class="btn btn-dark" type="button" disabled>
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span role="status">Guardando...</span>
+            </button>
+        </div>
+        <button id="line-description-update-submit" type="submit" class="btn btn-dark" onclick="updateFieldsBeforeSend()">Guardar</button>
+    </div>
+</form>
+
+<script>
+    setupTextEditor();
+
+    document.body.addEventListener("htmx:responseError", function(e) {
+        var response = JSON.parse(e.detail.xhr.response);
+        if(response.endpoint == "/description/update") {
+            $('#description-error').removeClass('hidden');
+            $('#line-description-update-saving').addClass('hidden');
+            $('#line-description-update-submit').removeClass('hidden');
+        }
+    }); 
+
+    function updateFieldsBeforeSend() {
+        var descriptionContents = $('#description-edit .ql-editor').html();
+
+        if (new Blob([descriptionContents]).size > 10 * 1024 * 1024) {
+            alert("La descripción no puede ser mayor a 10 MB.");
+            event.preventDefault();
+        } else {
+            $('#id_description').val(descriptionContents);
+            $('#line-description-update-saving').removeClass('hidden');
+            $('#line-description-update-submit').addClass('hidden');
+        }
+    }
+</script>

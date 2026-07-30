@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="shortcut icon" href="/static/images/shortcut-logo.png" type="image/x-icon" />
+
+        <meta name="description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+        <meta name="keywords" content="movilidad, transporte público, trenes, ciclovias, metros, tren ligero, transportes eléctricos, tren suburbano, cablebús, mexibús, metrobús, tren suburbano, tren interburbano, el insurgente">
+    
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+               
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <!-- Bootstrap CSS from CDN -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ 
+        <link rel="canonical" href="https://wikiando.mx/megalopolis" />
+    
+        <meta property="og:title" content="La red que tenemos - Wikiando: La movilidad de todos">
+        <meta property="og:description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+        <meta property="og:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+        <meta property="og:url" content="https://wikiando.mx/megalopolis">
+    
+        <meta name="twitter:title" content="La red que tenemos - Wikiando: La movilidad de todos">
+        <meta name="twitter:description" content="Mapa interactivo con las rutas de transporte público en la ciudad">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+        
+        <title>Wikiando MX: La página que buscas no fué encontrada</title>
+        
+        <style>
+
+            .container {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+            }
+
+            .container .card {
+                box-shadow: 0 7px 8px rgba(247, 83, 2, 0.1);
+                border: 2px solid rgba(247, 83, 2, 0.956);
+            }
+
+            .container a {
+                color: #4f4f4f;
+                text-decoration: none;
+            }
+
+            .container a:hover {
+                text-decoration: underline;
+            }
+
+            .container .errorlist {
+                list-style-type: none;
+                padding: 0;
+            }
+
+        </style>
+    </head>
+    <body>
+        
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W5QRTQ2H29"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W5QRTQ2H29');
+</script>
+
+<nav class="navbar border-bottom border-body navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <img src="/static/images/logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+      Wikiando <span class="badge rounded-pill bg-warning text-dark">Beta</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 main-app-sections">
+        <li class="nav-item dropdown ">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            La red del ayer
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item " href="/megalopolis/pasado/ruta-100-y-metro-1986">Ruta 100 y Metro (1986)</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#past-legend-plus">Más</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown ">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            La red que debería existir
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item " href="/megalopolis/la-red-que-deberiamos-tener/metro-y-tren-ligero-horizonte-1996">Metro y Tren Ligero (Horizonte 1996)</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#multiverse-legend-plus">Más</a>
+          </div>
+        </li>
+        <li class="nav-item dropdown ">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            La red a futuro
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item " href="/megalopolis/futuro/metro-horizonte-2018-2030">Metro (Horizonte 2018-2030)</a>
+            <a class="dropdown-item " href="/megalopolis/futuro/propuestas-politicas-2024">Propuestas políticas (2024)</a>
+          </div>
+        </li>
+
+        
+        <li class="nav-item ">
+          <a class="nav-link" href="/proponemos">La red que soñamos</a>
+        </li>
+        
+        <li class="nav-item ">
+          <a class="nav-link" href="/megalopolis">Red actual</a>
+        </li>
+      </ul>
+      <div class="d-flex" role="search">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Ciudades
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="/megalopolis">Megalópolis</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#change-city-legend">Más</a>
+              </div>
+            </li>
+            <li class="nav-item ">
+              <a class="nav-link" href="/acerca-de">Acerca de</a>
+            </li>
+            <li class="nav-item ">
+              <a class="nav-link" href="/politica-de-privacidad">Política de Privacidad</a>
+            </li>
+            <li class="nav-item spacer-20"> </li>
+            <li>
+              
+              <li class="nav-item">
+                <a class="nav-link" href="/accounts/login/"><b>Iniciar sesión</b></a>
+              </li>
+              
+            </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>
+    
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.18.0/font/bootstrap-icons.css" rel="stylesheet">
+<body>
+    <div class="custom-bg text-dark">
+        <div class="d-flex align-items-center justify-content-center min-vh-100 px-2">
+            <div class="text-center rounded p-5 pb-3 shadow-sm position-relative" style="border: 1px solid #d1d1d1; background-color: white;">
+                <h1 class="display-1 fw-bold">404</h1>
+                <p class="fs-2 fw-medium mt-4">Zaz! No encontramos la página</p>
+                <p class="mt-4 mb-5">La página que buscas no existe ó ha sido movida a otra ubicación</p>
+                <a href="/" class="btn btn-light fw-semibold rounded-pill px-4 py-2 custom-btn">
+                    Ir al Inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

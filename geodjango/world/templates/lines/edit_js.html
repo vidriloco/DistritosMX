@@ -1,0 +1,1280 @@
+{% load static %}
+<script>
+    var map = L.map('map', {
+        center: [19.4326, -99.1332],
+        zoom: 12,
+        zoomControl: false 
+    }).locate({setView: true, maxZoom: 16});
+
+    var gl = L.mapboxGL({
+        accessToken: 'pk.eyJ1Ijoidmlkcmlsb2NvIiwiYSI6Ik1QRzIwZmcifQ.BzdjvFURAZ8uJ6kNovrrDA',
+        style: 'mapbox://styles/vidriloco/clx4dzh6902so01qphb9efd0f'
+    }).addTo(map);
+
+    L.control.zoom({
+        position: 'topright'
+    }).addTo(map);
+
+    map.on('locationerror', function(e) {
+        alert(e.message);
+    });
+
+    $('.leaflet-control').append('<a id="wikiando-network-layer-custom-controls-selector" class="line-network-button" href="#" title="Lineas" role="button" aria-label="Lineas" aria-disabled="false" style="outline: none;"><img class="map-asp" src="{% static "images/transit-control-map-button.png" %}" alt="Mapa Asfalto" style="width: 30px; height: 30px;" class="hidden" /></a>')
+
+    $('#wikiando-network-layer-custom-controls-selector').click(function(event) {
+        event.stopPropagation();
+        $('#transit-layer-modal').modal('show');
+
+        var bounds = map.getBounds();
+        var yucatanBounds = L.latLngBounds(
+            L.latLng(17.5, -91.5), // Southwest corner
+            L.latLng(21.5, -86.5)  // Northeast corner
+        );
+
+        var estadoDeMexicoBounds = L.latLngBounds(
+            L.latLng(18.8, -100.0), // Southwest corner
+            L.latLng(19.5, -99.0)   // Northeast corner
+        );
+        if (bounds.intersects(yucatanBounds) && bounds.intersects(estadoDeMexicoBounds)) {
+            $('#cdmx-layer').removeClass('hidden');
+            $('#yucatan-layer').removeClass('hidden');
+            $('#none-layer').addClass('hidden');
+            $('#yucatan-layer').addClass('mt-3');
+        } else if (bounds.intersects(yucatanBounds)) {
+            $('#cdmx-layer').addClass('hidden');
+            $('#yucatan-layer').removeClass('hidden');
+            $('#yucatan-layer').removeClass('mt-3');
+            $('#none-layer').addClass('hidden');
+        } else if (bounds.intersects(estadoDeMexicoBounds)) {
+            $('#yucatan-layer').addClass('hidden');
+            $('#cdmx-layer').removeClass('hidden');
+            $('#none-layer').addClass('hidden');
+        } else {
+            $('#yucatan-layer').addClass('hidden');
+            $('#cdmx-layer').addClass('hidden');
+            $('#none-layer').removeClass('hidden');
+        }
+    });
+
+    var drawnLine = new L.FeatureGroup();
+    var drawnStations = new L.FeatureGroup();
+    var drawnMarkers = new L.FeatureGroup();
+    var drawnStationsIndexed = {};
+    var drawnMarkersIndexed = {};
+    var drawControl = null;
+    var marker;
+    var addingMarkerEnabled = false;
+    var addingSimpleMarkerEnabled = false;
+
+    var geozones = [];
+    var retrievedGeoZones = null;
+    var selectedAspect = 'population';
+    var lastLocation;
+    var currentRadius = "300-v";
+    var radiusBorder;
+    var totalRadiusData;
+    var geozonesActive = true;
+    var selectedRadius = '300-r';
+    var heatMapRanges = {};
+
+    map.addLayer(drawnLine);
+    map.addLayer(drawnStations);
+    map.addLayer(drawnMarkers);
+
+    // Handle the creation of new layers
+    map.on(L.Draw.Event.CREATED, function (e) {
+        var layer = e.layer;
+        drawnLine.addLayer(layer);
+        
+        updateLineGeoJSONTextField();  // Update the textarea with the new GeoJSON
+    });
+
+    // Handle edits to existing geometries
+    map.on(L.Draw.Event.EDITED, function (e) {
+        updateLineGeoJSONTextField();  // Update the textarea with the edited GeoJSON
+    });
+
+    // Handle removal of existing geometries
+    map.on(L.Draw.Event.DELETED, function (e) {
+        updateLineGeoJSONTextField();  // Update the textarea with the remaining GeoJSON or clear it
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadMapData();
+        loadHeatMapRanges();
+        registerEvents();
+        loadLineEvents();
+        loadDrawControl();
+        loadGeoLayersPanel();
+        presentEditPublishedLineModalIfNeeded();
+
+        const mapController = new MapController([0,0], 0);
+        mapController.initialize('', gl);
+    });
+
+    function addSimpleMarker(e) {
+        
+        if(!addingSimpleMarkerEnabled) { 
+            return;
+        }
+
+        var coordinates = e.latlng;
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        marker = L.marker([coordinates.lat, coordinates.lng], { draggable: true }).addTo(map);
+        var json = JSON.stringify({
+            type: 'Point',
+            coordinates: [coordinates.lng, coordinates.lat]
+        });
+        
+        $('#content-area-for-markers #id_coordinates').val(json);
+        $('#coordinates-input').val(json);
+        enableMarkerFormSubmitButton();
+
+        lastLocation = marker.getLatLng();
+
+        marker.on('dragend', function(event) {
+            var newCoordinates = event.target.getLatLng();
+            var json = JSON.stringify({
+                type: 'Point',
+                coordinates: [newCoordinates.lng, newCoordinates.lat]
+            });
+            $('#content-area-for-markers #id_coordinates').val(json);
+            $('#coordinates-input').val(json);
+
+            lastLocation = marker.getLatLng();
+        });
+    }
+
+    function addMarker(e) {
+        
+        if(!addingMarkerEnabled) { 
+            return;
+        }
+
+        var coordinates = e.latlng;
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        marker = L.marker([coordinates.lat, coordinates.lng], { draggable: true }).addTo(map);
+        var json = JSON.stringify({
+            type: 'Point',
+            coordinates: [coordinates.lng, coordinates.lat]
+        });
+        
+        $('#id_coordinates').val(json);
+        $('#coordinates-input').val(json);
+        enableStationSubmitButton();
+
+        lastLocation = marker.getLatLng();
+        handleRadiusChange(currentRadius);
+
+        updateAddressOnStationForm();
+
+        marker.on('dragend', function(event) {
+            var newCoordinates = event.target.getLatLng();
+            var json = JSON.stringify({
+                type: 'Point',
+                coordinates: [newCoordinates.lng, newCoordinates.lat]
+            });
+            $('#id_coordinates').val(json);
+            $('#coordinates-input').val(json);
+
+            lastLocation = marker.getLatLng();
+            handleRadiusChange(currentRadius);
+            updateAddressOnStationForm();
+        });
+    }
+
+    function updateAddressOnStationForm() {
+        $('#station-form-placeholder .address').text('Actualizando dirección...');
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lastLocation.lat}&lon=${lastLocation.lng}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    $('#station-form-placeholder .address').text(data.display_name);
+                }
+            })
+            .catch(error => $('#station-form-placeholder .address').text('No pudimos determinar la dirección'));
+    }
+
+    function enableSimpleMarkerDrawing() {
+        addingSimpleMarkerEnabled = true;
+        
+        map.on('click', addSimpleMarker);
+    }
+
+    function disableSimpleMarkerDrawing() {
+        addingSimpleMarkerEnabled = false;
+        map.off('click', addMarker);
+        if (marker) {
+            map.removeLayer(marker);
+        }
+    }
+
+    function enableMarkerDrawing() {
+        addingMarkerEnabled = true;
+        map.on('click', addMarker);
+    }
+
+    function disableMarkerDrawing() {
+        addingMarkerEnabled = false;
+        map.off('click', addMarker);
+        if (marker) {
+            map.removeLayer(marker);
+        }
+    }
+
+    function loadDrawControl() {
+        drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnLine,
+                edit: true,
+                remove: true
+            },
+            draw: {
+                polyline: true,
+                polygon: false,
+                rectangle: false,
+                circle: false,
+                marker: false,
+                circlemarker: false
+            },
+            position: 'topright'
+        });
+
+        map.addControl(drawControl);
+        disableLinePathDrawControl();
+    }
+
+    function enableLinePathDrawControl() {
+        drawControl._container.style.display = 'block';
+    }
+
+    function disableLinePathDrawControl() {
+        drawControl._container.style.display = 'none';
+    }
+
+    function didDeleteStation(id) {
+        var stations = $(".station-data");
+        
+        drawnStations.clearLayers();
+
+        if (stations.length > 0) {
+            updateStationsInMap(stations, id);
+        }
+    }
+
+    function didCreateStation(stationID) {
+        
+        var uniqueStations = {};
+        // This logic is to avoid duplicate stations in the map caused by an intrasient state in the DOM due to hx handling
+        $(".station-data").each(function() {
+            var id = $(this).attr('data-id');
+            if (uniqueStations[id]) {
+                if ($(this).attr('data-icon') === "/static/images/no-station-icon.png") {
+                    $(this).remove();
+                }
+            } else {
+                uniqueStations[id] = true;
+            }
+        });
+
+        var stations = $(".station-data");
+        
+        drawnStations.clearLayers();
+
+        if (stations.length > 0) {
+            updateStationsInMap(stations);
+        }
+    
+        disableMarkerDrawing();
+        clearGeoZonesSelection();
+
+        $('#add-new-station-area').removeClass('hidden');
+
+        makeStationActive(stationID);
+
+        resetPanels();
+    }
+
+    function stationOperationFailed() {
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        
+        registerEvents();
+        resetPanels();
+    }
+
+    function resetPanels() {
+        $('#line-path').removeClass('hidden');
+        $('#general-info').removeClass('hidden');
+        $('#line-markers').removeClass('hidden');
+
+        $('#geozones-legend-panel .entry-list').addClass('hidden');
+        $('#geozones-legend-panel .entry-intro').removeClass('hidden');
+
+        $('#visor-toggle').addClass('hidden');
+    }
+
+    function hideStationForm() {
+        $('#station-form-placeholder').addClass('hidden');
+        $('#station-area-content').removeClass('hidden');
+        $('#add-new-station-area').removeClass('hidden');
+
+        $('#geozones-legend-panel .entry-list').addClass('hidden');
+        $('#geozones-legend-panel .entry-intro').removeClass('hidden');
+
+        $('#line-path').removeClass('hidden');
+        $('#general-info').removeClass('hidden');
+        $('#line-image').removeClass('hidden');
+        
+        $('#geozones-legend-panel').addClass('hidden');
+
+        disableMarkerDrawing();
+        clearGeoZonesSelection();
+
+        $('#visor-toggle').addClass('hidden');
+    }
+
+    function showStationForm() {
+        $('#station-form-placeholder').removeClass('hidden');
+        $('#station-area-content').addClass('hidden');
+        $('#add-new-station-area').addClass('hidden');
+
+        $('#line-path').addClass('hidden');
+        $('#general-info').addClass('hidden');
+        $('#line-image').addClass('hidden');
+
+        if(geozonesActive) {
+            $('#geozones-legend-panel').removeClass('hidden');
+        } else {
+            $('#visor-toggle').removeClass('hidden');
+        }
+
+        $('#station-form #id_icon').addClass('form-control');
+
+        var lineFormSystemId = document.querySelector('#line-form #id_system').value;
+        document.querySelector('#station-form #id_system').value = lineFormSystemId;
+        document.querySelector('#station-form #id_lines').value = "{{ form.instance.id}}";
+
+        enableMarkerDrawing();
+
+        document.querySelectorAll('#station-form input, #station-form textarea, #station-form select').forEach(function(input) {
+            if (input.name !== 'csrfmiddlewaretoken' && input.name !== 'lines' && input.name !== 'coordinates' && input.name !== 'system') {
+                input.value = '';
+            }
+        });
+    }
+
+    function enableGeolayers() {
+        document.cookie = "geolayersDisabled=false; path=/";
+        loadGeoLayersPanel();
+        $('#geozones-legend-panel').removeClass('hidden');
+        $('#visor-toggle').addClass('hidden');
+    }
+
+    function disableGeolayers() {
+        document.cookie = "geolayersDisabled=true; path=/";
+        $('#visor-toggle').removeClass('hidden');
+
+        loadGeoLayersPanel();
+    }
+
+    function loadGeoLayersPanel() {
+        if (document.cookie.split(';').some((item) => item.trim().startsWith('geolayersDisabled=true'))) {
+            clearGeoZonesSelection();
+            geozonesActive = false;
+        } else {
+            geozonesActive = true;
+        }
+    }
+
+    function updateStationsInMap(stations, station_id) {
+        
+        stations.each(function() {
+            const coordinates = $(this).attr('data-coordinates');
+            const id = $(this).attr('data-id');
+
+            if (station_id && station_id == id) {
+                return;
+            }
+
+            var stationCoordinates = JSON.parse($(this).attr('data-coordinates'));
+            var stationLayer = L.geoJSON(stationCoordinates, {
+                onEachFeature: function (feature, layer) {
+                    layer.stationID = id;
+                }
+            });
+
+            var iconUrl = $(this).attr('data-icon');
+            
+            if (iconUrl) {
+                var customIcon = L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [40, 40],
+                    iconAnchor: [15, 40],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+
+                stationLayer.eachLayer(function(layer) {
+                    layer.setIcon(customIcon);
+                });
+
+                drawnStations.addLayer(stationLayer);
+            }
+
+            stationLayer.eachLayer(function(layer) {
+                layer.on('click', function(e) {
+                    highlightStation(e, id);
+                });
+            });
+
+            drawnStationsIndexed[id] = stationLayer;
+        });
+    }
+
+    function updateSimpleMarkersInMap() {
+        drawnMarkers.clearLayers();
+
+        var markers = $('.marker-data');
+        
+        markers.each(function() {
+            const coordinates = $(this).attr('data-coordinates');
+            const id = $(this).attr('data-id');
+
+            var markerCoordinates = JSON.parse($(this).attr('data-coordinates'));
+            var markerLayer = L.geoJSON(markerCoordinates, {
+                onEachFeature: function (feature, layer) {
+                    layer.markerID = id;
+                }
+            });
+            
+            var iconUrl = $(this).attr('data-icon');
+            
+            if (iconUrl) {
+                var customIcon = L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [40, 40],
+                    iconAnchor: [15, 40],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+
+                markerLayer.eachLayer(function(layer) {
+                    layer.setIcon(customIcon);
+
+                    layer.on('click', function(e) {
+                        highlightMarker(e.target.markerID);
+                    });
+                });
+
+                drawnMarkers.addLayer(markerLayer);
+            }
+
+            drawnMarkersIndexed[id] = markerLayer;
+        });
+    }
+
+    function resetMarkersHighlighting(collection) {
+        for (var key in collection) {
+            if (collection.hasOwnProperty(key)) {
+                collection[key].eachLayer(function(layer) {
+                    layer.setIcon(L.icon({
+                        iconUrl: layer.options.icon.options.iconUrl,
+                        iconSize: [40, 40],
+                        iconAnchor: [15, 40],
+                        popupAnchor: [1, -34]
+                    }));
+                });
+            }
+        }
+    }
+
+    function makeStationActive(stationID) {
+        $('.station-card').each(function() {
+            makeStationInactive($(this).attr('station-id'));
+            $('#station-' + stationID).removeClass('station-active');
+            $('#station-' + stationID).children('.station-body').addClass('hidden');
+        });
+                
+        $('#station-' + stationID).addClass('station-active');
+        
+        var stationControls = $('#station-' + stationID + '-controls');
+
+        stationControls.removeClass('hidden');
+
+        var stationElement = document.getElementById('station-' + stationID);
+        if (stationElement) {
+            stationElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        resetMarkersHighlighting(drawnStationsIndexed);
+
+        drawnStationsIndexed[stationID].eachLayer(function(layer) {
+            if (!map.getBounds().contains(layer.getLatLng())) {
+                map.flyTo(layer.getLatLng(), map.getZoom());
+            }
+            layer.setIcon(L.icon({
+                iconUrl: layer.options.icon.options.iconUrl,
+                iconSize: [60, 60],
+                iconAnchor: [25, 50],
+                popupAnchor: [1, -34]
+            }));
+        });
+    }
+
+    function makeStationInactive(stationID) {
+        resetMarkersHighlighting(drawnStationsIndexed);
+
+        $('#station-' + stationID + ' .station-body').addClass('hidden');
+        $('#station-' + stationID).removeClass('station-active');
+        $('#station-' + stationID + '-edit').addClass('hidden');
+
+        var stationControls = $('#station-' + stationID + '-controls');
+        stationControls.addClass('hidden');
+    }
+
+    function highlightStation(e) {
+        const stationID = e.target.stationID;
+        resetMarkersHighlighting(drawnMarkersIndexed);
+        makeHeaderInVisible($('#line-markers .header'));
+        makeHeaderVisible($('#line-stations .header-hidden'));
+        makeStationActive(stationID);
+    }
+
+    function highlightMarker(markerID) {
+        resetMarkersHighlighting(drawnStationsIndexed);
+        makeHeaderInVisible($('#line-stations .header'));
+        makeHeaderVisible($('#line-markers .header-hidden'));
+        makeMarkerActive(markerID);
+        resetMarkersHighlighting(drawnMarkersIndexed);
+
+        drawnMarkersIndexed[markerID].eachLayer(function(layer) {
+            map.flyTo(layer.getLatLng(), map.getZoom());
+
+            layer.setIcon(L.icon({
+                iconUrl: layer.options.icon.options.iconUrl,
+                iconSize: [60, 60],
+                iconAnchor: [25, 50],
+                popupAnchor: [1, -34]
+            }));
+        });
+    }
+
+    function makeMarkerActive(markerID) {
+        $('#marker-area-content .station-card').each(function() {
+            $(this).removeClass('station-active');
+        });
+                
+        $('#marker-' + markerID).addClass('station-active');
+        var stationElement = document.getElementById('marker-' + markerID);
+        if (stationElement) {
+            stationElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function showLoadingIndicator(eventName) {
+        if(eventName === 'creating-station') {
+            $('#station-form-placeholder').addClass('hidden');
+            $('#station-loading-indicator').removeClass('hidden');
+        } else if(eventName === 'updating-line-info') {
+            $('#line-form').addClass('hidden');
+            $('#line-info-loading-indicator').removeClass('hidden');
+        } else if(eventName === 'updating-line-path') {
+            $('#line-path-form').addClass('hidden');
+            $('#line-path-loading-indicator').removeClass('hidden');
+        }
+    }
+
+    function loadMapData() {
+        // Load geometry
+        var geomField = document.getElementById("id_geom").value;
+    
+        if (geomField) {
+            updateLineInMapWithGeoJSON(geomField);
+        }
+
+        // Load stations
+        var stations = $(".station-data");
+    
+        if (stations.length > 0) {
+            updateStationsInMap(stations);
+        }
+    }
+
+    function userClickedOnHeader(clickedHeader) {
+        var content = clickedHeader.siblings('.content')[0];
+
+        if (clickedHeader.hasClass('header')) {
+            content.style.display = 'none';
+            clickedHeader.removeClass('header').addClass('header-hidden');
+        } else {
+            $('.card .header').each(function() {
+                var content = $(this).siblings('.content')[0];
+                content.style.display = 'none';
+                $(this).removeClass('header').addClass('header-hidden');
+            });
+            makeHeaderVisible(clickedHeader);
+        }
+    }
+
+    function registerEvents() {
+        // Event listener for GeoJSON input changes
+        document.getElementById('geojson-input').addEventListener('input', function() {
+            var geojsonText = this.value;
+            updateLineInMapWithGeoJSON(geojsonText);
+        });
+
+        $('.card .header, .card .header-hidden').off('click').on('click', function() {
+            userClickedOnHeader($(this));
+        });
+
+        $('.station-card .station-header').off('click').on('click', function() {
+            var parent = $(this).parent();
+            if(parent.hasClass('station-active')) {
+                makeStationInactive(parent.attr('station-id'));                
+            } else {
+                makeStationActive(parent.attr('station-id'));
+
+                if($('#station-' + parent.attr('station-id') + '-edit').hasClass('hidden')) {
+                    $('#station-' + parent.attr('station-id') + '-edit').addClass('hidden');
+                    $('#station-' + parent.attr('station-id')).removeClass('hidden');
+                } 
+            }
+        });
+
+        $('#visor-toggle').off('click').on('click', function() {
+            enableGeolayers();
+        });
+
+        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    }
+
+    function showStationEditForm(stationID) {
+        var stationCard = $('#station-' + stationID);
+        var stationEditCard = $('#station-' + stationID + '-edit');
+
+        stationCard.addClass('hidden');
+        stationEditCard.removeClass('hidden');
+        stationEditCard.children('.station-body').removeClass('hidden');
+
+        var stationControls = $('#station-' + stationID + '-controls');
+        stationControls.addClass('hidden');
+    }
+
+    function cancelStationEdit(stationID) {
+        var stationCard = $('#station-' + stationID);
+        var stationEditCard = $('#station-' + stationID + '-edit');
+
+        stationCard.removeClass('hidden');
+        stationEditCard.addClass('hidden');
+        stationEditCard.removeClass('station-active');
+        stationCard.addClass('station-active');
+
+        var stationControls = $('#station-' + stationID + '-controls');
+        stationControls.removeClass('hidden');
+    }
+
+    function updateLineInMapWithGeoJSON(geojsonString) {
+        
+        try {
+            var geojsonData = JSON.parse(geojsonString);
+
+            // Clear existing layers
+            drawnLine.clearLayers();
+            
+            // Add the new layer and enable editing
+            var layer = L.geoJSON(geojsonData, {
+                onEachFeature: function (feature, layer) {
+                    drawnLine.addLayer(layer);
+                }
+            });
+            
+            layer.setStyle({
+                color: document.getElementById("id_color").value
+            });
+
+            map.fitBounds(layer.getBounds());
+        } catch (error) {
+            console.error('Invalid GeoJSON data:', error);
+        }
+    }
+
+    function isValidGeoJSON(geojsonString) {
+        try {
+            var geojson = JSON.parse(geojsonString);
+            // Basic check: valid GeoJSON must have a type and coordinates (depending on type)
+            if (geojson.type && (geojson.coordinates || geojson.features)) {
+                return true;
+            }
+        } catch (e) {
+            console.error('Invalid GeoJSON:', e);
+            return false;
+        }
+        return false;
+    }
+
+    function updateLineGeoJSONTextField() {
+        var allLayers = drawnLine.toGeoJSON();
+        var geomField = document.getElementById("id_geom");
+        var geojsonField = document.getElementById("geojson-input");
+
+        let geoJSON = allLayers.features;
+
+        for (let i = 0; i < geoJSON.length; i++) {
+            let lineString = geoJSON[i].geometry.coordinates;
+            
+            var lineStringCoordinates = lineString.map(coord => {
+                if (coord.length === 2) {
+                    coord.push(0);
+                }
+                return coord;
+            });
+            
+            geoJSON[i].geometry.coordinates = lineStringCoordinates;
+        }
+        
+        var geojsonString = JSON.stringify(geoJSON);
+        geomField.value = geojsonString;
+        geojsonField.value = geojsonString;
+        enableLinePathSubmitButton();
+    }
+
+    function goBack(e) {
+        var defaultLocation = "http://www.wikiando.mx";
+        var oldHash = window.location.hash;
+
+        history.back();
+
+        var newHash = window.location.hash;
+
+        if(
+            newHash === oldHash &&
+            (typeof(document.referrer) !== "string" || document.referrer  === "")
+        ){
+            window.setTimeout(function(){
+                window.location.href = defaultLocation;
+            },1000);
+        }
+        if(e){
+            if(e.preventDefault)
+                e.preventDefault();
+            if(e.preventPropagation)
+                e.preventPropagation();
+        }
+        return false;
+    }
+
+    function makeHeaderInVisible(element) {
+        var content = element.siblings('.content')[0];
+        if(content !== undefined) {
+            content.style.display = 'none';
+            element.addClass('header-hidden').removeClass('header');
+        }
+    }
+
+    function makeHeaderVisible(element) {
+        var content = element.siblings('.content')[0];
+        if(content !== undefined) {
+            content.style.display = 'block';
+            element.removeClass('header-hidden').addClass('header');
+        }
+    }
+
+    function enableStationSubmitButton() {
+        document.getElementById('submit-station-button').disabled = false;
+    }
+
+    function enableMarkerFormSubmitButton() {
+        document.getElementById('line-markers-save-button').disabled = false;
+    }
+
+    function rankingSelected(indicator) {
+        $('.indicator').removeClass('selected');
+        $('.indicator-extension').addClass('hidden');
+
+        if(selectedAspect !== indicator) {
+            $('#'+indicator+'-number').addClass('selected');
+            $('#'+indicator+'-number-ranking').removeClass('hidden');
+        }
+
+        selectedAspect = indicator;
+        refreshGeoZoneLayers(retrievedGeoZones);
+    }
+
+</script>
+
+<!-- Geostatistical functions -->
+<script>
+    function loadHeatMapRanges() {
+        fetch('/geozones/ranges')
+            .then(response => response.json())
+            .then(data => {
+                heatMapRanges = data;
+            })
+            .catch(error => console.error('Error fetching heatmap ranges:', error));
+    }
+
+    function getColorForField(field, value) {
+        if(field === 'bikes' || field === 'motorcycles' || field === 'cars') {
+            field  = field+'_rate';
+        }
+
+        var ranges = heatMapRanges.ranges[field];
+
+        if (!ranges) {
+            return null;
+        }
+        
+        for (var i = 0; i < ranges.length; i++) {
+            if (value > ranges[i].number_down && value <= ranges[i].number_up) {
+                return ranges[i].color;
+            }
+        }
+        return null;
+    }
+
+    function retrievedColorForSelectedFeature(feature) {
+		var fillColor = null;
+        var value = null;
+        var title = null;
+        
+		if (selectedAspect == 'population') {
+			value = parseFloat(feature.population);
+			
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Población: ';	
+            value = value.toLocaleString();
+		} else if (selectedAspect == 'housing') {
+            value = parseFloat(feature.housing);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Vivienda: ';	
+        } else if (selectedAspect == 'companies') {
+            value = parseFloat(feature.companies);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Empresas: ';	
+        } else if (selectedAspect == 'jobs') {
+            value = parseFloat(feature.jobs);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Trabajos: ';	
+        } else if (selectedAspect == 'education') {
+            value = parseFloat(feature.education);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Educación: ';	
+        } else if (selectedAspect == 'health') {
+            value = parseFloat(feature.health);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Salud: ';	
+        } else if (selectedAspect == 'provision') {
+            value = parseFloat(feature.provision);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Comercio: ';	
+        } else if (selectedAspect == 'leisure') {
+            value = parseFloat(feature.leisure);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Ocio: ';	
+        } else if (selectedAspect == 'cars') {
+            value = parseFloat(feature.cars);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Autos: ';	
+        } else if (selectedAspect == 'bikes') {
+            value = parseFloat(feature.bikes);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Bicicletas: ';	
+        } else if (selectedAspect == 'motorcycles') {
+            value = parseFloat(feature.motorcycles);
+
+            fillColor = getColorForField(selectedAspect, value);
+
+            title = 'Motos: ';	
+        }
+
+		return { fillColor: fillColor, value: value, title: title };
+	};
+
+    function refreshGeoZoneLayers(data) {
+
+        function updateGeographicLayer(geo) {
+            $('#population-number .value').text(geo.population.toLocaleString());
+            $('#companies-number .value').text(geo.companies.toLocaleString());
+            $('#jobs-number .value').text(geo.jobs.toLocaleString());
+            $('#education-number .value').text(geo.education.toLocaleString());
+            $('#health-number .value').text(geo.health.toLocaleString());
+            $('#provision-number .value').text(geo.provision.toLocaleString());
+            $('#leisure-number .value').text(geo.leisure.toLocaleString());
+
+            if(geo.housing === null || geo.housing === undefined) {
+                $('#housing-number').addClass('hidden');
+            } else {
+                $('#housing-number').removeClass('hidden');
+                $('#housing-number .value').text(geo.housing.toLocaleString());
+            }
+
+            if(geo.cars === null || geo.cars === undefined) {
+                $('#cars-number').addClass('hidden');
+                $('#items-divider').addClass('hidden');
+            } else {
+                $('#cars-number').removeClass('hidden');
+                $('#cars-number .value').text(geo.cars.toLocaleString());
+                $('#cars-number .value-metric').removeClass('hidden');
+                $('#items-divider').removeClass('hidden');
+            }
+
+            if(geo.motorcycles == null) {
+                $('#motorcycles-number').addClass('hidden');
+            } else {
+                $('#motorcycles-number').removeClass('hidden');
+                $('#motorcycles-number .value').text(geo.motorcycles.toLocaleString());
+                $('#motorcycles-number .value-metric').removeClass('hidden');
+            }
+
+            if(geo.bikes == null) {
+                $('#bikes-number').addClass('hidden');
+            } else {
+                $('#bikes-number').removeClass('hidden');
+                $('#bikes-number .value').text(geo.bikes.toLocaleString());
+                $('#bikes-number .value-metric').removeClass('hidden');
+            }
+        }
+
+        if (geozones.length > 0) {
+            geozones.forEach(function(geozone) {
+                map.removeLayer(geozone);
+            });
+            geozones = [];
+        }
+
+        if (data.geozones) {
+            
+            data.geozones.forEach(function(geo) {
+                
+                var geozoneLayer = L.geoJSON(JSON.parse(geo.geometry), {
+                    style: function (feature) {
+                        var fillColor = retrievedColorForSelectedFeature(geo).fillColor;
+                        var value = retrievedColorForSelectedFeature(geo).value;
+                        
+                        return {
+                            color: 'white',
+                            weight: 1,
+                            fillColor: fillColor,
+                            fillOpacity: 0.7
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        
+                        layer.on('mouseover', function () {
+                            var value = retrievedColorForSelectedFeature(geo).value;
+                            var title = retrievedColorForSelectedFeature(geo).title;
+                            
+                            var tooltip = L.tooltip({
+                                direction: 'center',
+                                className: 'custom-tooltip'
+                            })
+                            .setContent('<span style="color: ' + layer.options.fillColor + '">' + title + value + '</span>')
+                            .setLatLng(layer.getBounds().getCenter())
+                            .addTo(map);
+
+                            layer.bindTooltip(tooltip).openTooltip();
+                            
+                            updateGeographicLayer(geo);
+
+                            $('#geozones-legend-panel').css({"border-color": layer.options.fillColor, "border-width": "7px"});
+                            $('#geozones-legend-panel .entry-list').removeClass('hidden');
+                            $('#geozones-legend-panel .entry-intro').addClass('hidden');
+                        });
+
+                        layer.on('mouseout', function () {
+                            layer.closeTooltip();
+
+                            if(totalRadiusData) {
+                                $('#population-number .value').text(totalRadiusData.totalPopulation.toLocaleString());
+                                $('#housing-number .value').text(totalRadiusData.totalHousing.toLocaleString());
+                                $('#education-number .value').text(totalRadiusData.totalEducation.toLocaleString());
+                                $('#health-number .value').text(totalRadiusData.totalHealth.toLocaleString());
+                                $('#companies-number .value').text(totalRadiusData.totalCompanies.toLocaleString());
+                                $('#jobs-number .value').text(totalRadiusData.totalJobs.toLocaleString());
+                                $('#provision-number .value').text(totalRadiusData.totalProvision.toLocaleString());
+                                $('#leisure-number .value').text(totalRadiusData.totalLeisure.toLocaleString());
+                                $('#cars-number .value').text(totalRadiusData.totalCars.toLocaleString());
+                                $('#motorcycles-number .value').text(totalRadiusData.totalMotorcycles.toLocaleString());
+                                $('#bikes-number .value').text(totalRadiusData.totalBikes.toLocaleString());
+                            }
+                        });
+                    }
+                }).addTo(map);
+
+                geozones.push(geozoneLayer);
+            });
+        }
+    }
+
+    function clearGeoZonesSelection() {
+        $('#geozones-legend-panel').addClass('hidden');
+        if (geozones.length > 0) {
+            geozones.forEach(function(geozone) {
+                map.removeLayer(geozone);
+            });
+            geozones = [];
+        }
+
+        if (radiusBorder) {
+            map.removeLayer(radiusBorder);
+        }
+    }
+
+    function retrieveGeozonesGroupedWithinRadius(coordinates, radius) {
+        var url = `/geozones/coordinate/${coordinates.lng},${coordinates.lat}/radius/${radius}`;
+
+        $.get(url, function(data) {            
+            var point = turf.point([coordinates.lng, coordinates.lat]);
+            var buffered = turf.buffer(point, radius, { units: 'meters' });
+            
+            if (radiusBorder) {
+                map.removeLayer(radiusBorder);
+            }
+
+            radiusBorder = L.geoJSON(buffered, {
+                style: {
+                    color: 'white',
+                    weight: 5,
+                    fillOpacity: 0
+                }
+            }).addTo(map);
+
+            var filteredGeozones = data.geozones.filter(function(geo) {
+                var geojson = JSON.parse(geo.geometry);
+                var polygon = turf.polygon(geojson.coordinates);
+                return turf.booleanIntersects(buffered, polygon);
+            }).map(function(geo) {
+                
+                var geojson = JSON.parse(geo.geometry);
+                var polygon = turf.polygon(geojson.coordinates);
+                var intersection = turf.intersect(buffered, polygon);
+                if (intersection) {
+                    var originalArea = turf.area(polygon);
+                    var intersectionArea = turf.area(intersection);
+                    var proportion = intersectionArea / originalArea;
+
+                    geo.geometry = JSON.stringify(intersection);
+                    geo.population = Math.round(geo.population * proportion);
+
+                    if(geo.educationList.length > 0) {
+                        geo.education = geo.educationList.filter(function(coordStr) {
+                            var coords = coordStr.split(',').map(Number);
+                            var point = turf.point(coords);
+                            return turf.booleanPointInPolygon(point, intersection);
+                        }).length;
+                    }
+
+                    if(geo.healthList.length > 0) {
+                        geo.health = geo.healthList.filter(function(coordStr) {
+                            var coords = coordStr.split(',').map(Number);
+                            var point = turf.point(coords);
+                            return turf.booleanPointInPolygon(point, intersection);
+                        }).length;
+                    }
+
+                    if(geo.companiesList.length > 0) {
+                        geo.companies = geo.companiesList.filter(function(coordStr) {
+                            var coords = coordStr.split(',').map(Number);
+                            var point = turf.point(coords);
+                            return turf.booleanPointInPolygon(point, intersection);
+                        }).length;
+                    }
+
+                    if(geo.jobsList.length > 0) {
+                        geo.jobs = geo.jobsList.filter(function(coordStr) {
+                            var coords = coordStr.split(',').slice(0, 2).map(Number);
+                            var point = turf.point(coords);
+                            return turf.booleanPointInPolygon(point, intersection);
+                        }).reduce(function(sum, coordStr) {
+                            return sum + parseFloat(coordStr.split(',')[2]);
+                        }, 0);
+                    }
+
+                    if(geo.provisionList.length > 0) {
+                        geo.provision = geo.provisionList.filter(function(coordStr) {
+                            var coords = coordStr.split(',').map(Number);
+                            var point = turf.point(coords);
+                            return turf.booleanPointInPolygon(point, intersection);
+                        }).length;
+                    }
+
+                    if(geo.leisureList.length > 0) {
+                        geo.leisure = geo.leisureList.filter(function(coordStr) {
+                            var coords = coordStr.split(',').map(Number);
+                            var point = turf.point(coords);
+                            return turf.booleanPointInPolygon(point, intersection);
+                        }).length;
+                    }
+                }
+                return geo;
+            });
+
+            var totalPopulation = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.population;
+            }, 0);
+
+            var totalHousing = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.housing;
+            }, 0);
+
+            var totalEducation = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.education;
+            }, 0);
+
+            var totalHealth = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.health;
+            }, 0);
+
+            var totalCompanies = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.companies;
+            }, 0);
+
+            var totalJobs = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.jobs;
+            }, 0);
+
+            var totalProvision = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.provision;
+            }, 0);
+
+            var totalLeisure = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.leisure;
+            }, 0);
+
+            var totalCars = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.cars;
+            }, 0) / filteredGeozones.length;
+
+            var totalBikes = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.bikes;
+            }, 0) / filteredGeozones.length;
+
+            var totalMotorcycles = filteredGeozones.reduce(function(sum, geo) {
+                return sum + geo.motorcycles;
+            }, 0) / filteredGeozones.length;
+
+            totalRadiusData = {
+                totalPopulation: totalPopulation,
+                totalHousing: totalHousing,
+                totalEducation: totalEducation,
+                totalHealth: totalHealth,
+                totalCompanies: totalCompanies,
+                totalJobs: totalJobs,
+                totalProvision: totalProvision,
+                totalLeisure: totalLeisure,
+                totalCars: totalCars,
+                totalBikes: totalBikes,
+                totalMotorcycles: totalMotorcycles
+            };
+
+            $('#population-number .value').text(totalPopulation.toLocaleString());
+            $('#housing-number .value').text(totalHousing.toLocaleString());
+            $('#companies-number .value').text(totalCompanies.toLocaleString());
+            $('#jobs-number .value').text(totalJobs.toLocaleString());
+            $('#provision-number .value').text(totalProvision.toLocaleString());
+            $('#leisure-number .value').text(totalLeisure.toLocaleString());
+            $('#education-number .value').text(totalEducation.toLocaleString());
+            $('#health-number .value').text(totalHealth.toLocaleString());
+            $('#cars-number .value').text(totalCars.toLocaleString());
+            $('#bikes-number .value').text(totalBikes.toLocaleString());
+            $('#motorcycles-number .value').text(totalMotorcycles.toLocaleString());
+
+            data.geozones = filteredGeozones;
+
+            retrievedGeoZones = data;
+            refreshGeoZoneLayers(data);
+        }).fail(function() {
+            console.log('Error retrieving geozone.');
+        });
+    }
+
+    function retrieveMatchingGeozone(coordinates, radius) {
+        var url = `/geozones/coordinate/${coordinates.lng},${coordinates.lat}/radius/${radius}`;
+
+        if (radiusBorder) {
+            map.removeLayer(radiusBorder);
+        }
+
+        $.get(url, function(data) {
+            retrievedGeoZones = data;
+            refreshGeoZoneLayers(data);
+        }).fail(function() {
+            console.log('Error retrieving geozone.');
+        });
+
+        lastLocation = coordinates;
+    }
+
+    function handleRadiusChange(radius) {
+        if(geozonesActive == false) {
+            return;
+        }
+
+        currentRadius = radius;
+        var typeOfRadius = radius.split('-')[1];
+
+        totalRadiusData = null;
+
+        if(typeOfRadius === 'r') {
+            retrieveGeozonesGroupedWithinRadius(lastLocation, parseInt(radius.split('-')[0]));
+            $('#geozones-legend-panel .entry-list .title-r').removeClass('hidden');
+            $('#geozones-legend-panel .entry-list .title-v').addClass('hidden');
+            $('#mode-r').removeClass('hidden');
+            $('#mode-v').addClass('hidden');
+        } else {
+            retrieveMatchingGeozone(lastLocation, parseInt(radius.split('-')[0]));
+            $('#geozones-legend-panel .entry-list .title-r').addClass('hidden');
+            $('#geozones-legend-panel .entry-list .title-v').removeClass('hidden');
+            $('#mode-r').addClass('hidden');
+            $('#mode-v').removeClass('hidden');
+        }
+    }
+</script>
+
+<script>
+    function loadLineEvents() {
+        $('#id_color').on('change', function() {
+            var layers = drawnLine.getLayers();
+            if (layers.length > 0) {
+                layers.forEach(function(layer) {
+                    layer.setStyle({ color: $('#id_color').val() });
+                });
+            }
+        });
+
+        document.querySelectorAll('#line-path-form input, #line-path-form textarea, #line-path-form select, #id_color').forEach(function(input) {
+            input.addEventListener('input', enableLinePathSubmitButton);
+        });
+    }
+    
+    function enableLinePathSubmitButton() {
+        document.getElementById('submit-line-path-button').disabled = false;
+        document.getElementById('id_geom').value = $('#geojson-input').val();
+    }
+</script>

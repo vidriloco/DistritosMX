@@ -1,0 +1,70 @@
+{% load static %}
+<div class="col-12 mb-4">
+    <div class="line rounded p-5 pb-3 shadow-sm">
+        {% if line.flyer == None %}
+            <div id="map-id-{{ line.id }}" data-id="{{ line.id }}" data-theme-url="{{ line.theme_url }}" class="mini-map"></div>
+        {% else %}
+            <img src="{{ line.flyer.url }}" class="img-fluid m-1 ms-2 rounded-4" alt="Carátula de tu ruta" style="max-height: 400px; object-fit: contain;">
+        {% endif %}
+        <div id="line-header" class="pb-4 mt-4 rounded mx-2 d-flex align-items-center justify-content-start">
+            
+            <img src="{% static 'images/' %}{{ line.icon }}" alt="Metrobús" class="me-4" style="max-width: 70px;">
+            <div class="text-start">
+                <h1 class="m-0 rounded px-3 ps-0 mb-2 mt-2" style="font-size: calc(0.6rem + 1vw);">{{ line.route }}</h1>
+                <h1 class="badge text-bg-dark" style="font-size: 14px;">{{ line.get_operative_status }}</h1>
+                <h1 class="badge text-bg-secondary" style="font-size: 14px; background-color: {{ line.color }} !important;">{{ line.named_identifier }}</h1>
+                {% if edit_mode == True %}
+                <h1 class="badge text-bg-light" style="font-size: 14px;">
+                    <span class="rounded px-2 me-2" style="width: 7px; height:7px; border-radius: 14px !important; background-color: {% if line.mode %}green{% else %}orange{% endif %};"></span>
+                    {{ line.mode|yesno:"Publicada,En Borrador" }}
+                </h1>
+                {% endif %}
+            </div>
+
+            <div class="ms-auto d-none d-md-block">
+                <div class="d-flex align-items-center">
+                    {% if edit_mode == True and line.user == user %}
+                    <a href="{% url 'line_edit_page' line_id=line.id %}" class="btn btn-dark me-2">Editar</a>
+                    <button class="btn btn-danger" onclick="confirmDelete('{{ line.id }}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                            <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                        </svg>
+                        Eliminar
+                    </button>
+                    
+                    {% else %}
+                        <div class="d-flex align-items-center me-4">
+                            <p class="mb-0 me-2">Creada por <a href="{% url 'profile_page' line.user.username %}"><b>{{ line.user.username }}</b></a></p>
+                            <img src="{{ line.user.user_details.get_user_pic_url }}" alt="{{ line.user.username }}" width="30" height="30" class="rounded-circle">
+                        </div>
+                        <a href="{% url 'line_details_slug_page' slug=line.slug %}" class="btn btn-dark me-2">Abrir</a>
+                    {% endif %}
+                </div>
+            </div>  
+        </div>
+        <hr class="ms-auto d-block d-md-none" />
+        <div class="ms-auto d-block d-md-none text-center">
+            
+            <div class="d-flex justify-content-center align-items-center">
+                {% if edit_mode == True and line.user == user %}
+                <a href="{% url 'line_edit_page' line_id=line.id %}" class="btn btn-dark me-2">Editar</a>
+                <button class="btn btn-danger" onclick="confirmDelete('{{ line.id }}')">Eliminar</button>
+
+                <script>
+                    function confirmDelete(lineId) {
+                        if (confirm("¿Estás seguro de que deseas eliminar esta ruta?")) {
+                            window.location.href = "{% url 'line_delete' line_id='0' %}".replace('0', lineId);
+                        }
+                    }
+                </script>
+                {% else %}
+                    <div class="d-flex align-items-center me-4">
+                        <p class="mb-0">Creada por <a href="{% url 'profile_page' line.user.username %}"><b>{{ line.user.username }}</b></a></p>
+                        <img src="{{ line.user.user_details.get_user_pic_url }}" alt="{{ line.user.username }}" width="30" height="30" class="rounded-circle mx-2">
+                    </div>
+                    <a href="{% url 'line_details_slug_page' slug=line.slug %}" class="btn btn-dark me-2">Abrir</a>
+                {% endif %}
+            </div>
+        </div> 
+    </div>
+</div>

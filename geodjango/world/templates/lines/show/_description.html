@@ -1,0 +1,36 @@
+{% load static %}
+
+{% if line.has_description %}
+<div class="editor-show-style mt-5">
+    <p class="mt-4">
+        {{ line.description|default_if_none:"No hay descripción por el momento"|safe }}
+    </p>
+</div>
+{% else %}
+<h3 class="mt-5">Descripción</h3>
+<div class="editor-show-style">
+    <p class="mt-3">
+        {{ line.description|default_if_none:"No hay descripción por el momento"|striptags|default:"No hay descripción por el momento"|safe }}
+    </p>
+</div>
+{% endif %}
+
+{% if edit_mode == True %}
+<div class="d-flex justify-content-end mt-3">
+    <div class="hidden description-edit-saving">
+        <button class="btn btn-dark" type="button" disabled>
+            <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+            <span role="status">Cargando editor...</span>
+        </button>
+    </div>
+    <button hx-get="{% url 'line_description_form' line_id=line.id %}" class="btn btn-dark ms-3 description-edit-button">Editar</button>
+</div>
+<script>
+    $(document).ready(function() {
+        $('.description-edit-button').click(function() {
+            $('.description-edit-saving').removeClass('hidden');
+            $('.description-edit-button').addClass('hidden');
+        });
+    });
+</script>
+{% endif %}

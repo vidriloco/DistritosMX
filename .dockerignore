@@ -1,0 +1,11 @@
+.git
+venv
+node_modules
+__pycache__
+*.pyc
+*.DS_Store
+.env.production
+.env.production.example
+designs
+documentos
+*.sql

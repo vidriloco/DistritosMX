@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>Wikiando: Análisis de Datos - Afluencia en estaciones</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="Análisis de Datos y visualizaciones de la movilidad en la Ciudad de México con datos de SEMOVI">
+    <meta name="keywords" content="movilidad, transporte público, trenes, ciclovias, metros, tren ligero, transportes eléctricos, tren suburbano, cablebús, mexibús, metrobús, tren suburbano, tren interburbano, el insurgente">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/megalopolis" />
+
+    <meta property="og:title" content="Wikiando: Análisis de Datos - Afluencia en estaciones">
+    <meta property="og:description" content="Análisis de Datos y visualizaciones de la movilidad en la Ciudad de México con datos de SEMOVI">
+    <meta property="og:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+    <meta property="og:url" content="https://wikiando.mx/megalopolis">
+
+    <meta name="twitter:title" content="Wikiando: Análisis de Datos - Afluencia en estaciones">
+    <meta name="twitter:description" content="Análisis de Datos y visualizaciones de la movilidad en la Ciudad de México con datos de SEMOVI">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-language/v1.0.0/mapbox-gl-language.js'></script>
+
+    {% include '_shared_css.html' %}
+    <link rel="stylesheet" href="{% static 'css/analytics.css' %}">
+    {% block head %}
+    {% endblock head %}
+    <script src="{% static 'js/analytics/all.js' %}"></script>
+</head>
+<body>
+    <!-- Body content remains the same -->
+    <div id="map"></div>
+    
+    {% block body %}
+    {% endblock body %}
+
+    {% block scripts %}
+    {% endblock scripts %}
+</body>
+</html>

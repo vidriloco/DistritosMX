@@ -1,0 +1,265 @@
+body { margin: 0; padding: 0; }
+#map { width: 100vw; height: 100vh; }
+
+.control-panel {
+    text-align: center;
+    background-color: white;
+    padding: 15px;
+    border: 2px solid #e35f00;
+    z-index: 999;
+    border-radius: 5px;
+    color: #e35f00;
+}
+
+.control-panel .day, .control-panel .time {
+    padding: 10px;
+    background-color: white;
+    border-radius: 5px;
+    font-size: 25px;
+}
+
+.bus-info {
+    text-align: left; 
+    color: black !important;
+}
+
+.bus-info:hover {
+    background-color: #cbcbcb !important;
+}
+
+.control-panel .day {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.control-panel .time {
+    font-weight: italic;
+}
+
+.control-image {
+    height: 60px;
+}
+
+.animation-controls {
+    background: rgba(0, 0, 0, 0.242);
+    padding: 10px;
+    border-radius: 10px;
+    z-index: 1;
+    font-size: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+}
+
+.animation-controls .slider {
+    width: 100%;
+    margin-bottom: 10px;
+    height: 3px;
+    color: #d3d3d338;
+}
+
+.animation-controls .centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.animation-controls {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.main-container {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 400px;
+    pointer-events: none; /* Add this line */
+}
+
+.main-container .card {
+    width: 100%;
+}
+
+.main-container > * {
+    pointer-events: auto; /* Add this line */
+}
+
+.information-card .card {
+    padding-bottom: 0px !important;
+}
+
+.information-card .symbols {
+    color: #6c6c6c !important;
+    font-size: 15px !important;
+}
+
+.information-card .value {
+    color: #000000;
+    font-size: 25px !important;
+    font-style: normal;
+}
+
+.information-card hr {
+    margin: 0px;
+}
+
+.information-card .title {
+    color: #e35f00;
+    font-weight: bold;
+}
+
+.information-card .subtitle {
+    color: #656565;
+    margin-bottom: 15px;
+}
+
+.information-card .subtitle .value {
+    font-size: 16px !important;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.information-card .special-indicators .value {
+    font-size: 30px !important;
+}
+
+.information-card .data-point-style {
+    margin-top: 5px;
+    height: 15px;
+    width: 100%;
+    border-radius: 1;
+    background-color: #040404;
+}
+
+.row-cols-4 > .col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.row-cols-4 .symbols {
+    min-height: 2.5em;  /* Adjust as needed */
+    display: flex;
+    align-items: center;
+}
+
+.logo-style {
+    text-decoration: none !important;
+    color: #000000 !important;
+}
+
+.loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #e0e0e0;
+    border-top: 2px solid #e35f00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Add these styles to your existing <style> section */
+.selectable-container {
+    padding: 10px 10px 1px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.selectable-container.selected {
+    background-color: rgba(227, 95, 0, 0.3); /* Light orange color */
+}
+
+.selectable-container p {
+    margin-bottom: 10px;
+}
+
+/* Airbnb subsection title styles */
+.indicator-subsection-title {
+    margin: 20px 0 10px 0;
+    padding: 8px 0;
+    border-bottom: 2px solid #e35f00;
+}
+
+.indicator-subsection-title-text {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #e35f00;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Loading Modal Styles */
+.loading-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    backdrop-filter: blur(2px);
+}
+
+.loading-modal {
+    background-color: white;
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.loading-modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.loading-spinner-large {
+    width: 60px;
+    height: 60px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #e35f00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text-large {
+    font-size: 18px;
+    font-weight: 500;
+    color: #374151;
+    font-family: 'Ruda', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}

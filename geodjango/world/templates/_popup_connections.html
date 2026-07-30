@@ -1,0 +1,26 @@
+{% load static %}<div class="connection-details text-center theme-aware-popup">
+    <div class="header mt-3">
+        <p class="title popup-title">Transportes cercanos</p>
+    </div>
+    <div id="connections" class="connections-space">
+        <img id="loading-connections" class="loading-indicator-medium mt-3 mb-3" src="{% static "images/loader-indicator.gif" %}">
+        <div id="connections-body" class="container mt-3 mb-3 hidden">
+            <p class="h6 mb-2 radius-title popup-section-title">A un radio de 300 metros</p>
+            <img class="informative-image" src="{% static "images/no-transports.png" %}">
+            <p id="we-found" class="popup-description"><small>Encontramos las siguientes opciones de transporte</small></p>
+            <div class="list-group">
+                
+            </div>
+        </div>
+    </div>
+    <div id="popup-bottom-section" class="d-grid gap-2 d-md-block mt-3 inlined">
+        <ul class="list-inline">
+            <li class="list-inline-item"><button id="hide-popup" class="btn btn-light popup-button" type="button">Cerrar</button></li>
+            {% if 1 == 2 %}
+            <li class="list-inline-item">
+                <button class="btn btn-primary popup-button" type="button">Reportar</button>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

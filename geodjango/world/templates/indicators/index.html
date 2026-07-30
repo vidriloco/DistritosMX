@@ -1,0 +1,50 @@
+{% load static %}
+
+<div class="m-3 mb-0">
+    {% for indicator in indicators %}
+    {% if indicator.id == 'cars' %}
+        <hr id="items-divider" class="hidden" />
+    {% endif %}
+    <div id="{{ indicator.id }}-number" class="row indicator {% if indicator.selected %}selected{% endif %} rounded px-3 pt-1 pb-0 my-1" hx-get="{% url 'geozones_ranges' field=indicator.id %}" hx-trigger="click" hx-target="#{{ indicator.id }}-number-ranking" hx-swap="innerHTML" onclick="rankingSelected('{{ indicator.id }}')">
+        <div class="col-6 p-0 section-title d-flex align-items-center">
+            <p class="title title-r small mb-1 hidden">{{ indicator.title_r }}</p>
+            <p class="title title-v small mb-1 hidden">{{ indicator.title_v }}</p>
+        </div>
+        <div class="col-6 p-0 text-end d-flex flex-column">
+            <p class="mb-0"><span class="h4 value">--</span></p>
+        </div>
+        <div class="d-flex justify-content-end align-items-end p-0">
+            <span class="small value-metric hidden me-0">/ 1000 viviendas</span>
+        </div>
+    </div>
+    <div id="{{ indicator.id }}-number-ranking" class="indicator-extension" hx-swap-oob="true">
+        {% if indicator.id == "population" %}
+            {% include 'lines/edit/cards/legend/_explanation.html' %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+<hr/>
+<div class="text-end" style="font-size: small;">
+    <p class="d-inline-block">Modos disponibles: </p>
+    
+    <select class="form-select d-inline-block" aria-label="Select radius" style="width: auto;" onchange="handleRadiusChange(this.value)">
+        <optgroup label="Areas cercanas a:">
+            <option value="500-v">A 500 m</option>
+            <option value="1000-v">A 1 km</option>
+            <option value="2000-v">A 2 km</option>
+        </optgroup>
+        <optgroup label="Areas dentro de:">
+            <option value="300-r">300 metros</option>
+            <option value="500-r">500 metros</option>
+            <option value="1000-r">1000 metros</option>
+            <option value="2000-r">2000 metros</option>
+        </optgroup>
+    </select>
+
+    <p class="d-inline-block align-middle"></p>
+        <button href="javascript:void(0);" class="btn btn-light" data-bs-toggle="popover" data-bs-title="¿Cómo entender estos datos?" data-bs-content="En este panel mostramos indicadores del impacto de la estación en el barrio en dos modos: El modo 'Áreas cercanas' despliega todos los AGEBS dentro de la distancia seleccionada. El modo 'Áreas dentro' despliega todas las áreas EXACTAMENTE dentro del radio seleccionado y hace una sumatoria y /o promedio según sea el caso para el indicador seleccionado. Fuente de datos: INEGI">
+            <img src="{% static 'images/question-icon.png' %}" width="30" height="30" class="d-inline-block align-middle" alt="">
+        </button>
+    </p>
+</div>

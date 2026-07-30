@@ -1,0 +1,47 @@
+<script>
+    function dismissWelcomeProfileDialog(doNotShowAgain = false) {
+        $('#welcome-home-dialog').addClass('hidden');
+        $('.wikiando-items').removeClass('hidden');
+        if(doNotShowAgain) {
+            document.cookie = "welcomeProfileDialogDismissed=true; path=/; max-age=" + 60*60*24*365;
+        }
+
+        loadMaps();
+    }
+
+    function showAppropiateWelcomeDialog() {
+        var isDialogDismissed = document.cookie.indexOf('welcomeProfileDialogDismissed=true') !== -1;
+        $('#welcome-home-dialog').toggleClass('hidden', isDialogDismissed);
+        $('.wikiando-items').toggleClass('hidden', !isDialogDismissed);
+    }
+
+    function loadMap(lineID, themeURL) {
+        var center = [-99.133209, 19.432608];
+        var zoom = 12;
+        var map = new mapboxgl.Map({
+            container: "map-id-"+lineID,
+            style: themeURL,
+            center: center,
+            zoom: zoom,
+            interactive: false
+        });
+
+        loadLine(lineID, map, {top: 70, bottom: 70, left: 10, right: 10});
+    }
+
+    function loadMaps() {
+        $('.mini-map').each(function() {
+            var themeURL = $(this).attr('data-theme-url');
+            var id = $(this).attr('data-id');
+
+            loadMap(id, themeURL);
+        });
+    }
+    
+    $(document).ready(function() {
+        loadMaps();
+    });
+
+    mapboxgl.accessToken = 'pk.eyJ1Ijoidmlkcmlsb2NvIiwiYSI6Ik1QRzIwZmcifQ.BzdjvFURAZ8uJ6kNovrrDA';
+
+</script>

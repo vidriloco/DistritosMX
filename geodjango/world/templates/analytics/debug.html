@@ -1,0 +1,62 @@
+{% extends "wikiando/layouts/analytics.html" %}
+{% load static %}
+
+
+{% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+{% endblock head %}
+
+{% block body %}
+<div class="card-container main-container">
+        
+    <div class="information-card">
+        <div class="card mb-3">
+            <a href="/" class="d-flex align-items-center logo-style mb-3" alt="Regresar a la página principal">
+                <img src="{% static 'images/logo.png' %}" alt="Wikiando logo" class="img-fluid" width="50" height="50">
+                <h3 class="ms-3 mb-0">Wikiando <span class="badge rounded-pill bg-warning text-dark">Beta</span></h3>
+            </a>
+        </div>
+
+        <div id="control-panel" class="control-panel hidden">
+            <span id="current-time-day" class="day"></span>
+            <span id="current-time-time" class="time"></span>
+        </div>
+    </div>
+    
+    <!-- New loading indicator component -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span class="loading-text">Cargando datos...</span>
+    </div>
+
+    <div class="animation-controls mt-3" id="animation-controls">
+        <div class="centered">
+            <span id="rotate-map">
+                <img src="{% static 'images/rotate-play-icon.png' %}" alt="around button" id="rotate-play" class="circle control-image" />
+                <img src="{% static 'images/rotate-stop-icon.png' %}" alt="around button" id="rotate-stop" class="circle control-image hidden" />
+            </span>
+            <span id="play-pause">
+                <img src="{% static 'images/play-icon.png' %}" alt="play button" class="play control-image" />
+                <img src="{% static 'images/pause-icon.png' %}" alt="pause button" class="stop control-image hidden" />
+            </span>
+            <span id="play-forward">
+                <img src="{% static 'images/forward-icon.png' %}" alt="play button" class="forward-1x control-image" onclick="mapVisualization.setSpeed(500)" />
+                <img src="{% static 'images/forward-2x-icon.png' %}" alt="play button" class="forward-2x control-image hidden" onclick="mapVisualization.setSpeed(100)" />
+                <img src="{% static 'images/forward-3x-icon.png' %}" alt="play button" class="forward-3x control-image hidden" onclick="mapVisualization.setSpeed(700)" />
+            </span>
+        </div>
+        <input type="range" id="time-slider" min="0" max="100" value="0" class="slider">
+    </div>
+</div>
+{% endblock body %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+<script>
+    var mapVisualization;
+    $(document).ready(function() {
+        mapVisualization = new MapVisualizationDebug({{ vehicle_id }}, '{{ start_date }}', '{{ end_date }}');
+    });
+</script>
+{% endblock scripts %}

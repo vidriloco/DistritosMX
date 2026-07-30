@@ -1,0 +1,173 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}" />
+<script src="{% static 'leaflet/leaflet.js' %}"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet" />
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+    }
+    .leaflet-container {
+        z-index: 0;
+    }
+    #results {
+        margin-top: 0px;
+        margin-left: 20px;
+        padding: 0;
+        list-style-type: none;
+        position: absolute;
+        background: white;
+        width: 300px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+    }
+    #results li {
+        list-style: none;
+        cursor: pointer;
+        padding: 5px;
+        background: #f4f4f4;
+        border-bottom: 1px solid #ccc;
+    }
+    #results li:hover {
+        background: #e4e4e4;
+    }
+    .leaflet-bar {
+        background-color: #fff;
+        border-radius: 3px;
+    }
+    .leaflet-control-custom {
+        background-color: #007bff;
+        color: white;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 3px;
+        cursor: pointer;
+        padding: 5px;
+        margin: 5px;
+    }
+    
+    .location-searchbox {
+        width: 95%;
+        margin: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block after_related_objects %}
+{{ block.super }}
+<div>
+    <!-- Hidden fields to store the coordinates -->
+    <input type="hidden" id="id_latitude" name="latitude" value="{{ initial_lat }}">
+    <input type="hidden" id="id_longitude" name="longitude" value="{{ initial_lon }}">
+
+    <input type="text" id="location-search" class="location-searchbox" placeholder="Escribe una ubicación" autocomplete="off" />
+    <ul id="results"></ul>
+</div>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
+<script>
+    // Initialize Mapbox access token
+    mapboxgl.accessToken = 'pk.eyJ1Ijoidmlkcmlsb2NvIiwiYSI6Ik1QRzIwZmcifQ.BzdjvFURAZ8uJ6kNovrrDA';
+
+    var initialLat = {{ initial_lat|default:"20.400417" }};  // Default latitude if not provided
+    var initialLon = {{ initial_lon|default:"-89.134857" }};  // Default longitude if not provided
+
+    // Initialize the map
+    var map = L.map('map').setView([initialLat, initialLon], 13);
+
+    // Add a tile layer (you can use any tile provider)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+    var marker = L.marker([initialLat, initialLon], { draggable: true }).addTo(map);
+    marker.on('dragend', function(event) {
+        var position = event.target.getLatLng();
+        marker.setLatLng(position, { draggable: true });
+        updateCoordinates(position.lat, position.lng);
+    });
+
+    // Function to debounce input to avoid too many requests
+    function debounce(func, delay) {
+        let debounceTimer;
+        return function() {
+            const context = this;
+            const args = arguments;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(context, args), delay);
+        };
+    }
+
+    function updateCoordinates(lat, lng) {
+        let coordinateField = document.getElementById('id_coordinate');
+        coordinateField.innerHTML = '{ "type": "Point", "coordinates": [ ' + lng + ', ' + lat + '] }';
+    }
+
+    // Search functionality using Mapbox Geocoding API
+    document.getElementById('location-search').addEventListener('input', debounce(function() {
+        var location = this.value;
+        var resultsList = document.getElementById('results');
+        resultsList.innerHTML = ''; // Clear previous results
+
+        if (location.length > 2) { // Start searching after 3 characters
+            fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${mapboxgl.accessToken}&limit=5`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.features && data.features.length > 0) {
+                        data.features.forEach((feature) => {
+                            var li = document.createElement('li');
+                            li.textContent = feature.place_name;
+                            li.dataset.lat = feature.center[1];
+                            li.dataset.lon = feature.center[0];
+                            li.dataset.name = feature.place_name;
+
+                            // Event listener for each result item
+                            li.addEventListener('click', function() {
+                                var lat = this.dataset.lat;
+                                var lon = this.dataset.lon;
+                                var coordinate = [lat, lon];
+                                map.setView(coordinate, 13);
+                                
+                                updateCoordinates(lat, lon);
+                                // If a marker exists, remove it
+                                if (marker) {
+                                    map.removeLayer(marker);
+                                }
+
+                                // Add a draggable marker at the selected location
+                                marker = L.marker(coordinate, { draggable: true }).addTo(map);
+
+                                // Update marker position when dragged
+                                marker.on('dragend', function(event) {
+                                    var position = event.target.getLatLng();
+                                    marker.setLatLng(position, { draggable: true });
+
+                                    updateCoordinates(position.lat, position.lng);
+                                });
+
+                                // Clear the results and search input after selection
+                                resultsList.innerHTML = '';
+                                document.getElementById('location-search').value = '';
+                            });
+
+                            resultsList.appendChild(li);
+                        });
+                    } else {
+                        resultsList.innerHTML = '<li>No results found</li>';
+                    }
+                })
+                .catch(error => {
+                    resultsList.innerHTML = `<li>Error: ${error.message}</li>`;
+                });
+        }
+    }, 300)); // Debounce delay of 300ms
+
+</script>
+{% endblock %}

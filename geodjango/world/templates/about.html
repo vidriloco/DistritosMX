@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% load static %}
+    <meta charset="utf-8">
+    
+    <title>Acerca de este proyecto - Wikiando: La movilidad de todos</title>
+
+    <link rel="shortcut icon" href="{% static 'images/shortcut-logo.png' %}" type="image/x-icon" />
+
+    <meta name="description" content="El equipo detrás de Wikiando: gente apasionada por el transporte público de la CDMX">
+    <meta name="keywords" content="movilidad, panthéon-Sorbonne, Paris, Francia, Países Bajos, coyoacán, the trainline, deutsche bahn, Berlin, Alemania">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="canonical" href="https://wikiando.mx/acerca-de" />
+
+    <meta property="og:title" content="Acerca de este proyecto - Wikiando: La movilidad de todos">
+    <meta property="og:description" content="El equipo detrás de Wikiando: gente apasionada por el transporte público de la CDMX">
+    <meta property="og:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+    <meta property="og:url" content="https://wikiando.mx/acerca-de">
+
+    <meta name="twitter:title" content="Acerca de este proyecto - Wikiando: La movilidad de todos">
+    <meta name="twitter:description" content="El equipo detrás de Wikiando: gente apasionada por el transporte público de la CDMX">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://wikiando.mx/static/images/intro-social-media.jpg">
+
+    <style>
+
+        .active a {
+            font-weight: bold;
+            color: black;
+        }
+
+        .about .description {
+            margin: 50px;
+        }
+
+        .about .profile {
+            margin: 80px 0px;
+        }
+
+        .about .social-media {
+            color: rgb(43, 115, 182);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-close-over-image {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .spacer-20 {
+            margin-right: 20px !important;
+        }
+    </style>
+</head>
+<body>
+    {% with active_tab="about" %}
+        {% include '_shared_navbar.html' %}
+    {% endwith %}
+
+    <!-- Bootstrap JS and Mapbox JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <div class="container mt-5 about">
+        <div class="p-5 mb-4 bg-light rounded-3">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">Acerca de Wikiando</h1>
+                <p class="col-md-8 fs-4">Es la plataforma de inteligencia colectiva para documentar y mejorar entre todos el transporte público en las principales ciudades del país.</p>
+            </div>
+        </div>
+        <div class="description">
+            <p class="lead">Somos un grupo de personas a quienes les gusta hacer apps para visibilizar problemas urbanos y proponer soluciones desde la tecnología. Quienes integramos <b>Wikiando</b> somos unos nerds del transporte público que hemos dedicido dedicar un poco de nuestro tiempo libre al desarrollo de esta plataforma digital.</p>
+            <div class="lead mt-5"><p class="display-4">🚈 🚌 🚲 🚎  🚉</p></div>
+            <p class="lead">Con <b>Wikiando</b> queremos poner a disposición de la ciudadanía una plataforma digital con la información más completa y correcta del transporte público. Con esto queremos ofrecer mecanismos dentro (y fuera) de la plataforma para que los ciudadanos podamos seguir el estado de la red de transporte público y demandar mejoras y ampliaciones a su infraestructura.</p>
+        </div>
+
+        <div class="description">
+            <h1 class="display-5 fw-bold">Equipo</h1>
+
+            <div class="profile">
+
+                <div class="row featurette">
+                    <div class="col-md-7 order-md-2">
+                        <h2 class="featurette-heading">Alejandro Cruz Paz</h2>
+                        <p class="lead">Apasionado por resolver problemas sociales con tecnología, ha estado construyendo aplicaciones móviles y web desde 2008 para organizaciones de todos tamaños en México, Europa y EEUU. Ha trabajado para empresas en la industria ferroviaria y de transporte público en Francia y en Alemania.</p>
+                        <p class="lead">Hace 10 años desarrolló Wikicleta, una app para la comunidad ciclista y ahora está de vuelta desarrollando aplicaciones como ésta a través de <a class="social-media" href="https://tallerdeapps.mx">Taller de Apps</a> en su tiempo libre.</p>
+                        <h4><span class="badge badge-secondary"> <a class="social-media" href="https://twitter.com/vidriloco"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-twitter" viewBox="0 0 16 16">
+                            <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334q.002-.211-.006-.422A6.7 6.7 0 0 0 16 3.542a6.7 6.7 0 0 1-1.889.518 3.3 3.3 0 0 0 1.447-1.817 6.5 6.5 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.32 9.32 0 0 1-6.767-3.429 3.29 3.29 0 0 0 1.018 4.382A3.3 3.3 0 0 1 .64 6.575v.045a3.29 3.29 0 0 0 2.632 3.218 3.2 3.2 0 0 1-.865.115 3 3 0 0 1-.614-.057 3.28 3.28 0 0 0 3.067 2.277A6.6 6.6 0 0 1 .78 13.58a6 6 0 0 1-.78-.045A9.34 9.34 0 0 0 5.026 15"/>
+                          </svg> @vidriloco</a></span></h4>
+
+                    </div>
+                    <div class="col-md-5 order-md-1">
+                        <img class="featurette-image img-fluid mx-auto" alt="500x500" src="{% static "images/alex.png" %}" data-holder-rendered="true" style="width: 400px; height: 400px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile">
+
+                <div class="row featurette">
+                    <div class="col-md-7">
+                        <h2 class="featurette-heading">Kei Tanikawa Obregón</h2>
+                        <p class="lead">Geógrafo urbanista especializado en sistemas de transporte y movilidad. Es candidato a doctor en la universidad de Paris 1 panthéon-Sorbonne, su trabajo se centra sobre gobernanza y digitalización del sector del transporte urbano.</p>
+                        <h4><span class="badge badge-secondary"> <a class="social-media" href="mailto:Kei.Tanikawa-Obregon@univ-paris1.fr"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-open-fill" viewBox="0 0 16 16">
+                            <path d="M8.941.435a2 2 0 0 0-1.882 0l-6 3.2A2 2 0 0 0 0 5.4v.314l6.709 3.932L8 8.928l1.291.718L16 5.714V5.4a2 2 0 0 0-1.059-1.765zM16 6.873l-5.693 3.337L16 13.372v-6.5Zm-.059 7.611L8 10.072.059 14.484A2 2 0 0 0 2 16h12a2 2 0 0 0 1.941-1.516M0 13.373l5.693-3.163L0 6.873z"/>
+                          </svg> Kei.Tanikawa-Obregon@univ-paris1.fr</a></span></h4>
+                        <h4><span class="badge badge-secondary"> <a class="social-media" href="mailto:keitani89@hotmail.com"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-envelope-open-fill" viewBox="0 0 16 16">
+                            <path d="M8.941.435a2 2 0 0 0-1.882 0l-6 3.2A2 2 0 0 0 0 5.4v.314l6.709 3.932L8 8.928l1.291.718L16 5.714V5.4a2 2 0 0 0-1.059-1.765zM16 6.873l-5.693 3.337L16 13.372v-6.5Zm-.059 7.611L8 10.072.059 14.484A2 2 0 0 0 2 16h12a2 2 0 0 0 1.941-1.516M0 13.373l5.693-3.163L0 6.873z"/>
+                          </svg> keitani89@hotmail.com</a></span></h4>
+                    </div>
+                    <div class="col-md-5">
+                        <img class="featurette-image img-fluid mx-auto" alt="500x500" src="{% static "images/kei.png" %}" data-holder-rendered="true" style="width: 400px; height: 400px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      </div>
+</body>
+</html>

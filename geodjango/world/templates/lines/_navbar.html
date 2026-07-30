@@ -1,0 +1,211 @@
+{% include '_shared_ga.html' %}
+{% load static %}
+
+<!-- Navbar desktop version -->
+<div class="floating-nav d-none d-md-block">
+    <div class="shrinkable compact-content content-fixed-height hidden d-flex justify-content-center align-items-center">
+        <div class="compact rounded px-3 py-1">
+            <h4 class="my-2">
+                <a class="navbar-brand" href="/">
+                    <img src="{% static 'images/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+                </a>
+            </h4>
+        </div>
+        <div class="shrinking-button d-inline-block">
+            <svg width="20" height="20" viewBox="0 0 100 100">
+                <polygon points="50,10 90,90 10,90" fill="#FF4500" transform="rotate(90 50 50)" />
+            </svg>
+        </div>
+    </div>
+    <div class="shrinkable content content-fixed-height rounded px-3 py-1">
+        <h4 class="my-2">
+            <a class="navbar-brand" href="/">
+                <img src="{% static 'images/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+                <span class="shrinkable">Wikiando</span> <span class="shrinkable badge rounded-pill bg-warning text-dark">Beta</span>
+            </a>
+            {% if shrinkable %}
+                <div class="shrinkable shrinking-button d-inline-block ms-3">
+                    <svg width="15" height="15" viewBox="0 0 100 100">
+                        <polygon points="50,10 90,90 10,90" fill="#FF4500" transform="rotate(-90 50 50)" />
+                    </svg>
+                </div>
+            {% endif %}
+        </h4>
+        <div class="separator mx-3 shrinkable"></div>
+        <span><b>Editando ruta</b> / <a href="{% url 'imaginamos_page' %}">Salir modo edición</a></span>
+        <div class="separator mx-3"></div>
+        {% if active_tab == "step-0" %}
+            <h5 class="mb-0 mx-2"><b>Registra tu ruta</b></h5>
+        {% else %}
+            {% if active_tab == "step-1" %}
+                <h5 class="mb-0 mx-2"><b>Trazo y Ubicaciones</b></h5>
+            {% else %}
+                <a href="{% url 'line_edit_page' line_id=line.id %}" class="mb-0 mx-2">Trazo y Ubicaciones</a>        
+            {% endif %}
+            <img class="mb-0 mx-2" src="{% static 'images/next-icon.png' %}" width="15" height="15" class="d-inline-block align-top" alt="">
+            {% if active_tab == "step-2" %}
+                <h5 class="mb-0 mx-2"><b>Descripción y fotos</b></h5>
+            {% else %}
+                <a href="javascript:void(0);" class="mb-0 mx-2" onclick="userDidClickOnPreview({{ line.id }})">Descripción y fotos</a>
+            {% endif %}
+            <img class="mb-0 mx-2" src="{% static 'images/next-icon.png' %}" width="15" height="15" class="d-inline-block align-top" alt="">
+            <a class="published-text-label" href="javascript:void(0);" hx-get="{% url 'line_publish_modal' line_id=line.id %}" hx-target="#line-change-publish-status" hx-swap="innerHTML" class="mb-0 mx-2">
+                {% if line.published %}
+                    Delistar
+                {% else %}
+                    Publicar
+                {% endif %}
+            </a>
+        {% endif %}        
+        <div class="dropdown">
+            <button class="btn btn-clear dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ user.user_details.get_user_pic_url }}" alt="{{ line.user.username }}" width="40" height="40" class="rounded-circle mx-2">
+                {{ request.user.username }}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><a class="dropdown-item" href="{% url 'home' %}">Perfil</a></li>
+                <li><a class="dropdown-item" href="{% url 'settings' %}">Ajustes</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url  'account_logout' %}">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Navbar mobile version -->
+<div class="floating-nav d-block d-md-none">
+    <div class="content rounded px-3 py-1">
+        <h4 class="mb-0 me-2">
+            <a class="navbar-brand me-2" href="/">
+                <img src="{% static 'images/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+                Wikiando <span class="badge rounded-pill bg-warning text-dark">Beta</span>
+            </a>
+        </h4>
+        <div class="separator mx-1"></div>
+        <div class="dropdown">
+            <button class="btn btn-clear dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <h6 class="mb-0 mx-2"><b>Descripción y fotos</b></h6>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <li><a class="dropdown-item" href="{% url 'line_edit_page' line_id=line.id %}">Trazo y Ubicaciones</a></li>
+            <li><a class="dropdown-item" href="javascript:void(0);" onclick="userDidClickOnPreview({{ line.id }})">Descripción y fotos</a></li>
+            <li>
+                <a class="dropdown-item published-text-label" href="javascript:void(0);" hx-get="{% url 'line_publish_modal' line_id=line.id %}" hx-target="#line-change-publish-status" hx-swap="innerHTML">
+                {% if line.published %}
+                    Delistar
+                {% else %}
+                    Publicar
+                {% endif %}
+                </a>
+            </li>
+            </ul>
+        </div>
+        <div class="separator mx-1"></div>
+        <div class="dropdown">
+            <button class="btn btn-clear dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ user.user_details.get_user_pic_url }}" alt="{{ line.user.username }}" width="40" height="40" class="rounded-circle mx-2">
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <li><b class="dropdown-item disabled">{{line.user.username}}</b></li>
+                <li><a class="dropdown-item" href="{% url 'home' %}">Perfil</a></li>
+                <li><a class="dropdown-item" href="{% url 'settings' %}">Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url  'account_logout' %}">Cerrar Sesión</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function userDidClickOnPreview(lineID) {
+        fetch('/lines/' + lineID + '/validate')
+            .then(response => response.json())
+            .then(data => {
+                if (data['preview-ready']['ready'] == true) {
+                    window.location.href = '/lines/' + lineID + '/preview';
+                } else {
+                    if(data['preview-ready']['is_geom_valid'] == false) {
+                        $('#form-checklist .is_geom_valid').removeClass('hidden');
+                    }
+
+                    if(data['preview-ready']['has_stations'] == false) {
+                        $('#form-checklist .has_stations').removeClass('hidden');
+                    }
+
+                    if(data['preview-ready']['is_route_valid'] == false) {
+                        $('#form-checklist .is_route_valid').removeClass('hidden');
+                    }
+
+                    if(data['preview-ready']['is_identifier_valid'] == false) {
+                        $('#form-checklist .is_identifier_valid').removeClass('hidden');
+                    }
+
+                    if(data['preview-ready']['is_system_valid'] == false) {
+                        $('#form-checklist .is_system_valid').removeClass('hidden');
+                    }
+                    
+                    if(data['preview-ready']['is_operative_status_valid'] == false) {
+                        $('#form-checklist .is_operative_status_valid').removeClass('hidden');
+                    }
+
+                    $('#line-not-ready-to-save').modal('show');
+                }
+            })
+            .catch(error => console.error('Error validating line:', error));
+    }
+</script>
+
+<div class="modal fade" id="line-not-ready-to-save" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">A esta ruta le falta información</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small">Puedes proceder al siguiente paso, pero tendrás que volver a esta sección antes de poder publicarla. Te sugerimos validar los campos siguientes:</p>
+                <ul id="form-checklist">
+                    <li class="is_route_valid hidden small">Debe tener un nombre</li>
+                    <li class="has_stations hidden small">Debe tener más de una estación</li>
+                    <li class="is_geom_valid hidden small">El trazo de la ruta parece no estar bien</li>
+                    <li class="is_system_valid hidden small">Asígnala algún sistema de transporte</li>
+                    <li class="is_identifier_valid hidden small">Debe tener un identificador corto</li>
+                    <li class="is_operative_status_valid hidden small">Selecciona su estado de operación</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Volver</button>
+                <a href="{% url 'line_preview' line_id=line.id %}" class="btn btn-dark">Siguiente</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="line-not-ready-to-save" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">A esta ruta le falta información</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small">Puedes proceder al siguiente paso, pero tendrás que volver a esta sección antes de poder publicarla. Te sugerimos validar los campos siguientes:</p>
+                <ul id="form-checklist">
+                    <li class="is_route_valid hidden small">Debe tener un nombre</li>
+                    <li class="has_stations hidden small">Debe tener más de una estación</li>
+                    <li class="is_geom_valid hidden small">El trazo de la ruta parece no estar bien</li>
+                    <li class="is_system_valid hidden small">Asígnala algún sistema de transporte</li>
+                    <li class="is_identifier_valid hidden small">Debe tener un identificador corto</li>
+                    <li class="is_operative_status_valid hidden small">Selecciona su estado de operación</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-light" data-bs-dismiss="modal">Volver</button>
+                <a href="{% url 'line_preview' line_id=line.id %}" class="btn btn-dark">Siguiente</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="line-change-publish-status" tabindex="-1" aria-hidden="true"></div>

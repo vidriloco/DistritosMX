@@ -1,0 +1,95 @@
+{% load static %}
+<script src="https://unpkg.com/htmx.org@2.0.3"></script>
+<script>
+
+var bLinePattern = '{% static "images/line-b-pattern.svg" %}';
+
+function getStyle() {
+    return '{% static "js/themes/default.json" %}';
+}
+
+function rutaCienLogo() {
+    return '{% static "images/ruta-100-logo.png" %}';
+}
+
+function oldMetroLogo() {
+    return '{% static "images/metro-old.jpeg" %}';
+}
+
+function oldTrenLigeroLogo() {
+    return '{% static "images/tren-ligero-old.png" %}';
+}
+
+function metroLogo() {
+    return '{% static "images/metro-logo.png" %}';
+}
+
+function vayvenLogo() {
+    return '{% static "images/va-y-ven.png" %}';
+}
+
+function popupStationHTML() {
+    var html = "";
+    {% spaceless %}
+    html = '{% include "_popup_station_details.html" %}';
+    {% endspaceless %}
+    return html;
+}
+
+function popupConnectionsHTML() {
+    var html = "";
+    {% spaceless %}
+    html = '{% include "_popup_connections.html" %}';
+    {% endspaceless %}
+    return html;
+}
+
+function agebsDataSource() {
+    return '{% static "images/agebs.json" %}';
+}
+
+function getLogo(system, layer) {
+    var logo = '{% static "images/mi-logo.png" %}';
+
+    if (system == 'Metrobús') {
+        logo = '{% static "images/metrobus-logo.png" %}';
+    } else if (system == 'Tren Interurbano (El Insurgente)') {
+        logo = '{% static "images/insurgente-logo.png" %}';
+    } else if (system == 'Tren Suburbano' || system == 'SUBURBANO') {
+        logo = '{% static "images/suburbano-logo.png" %}';
+    } else if (system == 'STE Tren ligero' || system == 'Tren Ligero') {
+        logo = '{% static "images/transportes-electricos-logo.png" %}';
+    } else if (system.toLowerCase() == 'ste trolebús') {
+        logo = '{% static "images/transportes-electricos-logo.png" %}';
+    } else if (system == 'STE Trolebús Elevado') {
+        logo = '{% static "images/transportes-electricos-logo.png" %}';
+    } else if (system == 'STE Cablebús') {
+        logo = '{% static "images/cablebus-logo.png" %}';
+    } else if (system == 'Red de Transporte de Pasajeros') {
+        logo = '{% static "images/rtp-logo.png" %}';
+    } else if (system == 'CORREDORES CONCESIONADOS') {
+        logo = '{% static "images/concesionados-logo.png" %}';
+    } else if (system == 'STC Metro' || system == 'METRO') {
+        logo = metroLogo();
+    } else if (system == 'TRANSPORTE PÚBLICO CONCESIONADO DE RUTA') {
+        logo = '{% static "images/peseros-logo.png" %}';
+    } else if (system == 'Ecobici') {
+        logo = '{% static "images/ecobici-logo.png" %}';
+    } else {
+        if (layer.includes("Tren Suburbano")) {
+            logo = '{% static "images/suburbano-logo.png" %}';
+        } else if (layer.includes("Mexibús")) {
+            logo = '{% static "images/mexibus-logo.png" %}';
+        } else if (layer.includes("Tren Interurbano")) {
+            logo = '{% static "images/insurgente-logo.png" %}';
+        } else if (layer.includes("Mexicable")) {
+            logo = '{% static "images/mexicable-logo.png" %}';
+        } else if (layer.includes("ecobici-stations")) {
+            logo = '{% static "images/ecobici-logo.png" %}';
+        }
+    }
+
+    return logo;
+}
+
+</script>

@@ -1,0 +1,130 @@
+{% extends "wikiando/layouts/base_simple.html" %}
+{% load static %}
+
+{% block head_title %}
+    Wikiando MX: Home de {{ user.username }}
+{% endblock %}
+
+{% block body %}
+    <div class="base-page d-flex justify-content-center align-items-center mt-5">
+        <div class="text-center mt-5">
+
+            {% if edit_mode == True %}
+            <div id="welcome-home-dialog" class="rounded p-5 pb-3 shadow-sm position-relative" style="border: 1px solid #d1d1d1;">
+                <button type="button" class="btn-close position-absolute top-0 end-0 m-4" aria-label="Close"  onclick="dismissWelcomeProfileDialog()"></button>
+                <img src="{{ user.user_details.get_user_pic_url }}" alt="" class="mb-3 rounded-circle" style="max-height: 100px;">
+
+                <div>
+                    <h1 class="mb-3">Hola {{ user.username }} 👋</h1>
+                    {% if edit_mode == True %}
+                    <a href="{% url 'settings' %}" class="btn btn-light btn-sm mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                        </svg>
+                         Ajustes
+                    </a>
+                    {% endif %}
+                </div>
+                <p>Este es tu home, aquí viven tus rutas de transporte y desde aquí puedes <br/>contribuir a mejorar el transporte público de tu ciudad.</p>
+
+                <p class="mt-3">
+                    <a href="javascript:void(0);" class="text-decoration-none" onclick="dismissWelcomeProfileDialog(true)">No volver a mostrar</a>
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        <div id="lines-container" class="wikiando-items text-center mt-5">
+            {% include 'messages/display.html' %}
+            <div class="text-center mb-3">
+                <img src="{{ user.user_details.get_user_pic_url }}" alt="" class="rounded-circle" style="max-height: 200px;">
+                <h1 class="mb-0 ms-3 mt-3">{{ user.username }}</h1>
+                <p class="fs-5">
+                    {% if user.user_details.bio %}
+                        {{ user.user_details.bio }}
+                    {% else %}
+                        {% if is_my_home == True %}
+                        No has escrito tu biografía aún.
+                        {% else %}
+                        No hay biografía disponible.
+                        {% endif %}
+                    {% endif %}
+                </p>
+                
+                <div class="social-buttons mb-5">
+                    {% if user.user_details.instagram %}
+                        <a href="{{ user.user_details.website }}" target="_blank" class="btn btn-info me-3 px-2 p-0">
+                            <img src="{% static 'images/web-icon.png' %}" alt="Website" class="p-0" style="height: 25px;">
+                        </a>
+                    {% endif %}
+                    {% if user.user_details.facebook %}
+                        <a href="{{ user.user_details.facebook }}" target="_blank" class="btn btn-primary me-2 px-2 p-0">
+                            <img src="{% static 'images/facebook-icon.png' %}" alt="Facebook" style="height: 25px;">
+                        </a>
+                    {% endif %}
+                    {% if user.user_details.twitter %}
+                        <a href="{{ user.user_details.twitter }}" target="_blank" class="btn btn-dark me-2 px-2 p-0">
+                            <img src="{% static 'images/x-icon.png' %}" alt="X" style="height: 25px;">
+                        </a>
+                    {% endif %}
+                    {% if user.user_details.youtube %}
+                        <a href="{{ user.user_details.youtube }}" target="_blank" class="btn btn-danger me-2 px-2 p-0">
+                            <img src="{% static 'images/youtube-icon.png' %}" alt="Youtube" class="p-0" style="height: 25px;">
+                        </a>
+                    {% endif %}
+                    {% if user.user_details.tiktok %}
+                        <a href="{{ user.user_details.tiktok }}" target="_blank" class="btn btn-dark me-2 px-2 p-0">
+                            <img src="{% static 'images/tiktok-icon.png' %}" alt="Tiktok" style="height: 25px;">
+                        </a>
+                    {% endif %}
+                    {% if user.user_details.instagram %}
+                        <a href="{{ user.user_details.instagram }}" target="_blank" class="btn btn-danger me-2 px-2 p-0">
+                            <img src="{% static 'images/instagram-icon.png' %}" alt="Instagram" class="p-0" style="height: 25px;">
+                        </a>
+                    {% endif %}
+                    {% if edit_mode == True %}
+                        <a href="{% url 'settings' %}" class="ms-3 btn btn-light btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                            </svg>
+                                Ajustes
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if not lines %}
+            <hr/>
+            <div class="text-center">
+                <img src="{% static 'images/empty-icon.png' %}" alt="" class="my-5 rounded-circle mb-3" style="max-height: 200px;">
+
+                <h4>No hay rutas que mostrar aún.</h4>
+                <p class="mt-2">Empieza añadiendo esa ruta de Metro, Tren Ligero, Metrobús ó paseo ciclista,<br/> que quisieras que existiera.</p>
+                <a href="{% url 'line_new_create' %}" class="mt-3 btn btn-warning">Añadir una ruta</a>
+                {% else %}
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    {% if is_my_home == True %}
+                    <h2 class="my-3">Tus rutas</h2>
+                    <a href="{% url 'line_new_create' %}" class="btn btn-dark">Nueva ruta</a>
+                    {% else %}
+                    <h2 class="my-3">Sus rutas</h2>
+                    {% endif %}
+                </div>
+                
+                <div class="row">
+                    {% for line in lines %}
+                    {% with edit_mode=edit_mode %}
+                        {% include 'lines/list/entry.html' %}
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if is_my_home == True %}
+    <script>showAppropiateWelcomeDialog();</script>
+    {% endif %}
+{% endblock body %}

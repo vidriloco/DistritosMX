@@ -1,0 +1,2374 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <meta name="title" content="Wikiando MX: La Movilidad de todos nosotros">
+    <meta name="description" content="Un ecosistema para el transporte público y la bicicleta en tu ciudad: Mapas interactivos, rutas en tiempo real, y propuestas ciudadanas para mejorar la movilidad urbana.">
+    <meta name="keywords" content="transporte público, CDMX, Estado de México, movilidad urbana, metro CDMX, metrobús, mexibús, cablebús, mapa interactivo">
+    <meta name="author" content="Wikiando">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Spanish">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wikiando.mx/">
+    <meta property="og:title" content="Wikiando : La Movilidad de todos nosotros">
+    <meta property="og:description" content="Un ecosistema para el transporte público y la bicicleta en tu ciudad: Mapas interactivos, rutas en tiempo real, y propuestas ciudadanas para mejorar la movilidad urbana.">
+    <meta property="og:image" content="{% static 'images/home/night-now.jpg' %}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://wikiando.mx/">
+    <meta property="twitter:title" content="Wikiando : La Movilidad de todos nosotros">
+    <meta property="twitter:description" content="Un ecosistema para el transporte público y la bicicleta en tu ciudad: Mapas interactivos, rutas en tiempo real, y propuestas ciudadanas para mejorar la movilidad urbana.">
+    <meta property="twitter:image" content="{% static 'images/home/night-now.jpg' %}">
+
+    <!-- Canonical URL -->
+    <meta rel="canonical" href="https://wikiando.mx/">
+
+    <title>Wikiando : La Movilidad de todos nosotros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    
+    <!-- Mixpanel Analytics -->
+    <script type="text/javascript">
+        (function(f,b){if(!b.__SV){var e,g,i,h;window.mixpanel=b;b._i=[];b.init=function(e,f,c){function g(a,d){var b=d.split(".");2==b.length&&(a=a[b[0]],d=b[1]);a[d]=function(){a.push([d].concat(Array.prototype.slice.call(arguments,0)))}}var a=b;"undefined"!==typeof c?a=b[c]=[]:c="mixpanel";a.people=a.people||[];a.toString=function(a){var d="mixpanel";"mixpanel"!==c&&(d+="."+c);a||(d+=" (stub)");return d};a.people.toString=function(){return a.toString(1)+".people (stub)"};i="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
+        for(h=0;h<i.length;h++)g(a,i[h]);var j="set set_once union unset remove delete".split(" ");a.get_group=function(){function b(c){d[c]=function(){call2_args=arguments;call2=[c].concat(Array.prototype.slice.call(call2_args,0));a.push([e,call2])}}var d={},e=["get_group"].concat(Array.prototype.slice.call(arguments,0));for(var c=0;c<j.length;c++)b(j[c]);return d};b._i.push([e,f,c])};b.__SV=1.2;e=f.createElement("script");e.type="text/javascript";e.async=!0;e.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?
+        MIXPANEL_CUSTOM_LIB_URL:"file:"===f.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";g=f.getElementsByTagName("script")[0];g.parentNode.insertBefore(e,g)}})(document,window.mixpanel||[]);
+    </script>
+    
+    <!-- Analytics Configuration -->
+    <script src="{% static 'js/config/analytics-config.js' %}"></script>
+    
+    <!-- Analytics Constants and Service -->
+    <script type="module">
+        import { ANALYTICS_EVENTS, ANALYTICS_PROPERTIES } from '{% static "js/constants/analytics.js" %}';
+        import { initAnalytics, trackEvent, trackVisitStarted } from '{% static "js/services/analytics.js" %}';
+        
+        // Make constants available globally
+        window.ANALYTICS_EVENTS = ANALYTICS_EVENTS;
+        window.ANALYTICS_PROPERTIES = ANALYTICS_PROPERTIES;
+        
+        // Make functions available globally
+        window.initAnalytics = initAnalytics;
+        window.trackEvent = trackEvent;
+        window.trackVisitStarted = trackVisitStarted;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(-45deg, #2196F3, #90CAF9);
+            background-size: 400% 400%;
+            transition: background 1s ease;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            20% {
+                background-position: 100% 50%;
+                background-image: linear-gradient(-45deg, #E3F2FD, #BBDEFB);
+            }
+            40% {
+                background-position: 0% 50%;
+                background-image: linear-gradient(-45deg, #E8F5E9, #C8E6C9);
+            }
+            60% {
+                background-position: 100% 50%;
+                background-image: linear-gradient(-45deg, #FFF3E0, #FFE0B2);
+            }
+            80% {
+                background-position: 0% 50%;
+                background-image: linear-gradient(-45deg, #F3E5F5, #E1BEE7);
+            }
+            100% {
+                background-position: 0% 50%;
+                background-image: linear-gradient(-45deg, #f5f7fa, #e4e9f2);
+            }
+        }
+
+        .header {
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            z-index: 100;
+            transition: all 0.4s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header.scrolled {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            letter-spacing: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo img {
+            height: 4rem;
+            width: auto;
+            transition: all 0.4s ease;
+        }
+
+        .header.scrolled .logo img {
+            content: url('/static/images/logo-wikiando-dark.png');
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            align-items: center;
+        }
+
+        .mobile-menu-button {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            z-index: 101;
+        }
+
+        .mobile-menu-button svg {
+            width: 24px;
+            height: 24px;
+            stroke: #fff;
+            transition: stroke 0.3s ease;
+        }
+
+        .header.scrolled .mobile-menu-button svg {
+            stroke: #000;
+        }
+
+        .nav-link {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.05rem;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+            letter-spacing: 0.2px;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+            opacity: 0;
+        }
+
+        .nav-link:hover {
+            color: #ffffff;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+            opacity: 1;
+        }
+
+        .header.scrolled .nav-link {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .header.scrolled .nav-link:hover {
+            color: #1a73e8;
+        }
+
+        .header.scrolled .nav-link::after {
+            background: #1a73e8;
+        }
+
+        .nav-link.highlight::after {
+            display: none;
+        }
+
+        .nav-link.highlight {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 1);
+            font-family: 'Sora', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            font-size: 0.95rem;
+        }
+
+        .nav-link.highlight:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        .header.scrolled .nav-link.highlight {
+            background: #000000;
+            color: white;
+            border: none;
+        }
+
+        .header.scrolled .nav-link.highlight:hover {
+            background: #333333;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 6rem 2rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            line-height: 1.15;
+            transition: color 0.6s ease;
+        }
+
+        .hero-subtitle {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: color 0.6s ease;
+        }
+
+        .features {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            padding: 2rem;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, background 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: #1a73e8;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1rem;
+        }
+
+        .stats {
+            background: rgba(26, 115, 232, 0.1);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-item h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+
+        .image-carousel {
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 425px;
+            margin: 4rem auto;
+            overflow: visible;
+        }
+
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            width: 75%;
+            height: 100%;
+            transition: all 0.5s ease, border-color 0.3s ease;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(0) scale(0.85);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .carousel-slide.active {
+            z-index: 2;
+            transform: translateX(0) scale(1);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .carousel-slide.prev {
+            z-index: 1;
+            transform: translateX(-75%) scale(0.85);
+            opacity: 0.7;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .carousel-slide.next {
+            z-index: 1;
+            transform: translateX(75%) scale(0.85);
+            opacity: 0.7;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .carousel-slide.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transform: translateX(0) scale(0.85);
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 24px;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 2.5rem;
+            color: white;
+            border-radius: 0 0 24px 24px;
+        }
+
+        .carousel-caption.left {
+            text-align: left;
+            padding-right: 40%;
+        }
+
+        .carousel-caption.right {
+            text-align: right;
+            padding-left: 40%;
+        }
+
+        .carousel-caption.center {
+            text-align: center;
+            padding: 2.5rem 20%;
+        }
+
+        .carousel-caption h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            line-height: 1.15;
+        }
+
+        .carousel-caption p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .carousel-caption .explore-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+            font-family: 'Sora', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .carousel-slide.active .explore-link {
+            opacity: 1;
+        }
+
+        .carousel-caption .explore-link svg {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-slide.active:hover .explore-link svg {
+            transform: translateX(8px);
+        }
+
+        .carousel-slide.prev .explore-link,
+        .carousel-slide.next .explore-link {
+            pointer-events: none;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            bottom: -70px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+            z-index: 10;
+        }
+
+        .carousel-arrow {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            outline: none;
+            color: white;
+        }
+
+        .carousel-arrow:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .carousel-arrow svg {
+            width: 20px;
+            height: 20px;
+            stroke-width: 1.5;
+            transition: transform 0.3s ease;
+        }
+
+        .carousel-arrow.prev:hover svg {
+            transform: translateX(-2px);
+        }
+
+        .carousel-arrow.next:hover svg {
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.25rem;
+            }
+
+            .image-carousel {
+                height: 340px;
+                border-radius: 16px;
+                margin-bottom: 5rem;
+            }
+
+            .carousel-caption {
+                padding: 1.5rem;
+            }
+
+            .carousel-caption.left,
+            .carousel-caption.right {
+                padding: 1.5rem;
+                text-align: left;
+            }
+
+            .carousel-caption.center {
+                padding: 1.5rem;
+            }
+
+            .carousel-caption h3 {
+                font-size: 1.6rem;
+            }
+
+            .carousel-caption p {
+                margin-bottom: 1.5rem;
+            }
+
+            .carousel-nav {
+                bottom: -50px;
+            }
+
+            .carousel-arrow {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .carousel-arrow svg {
+                width: 18px;
+                height: 18px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .header {
+                padding: 0.875rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.75rem;
+                line-height: 1.2;
+                margin-bottom: 1.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .mission-title {
+                font-size: 2.2rem;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .experience-title {
+                font-size: 2rem;
+            }
+            
+            .experience-text {
+                font-size: 1.1rem;
+            }
+
+            .carousel-nav {
+                gap: 1.5rem;
+            }
+
+            .carousel-arrow {
+                width: 36px;
+                height: 36px;
+            }
+        }
+
+        .video-section {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            background: transparent;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .video-background iframe {
+            width: 100vw;
+            height: 56.25vw; /* Given a 16:9 aspect ratio, 9/16*100 = 56.25 */
+            min-height: 100vh;
+            min-width: 177.77vh; /* Given a 16:9 aspect ratio, 16/9*100 = 177.77 */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .video-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 2rem;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+        }
+
+        .video-content h2 {
+            font-family: 'Sora', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.15;
+        }
+
+        .video-content p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .video-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            color: #000;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 400;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-family: 'Sora', sans-serif;
+            letter-spacing: 0.02em;
+        }
+
+        .video-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .split-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+            background: transparent;
+        }
+
+        .split-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .split-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 4rem;
+            background: rgba(248, 249, 250, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .split-content h2 {
+            font-family: 'Sora', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            line-height: 1.15;
+        }
+
+        .split-content p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: #666;
+        }
+
+        .feature-showcase {
+            padding: 8rem 2rem;
+            background: transparent;
+            color: white;
+            text-align: center;
+        }
+
+        .feature-showcase-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-showcase h2 {
+            font-family: 'Sora', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .feature-showcase p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 4rem;
+            opacity: 0.9;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .feature-item {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .feature-item h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-item p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .split-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-title {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .split-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .split-content {
+                padding: 3rem 1.5rem;
+            }
+            
+            .split-content h2 {
+                font-size: 2rem;
+            }
+            
+            .split-content p {
+                font-size: 1.1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .feature-item {
+                padding: 1.5rem;
+            }
+            
+            .feature-item h3 {
+                font-size: 1.3rem;
+            }
+            
+            .feature-item p {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .mission-title {
+                font-size: 2.2rem;
+            }
+            
+            .app-title {
+                font-size: 2rem;
+            }
+            
+            .experience-title {
+                font-size: 2rem;
+            }
+            
+            .experience-text {
+                font-size: 1.1rem;
+            }
+        }
+
+        .hero-title, 
+        .feature-title, 
+        .video-content h2,
+        .split-content h2,
+        .feature-showcase h2,
+        .feature-item h3,
+        .carousel-caption h3,
+        .circle-title,
+        .mission-title,
+        .app-title,
+        .what-we-do-title,
+        .experience-title,
+        .footer-column h3 {
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle,
+        .feature-card p,
+        .carousel-caption p,
+        .video-content p,
+        .split-content p,
+        .feature-item p,
+        .stat-item p,
+        .mission-text,
+        .app-description-text,
+        .circle-subtitle,
+        .experience-text,
+        .footer-column p,
+        .footer-column ul li a {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .video-button,
+        .nav-link.highlight,
+        .explore-link {
+            font-family: 'Sora', sans-serif;
+            font-weight: 600;
+        }
+
+        .circle-showcase {
+            padding: 4rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .circle-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .circle-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .circle-subtitle {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .circle-connections {
+            width: 100%;
+            max-width: 800px;
+            height: 400px;
+            margin: 0 auto;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s ease, z-index 0s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .circle-connections:hover {
+            border-color: rgba(255, 255, 255, 1);
+            z-index: 10;
+        }
+
+        .circle-connections img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .circle-images {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1000px;
+            margin: -400px auto 0;
+            padding: 0 20px;
+            position: relative;
+            pointer-events: none;
+        }
+
+        .circle-image-left {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            pointer-events: auto;
+            transform: translateX(50px);
+        }
+
+        .circle-image-right {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            pointer-events: auto;
+            transform: translateX(-60px);
+        }
+
+        .circle-image {
+            opacity: 0;
+            transform-origin: center;
+            transition: none;
+            transform: translateY(60px) scale(0.8);
+        }
+
+        .circle-image:nth-child(1) {
+            max-width: 174px;
+            transform: rotate(60deg) scale(0.8);
+        }
+
+        .circle-image:nth-child(2) {
+            max-width: 188px;
+            transform: rotate(15deg) scale(0.8);
+        }
+
+        .circle-image:nth-child(1) {
+            max-width: 188px;
+            transform: rotate(15deg) scale(0.8);
+        }
+
+        .circle-image:nth-child(2) {
+            max-width: 280px;
+            transform: rotate(-15deg) scale(0.8);
+        }
+
+        .circle-image.visible {
+            opacity: 1;
+            transition: opacity 0.8s ease-out, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .circle-image:nth-child(1).visible {
+            transform: rotate(-15deg) scale(1);
+        }
+
+        .circle-image:nth-child(2).visible {
+            transform: rotate(15deg) scale(1);
+        }
+
+        /* Add specific style for Tacubaya image */
+        .circle-image-left img[alt="Estela del STC Metro Tacubaya"] {
+            transform: rotate(25deg) scale(0.88) !important;
+            max-width: 198px !important;
+        }
+
+        .circle-image-left img[alt="Estela del STC Metro Tacubaya"].visible {
+            transform: rotate(25deg) scale(1.1) !important;
+            animation: floatTacubaya 4s ease-in-out infinite !important;
+        }
+
+        @keyframes floatTacubaya {
+            0%, 100% { 
+                transform: rotate(25deg) scale(1.1) translateY(0);
+            }
+            50% { 
+                transform: rotate(25deg) scale(1.1) translateY(-10px);
+            }
+        }
+
+        @keyframes floatAnimation {
+            0%, 100% { 
+                transform: translateY(0) rotate(var(--rotation)) scale(1);
+            }
+            50% { 
+                transform: translateY(-10px) rotate(var(--rotation)) scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .circle-images {
+                padding: 0 10px;
+            }
+            
+            .circle-image-left img,
+            .circle-image-right img { 
+                max-width: 100px;
+            }
+        }
+
+        .mission-section {
+            padding: 8rem 2rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin: 0;
+        }
+
+        .mission-content {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .mission-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 3.8rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0;
+        }
+
+        .mission-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.5rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 900px;
+            margin: 0 auto;
+            letter-spacing: -0.01em;
+        }
+
+        @media (max-width: 768px) {
+            .mission-section {
+                padding: 4rem 1.5rem;
+            }
+            
+            .mission-title {
+                font-size: 2.8rem;
+            }
+            
+            .mission-text {
+                font-size: 1.25rem;
+            }
+        }
+
+        .app-description {
+            padding: 6rem 2rem;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .app-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .app-image {
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 4rem;
+            filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+        }
+
+        .app-image img {
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+        }
+
+        .app-text {
+            max-width: 800px;
+        }
+
+        .app-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0;
+        }
+
+        .app-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto 3rem;
+            max-width: 600px;
+        }
+
+        .app-features li {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+            position: relative;
+            text-align: left;
+        }
+
+        .app-features li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .app-stores {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .app-store-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .app-store-button.coming-soon {
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .app-store-button:hover {
+            background: rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .app-store-button.coming-soon:hover {
+            background: rgba(0, 0, 0, 0.35);
+        }
+
+        .app-store-button img {
+            height: 60px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .app-image {
+                max-width: 100%;
+                margin-bottom: 3rem;
+            }
+
+            .app-title {
+                font-size: 2.4rem;
+            }
+
+            .app-features li {
+                font-size: 1.1rem;
+            }
+
+            .app-stores {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .app-store-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .carousel-caption.right .explore-link {
+            justify-content: flex-end;
+        }
+
+        .app-description-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .app-description-text {
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        .what-we-do {
+            padding: 8rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        .what-we-do-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .what-we-do-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Add hover effects for each slide theme */
+        .carousel-slide:nth-child(1):hover {
+            border-color: #2196F3;
+        }
+
+        .carousel-slide:nth-child(2):hover {
+            border-color: #4CAF50;
+        }
+
+        .carousel-slide:nth-child(3):hover {
+            border-color: #FF9800;
+        }
+
+        .carousel-slide:nth-child(4):hover {
+            border-color: #9C27B0;
+        }
+
+        .carousel-slide:nth-child(5):hover {
+            border-color: #E91E63;
+        }
+
+        .experience-section {
+            padding: 6rem 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .experience-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .experience-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .experience-text-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .experience-text {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        @media (max-width: 768px) {
+            .experience-text {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .experience-text {
+                font-size: 1rem;
+            }
+            .experience-text-container {
+                gap: 1.5rem;
+            }
+        }
+
+        .footer {
+            background: #000000;
+            color: #ffffff;
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 4rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-column h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .footer-column p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .footer-column ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-column ul li a {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-column ul li a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .footer-bottom p {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .experience-title {
+                font-size: 2.5rem;
+            }
+            
+            .experience-text {
+                font-size: 1.25rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .footer {
+                padding: 3rem 1.5rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 300px;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.95);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                gap: 2rem;
+                padding: 2rem;
+                transition: right 0.3s ease;
+                z-index: 100;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links .nav-link {
+                color: white !important;
+                font-size: 1.2rem;
+                text-align: center;
+                opacity: 0.9;
+            }
+
+            .nav-links .nav-link:hover {
+                opacity: 1;
+                color: white !important;
+            }
+
+            .nav-links .nav-link.highlight {
+                background: rgba(255, 255, 255, 0.15);
+                color: white !important;
+            }
+
+            .nav-links .nav-link.highlight:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-1px);
+            }
+
+            .mobile-menu-button {
+                display: block;
+                z-index: 101;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            .header {
+                padding: 0.875rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 1.5rem;
+                line-height: 1.2;
+                margin-bottom: 1.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .mission-title {
+                font-size: 1.87rem;
+            }
+            
+            .app-title {
+                font-size: 1.7rem;
+            }
+            
+            .experience-title {
+                font-size: 1.7rem;
+            }
+            
+            .experience-text {
+                font-size: 1rem;
+            }
+
+            .circle-title {
+                font-size: 1.87rem;
+            }
+
+            .feature-showcase h2 {
+                font-size: 1.87rem;
+            }
+
+            .video-content h2 {
+                font-size: 1.87rem;
+            }
+
+            .what-we-do-title {
+                font-size: 1.87rem;
+            }
+
+            .carousel-nav {
+                gap: 1.5rem;
+            }
+
+            .carousel-arrow {
+                width: 36px;
+                height: 36px;
+            }
+
+            /* Circle images mobile adjustments */
+            .circle-images {
+                margin: -200px auto 0;
+                justify-content: flex-start;
+                padding: 0;
+                pointer-events: none;
+            }
+
+            .circle-image-right {
+                display: none;
+            }
+
+            .circle-image-left {
+                transform: none;
+                position: absolute;
+                bottom: -40px;
+                left: 20px;
+                z-index: 2;
+            }
+
+            .circle-image-left img:first-child {
+                display: none;
+            }
+
+            .circle-image-left img[alt="Estela del STC Metro Tacubaya"] {
+                max-width: 140px !important;
+                transform: rotate(15deg) scale(1) !important;
+            }
+
+            .circle-image-left img[alt="Estela del STC Metro Tacubaya"].visible {
+                transform: rotate(15deg) scale(1.1) !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .circle-connections {
+                height: 300px;
+            }
+        }
+
+        /* Add mobile menu overlay styles */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 99;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <img src="/static/images/logo-wikiando.png" alt="Wikiando Icon">
+            </div>
+            <div class="nav-links">
+                <a href="/red-actual" class="nav-link">Mapa de la red</a>
+                <a href="https://apps.apple.com/us/app/metrobus-cdmx/id1459177330" target="_blank" class="nav-link">
+                    La app
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 15px; height: 15px;">
+                        <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                </a>
+                <a href="/accounts/login" class="nav-link highlight">Iniciar Sesión</a>
+            </div>
+            <button class="mobile-menu-button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 6h16M4 10h16M4 14h16M4 18h16" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Un ecosistema para <br/>el transporte público y la bicicleta en tu ciudad</h1>
+            <p class="hero-subtitle">Te invitamos a explorar algunas de nuestras herramientas</p>
+            
+            <div class="image-carousel">
+                <div class="carousel-container" id="carousel-container">
+                    <div class="carousel-slide hidden">
+                        <img class="time-based-image" src="{% static 'images/home/night-now.jpg' %}" alt="Sustainable Transport">
+                        <div class="carousel-caption center">
+                            <h3>Mapa Interactivo de CDMX y EdoMex</h3>
+                            <a href="/red-actual" target="_blank" class="explore-link" style="justify-content: center">
+                                Abrir mapa
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide hidden">
+                        <img class="time-based-image" src="{% static 'images/home/future-network.jpg' %}" alt="La red a futuro">
+                        <div class="carousel-caption left">
+                            <h3>La red a futuro</h3>
+                            <p>Propuestas oficiales para extender la red de transporte público</p>
+                            <a href="megalopolis/futuro/metro-horizonte-2018-2030" target="_blank" class="explore-link">
+                                Ver propuestas
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide hidden">
+                        <img src="{% static 'images/home/dream-network.jpg' %}" alt="Smart Transit">
+                        <div class="carousel-caption right">
+                            <h3>Socialización del transporte público</h3>
+                            <p>Recolectamos propuestas ciudadanas y fomentamos la construcción de comunidad</p>
+                            <a href="/proponemos" target="_blank" class="explore-link">
+                                Ver propuestas
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide hidden">
+                        <img src="{% static 'images/home/geo-mapita.jpg' %}" alt="Análisis del territorio">
+                        <div class="carousel-caption right">
+                            <h3>Análisis del territorio</h3>
+                            <p>Conjuntamos datos sociodemográficos y de transporte público para entender la ciudad</p>
+                            <a href="/proponemos/lineas/nueva" target="_blank" class="explore-link">
+                                Pruébalo creando tu ruta
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 5v14M5 12h14"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="carousel-slide hidden">
+                        <img src="{% static 'images/home/past-network.jpg' %}" alt="La red del ayer">
+                        <div class="carousel-caption left">
+                            <h3>La red del ayer</h3>
+                            <p>La ciudad en el tiempo: La red del <b>STC Metro</b> y la extinta <b>Ruta 100</b> en 1986</p>
+                            <a href="#learn-more" class="explore-link">
+                                Ir a la sección
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M5 12h14m-7-7l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-nav">
+                    <button class="carousel-arrow prev">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button class="carousel-arrow next">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="circle-showcase">
+        <div class="circle-content">
+            <h2 class="circle-title">Una ciudad: varios sistemas de transporte</h2>
+            <p class="circle-subtitle">Todas las opciones de movilidad en tu ciudad en armonía y fáciles de consultar</b></p>
+            <div class="circle-connections">
+                <iframe 
+                    src="https://www.youtube.com/embed/uAmF9tBlcE0?autoplay=1&mute=1&loop=1&playlist=uAmF9tBlcE0&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&iv_load_policy=3" 
+                    title="YouTube video player" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    style="position: absolute; top: 0; left: -1px; width: calc(100% + 2px); height: 100%; object-fit: cover; pointer-events: none;"
+                    referrerpolicy="strict-origin-when-cross-origin" 
+                    allowfullscreen>
+                </iframe>
+            </div>
+            <div class="circle-images">
+                <div class="circle-image-right">
+                    <img src="{% static 'images/home/cablebus.png' %}" alt="El Cablebús" class="circle-image rotate-fast">
+                    <img src="{% static 'images/home/mexibus.png' %}" alt="Un Mexibus en Ecatepec" class="circle-image rotate-slow">
+                </div>
+                <div class="circle-image-left">
+                    <img src="{% static 'images/home/microbus.png' %}" alt="Un microbús a Mixcoac" class="circle-image rotate-slow">
+                    <img src="{% static 'images/home/tacubaya.png' %}" alt="Estela del STC Metro Tacubaya" class="circle-image rotate-medium">
+                </div>
+                
+            </div>
+        </div>
+    </section>
+    
+    <section class="mission-section">
+        <div class="mission-content">
+            <h2 class="mission-title">Nuestra Misión</h2>
+            <p class="mission-text">Democratizar el acceso a la información del transporte público y la bicicleta en ciudades y áreas metropolitanas, 
+            facilitando la movilidad de millones de personas a través de datos abiertos y tecnología colaborativa 
+            que conecta a las comunidades con su ciudad.</p>
+        </div>
+    </section>
+
+    <section class="app-description">
+        <div class="app-content">
+            <div class="app-image">
+                <img src="{% static 'images/home/app-details.png' %}" alt="Wikiando App Preview">
+            </div>
+            <div class="app-text">
+                <h2 class="app-title">La App de Wikiando</h2>
+                <p class="app-description-text">Toda la red de transporte público en la Zona Metropolitana del Valle de México y datos sociales de movilidad en bicicleta desde tu teléfono. Visualiza las opciones de transporte público cercanas y las conexiones disponibles entre sistemas.</p>
+                <div class="app-stores">
+                    <a href="https://apps.apple.com/us/app/metrobus-cdmx/id1459177330" target="_blank" class="app-store-button">
+                        <img src="{% static 'images/home/app-store.png' %}" alt="Download on App Store">
+                    </a>
+                    <div class="app-store-button">
+                        <img src="{% static 'images/home/google-play.png' %}" alt="Get it on Google Play">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="feature-showcase">
+        <div class="feature-showcase-content">
+            <h2>¿Qué más hacemos?</h2>
+            <p>Trabajamos con ciudades y actores del transporte para ayudarles en su proceso de transformación digital con un énfasis en la experiencia del usuario y la mejora del transporte público.</p>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h3>Visualización de datos</h3>
+                    <p>Diseñamos visualizaciones interactivas para entender fenómenos urbanos complejos</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Diagnóstico y análisis</h3>
+                    <p>Generamos herramientas de diagnostico territorial, socio-demográfico y operativo del transporte</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Socialización</h3>
+                    <p>Generamos espacios digitales para crear comunidad y promover la participación ciudadana en torno a la movilidad</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="video-section">
+        <div class="video-background">
+            <iframe width="560" height="315" 
+                src="https://www.youtube.com/embed/vVaVUjwjBCI?autoplay=1&mute=1&loop=1&playlist=vVaVUjwjBCI&controls=0&showinfo=0&rel=0&controls=0&showinfo=0" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                referrerpolicy="strict-origin-when-cross-origin" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="video-content">
+            <h2>Visualización de datos</h2>
+            <p>Afluencia de pasajeros en estaciones por rangos de 15 minutos en un día típico en la Ciudad de México</p>
+        </div>
+    </section>
+
+    <section class="experience-section">
+        <div class="experience-content">
+            <h2 class="experience-title">Experiencia en México y Europa</h2>
+            <div class="experience-text-container">
+                <p class="experience-text">Apasionados por la movilidad, sus fundadores cuentan con experiencia en temas digitales relacionados con la movilidad en colaboraciones con la SEMOVI, así como con ONGs como ITDP, WRI, GIZ y Bicitekas en la ciudad de México.</p>
+                <p class="experience-text">Se han destacado trabajando para Mobimeo (filial de la Deutsche-Bahn) en Berlin, Trainline en Paris: el principal e-commerce de transporte ferroviario en el continente Europeo y Backbase en Ámsterdam: un fintech que desarrolla software para instituciones financieras a nivel global.</p>
+                <p class="experience-text">En 2024, se constituyen como una startup social, con el objetivo de promover la movilidad sostenible y la bicicleta en la Ciudad de México.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <img src="/static/images/logo-wikiando.png" alt="Wikiando" style="height: 2.5rem; width: auto; margin-bottom: 1.5rem;">
+                    <p>Integramos datos del transporte público para mejorar la movilidad urbana entre todos.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Enlaces</h3>
+                    <ul>
+                        <li><a href="/red-actual">Mapa de la red</a></li>
+                        <li><a href="/proponemos">Propuestas</a></li>
+                        <li><a href="https://apps.apple.com/us/app/metrobus-cdmx/id1459177330" target="_blank">App para iOS</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contacto</h3>
+                    <ul>
+                        <li><a href="mailto:alex@tallerdeapps.mx">alex@tallerdeapps.mx</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024-2025 Wikiando.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+        // Add scroll behavior for header
+        function updateHeader() {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 10) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        // Initialize header state
+        updateHeader();
+
+        // Add scroll listener
+        window.addEventListener('scroll', updateHeader);
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add scroll animation for features
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = 0;
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+
+        // WebGL Carousel
+        class Carousel {
+            constructor() {
+                this.slides = Array.from(document.querySelectorAll('.carousel-slide'));
+                this.totalSlides = this.slides.length;
+                this.currentIndex = 0;
+                this.isAnimating = false;
+                
+                // Define background colors and title colors for each slide
+                this.slideThemes = [
+                    { background: { from: '#2196F3', to: '#90CAF9' }, titleColor: '#ffffff' },     // Blue theme
+                    { background: { from: '#4CAF50', to: '#A5D6A7' }, titleColor: '#ffffff' },     // Green theme
+                    { background: { from: '#FF9800', to: '#FFCC80' }, titleColor: '#1a1a1a' },     // Orange theme
+                    { background: { from: '#9C27B0', to: '#E1BEE7' }, titleColor: '#ffffff' },     // Purple theme
+                    { background: { from: '#E91E63', to: '#F48FB1' }, titleColor: '#ffffff' }      // Pink theme
+                ];
+                
+                // Initialize Three.js
+                this.container = document.getElementById('carousel-container');
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                
+                this.init();
+                this.setupControls();
+                this.updateSlides();
+                this.updateBackground(this.currentIndex);
+            }
+
+            // Helper function to convert hex to RGB
+            hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? [
+                    parseInt(result[1], 16),
+                    parseInt(result[2], 16),
+                    parseInt(result[3], 16)
+                ] : [255, 255, 255];
+            }
+
+            updateBackground(index) {
+                const theme = this.slideThemes[index];
+                const heroElements = document.querySelectorAll('.hero-title, .hero-subtitle');
+                const highlightButton = document.querySelector('.nav-link.highlight');
+                
+                // Update background with gradient
+                gsap.to(document.body, {
+                    duration: 0.6,
+                    ease: 'power2.inOut',
+                    background: `linear-gradient(-45deg, ${theme.background.from}, ${theme.background.to})`
+                });
+
+                // Update title and subtitle color together
+                gsap.to(heroElements, {
+                    duration: 0.6,
+                    ease: 'power2.inOut',
+                    color: theme.titleColor,
+                    overwrite: true
+                });
+
+                // Update highlight button background color with full opacity
+                gsap.to(highlightButton, {
+                    duration: 0.6,
+                    ease: 'power2.inOut',
+                    background: theme.background.from,
+                    borderColor: theme.background.from,
+                    color: '#ffffff',
+                    overwrite: true
+                });
+
+                // Update hover state in CSS
+                const style = document.createElement('style');
+                style.textContent = `
+                    .nav-link.highlight:hover {
+                        background: ${theme.background.to} !important;
+                    }
+                `;
+                // Remove any previous dynamic styles
+                document.querySelectorAll('style[data-highlight-hover]').forEach(s => s.remove());
+                style.setAttribute('data-highlight-hover', '');
+                document.head.appendChild(style);
+            }
+
+            init() {
+                // Setup renderer
+                this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+                this.renderer.setPixelRatio(window.devicePixelRatio);
+                this.container.appendChild(this.renderer.domElement);
+
+                // Position camera
+                this.camera.position.z = 5;
+
+                // Initial slide setup
+                this.updateSlides();
+                
+                // Set initial colors
+                const heroElements = document.querySelectorAll('.hero-title, .hero-subtitle');
+                heroElements.forEach(element => {
+                    element.style.color = this.slideThemes[0].titleColor;
+                });
+            }
+
+            setupControls() {
+                const prevBtn = document.querySelector('.carousel-arrow.prev');
+                const nextBtn = document.querySelector('.carousel-arrow.next');
+
+                prevBtn.addEventListener('click', () => !this.isAnimating && this.navigate('prev'));
+                nextBtn.addEventListener('click', () => !this.isAnimating && this.navigate('next'));
+
+                // Enable click on prev/next slides
+                this.slides.forEach(slide => {
+                    slide.addEventListener('click', () => {
+                        if (this.isAnimating) return;
+                        if (slide.classList.contains('prev')) this.navigate('prev');
+                        if (slide.classList.contains('next')) this.navigate('next');
+                    });
+                });
+            }
+
+            navigate(direction) {
+                if (this.isAnimating) return;
+                this.isAnimating = true;
+
+                const oldIndex = this.currentIndex;
+                if (direction === 'next') {
+                    this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+                } else {
+                    this.currentIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
+                }
+
+                // Update background color
+                this.updateBackground(this.currentIndex);
+
+                // Calculate positions for the smooth infinite effect
+                const positions = this.calculatePositions(direction);
+
+                // Animate all visible slides
+                const timeline = gsap.timeline({
+                    onComplete: () => {
+                        this.isAnimating = false;
+                        this.updateSlides();
+                        
+                        // Hide all non-visible slides after animation
+                        this.slides.forEach((slide, index) => {
+                            if (!['active', 'prev', 'next'].some(cls => slide.classList.contains(cls))) {
+                                slide.classList.add('hidden');
+                                slide.setAttribute('aria-hidden', 'true');
+                                slide.tabIndex = -1;
+                            } else {
+                                slide.removeAttribute('aria-hidden');
+                                slide.tabIndex = 0;
+                            }
+                        });
+                    }
+                });
+
+                // Animate current slide going out
+                timeline.to(this.slides[oldIndex], {
+                    scale: 0.85,
+                    x: direction === 'next' ? '-75%' : '75%',
+                    opacity: 0.7,
+                    duration: 0.6,
+                    ease: 'power2.inOut'
+                }, 0);
+
+                // Animate new slide coming in
+                timeline.to(this.slides[this.currentIndex], {
+                    scale: 1,
+                    x: '0%',
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: 'power2.inOut'
+                }, 0);
+
+                // Animate adjacent slides
+                const nextIndex = (this.currentIndex + 1) % this.totalSlides;
+                const prevIndex = (this.currentIndex - 1 + this.totalSlides) % this.totalSlides;
+
+                timeline.to(this.slides[nextIndex], {
+                    x: '75%',
+                    scale: 0.85,
+                    opacity: 0.7,
+                    duration: 0.6,
+                    ease: 'power2.inOut'
+                }, 0);
+
+                timeline.to(this.slides[prevIndex], {
+                    x: '-75%',
+                    scale: 0.85,
+                    opacity: 0.7,
+                    duration: 0.6,
+                    ease: 'power2.inOut'
+                }, 0);
+            }
+
+            calculatePositions(direction) {
+                const positions = {};
+                const centerIndex = this.currentIndex;
+                const prevIndex = (centerIndex - 1 + this.totalSlides) % this.totalSlides;
+                const nextIndex = (centerIndex + 1) % this.totalSlides;
+
+                positions[centerIndex] = { x: 0, scale: 1, opacity: 1, zIndex: 3 };
+                positions[prevIndex] = { x: -75, scale: 0.85, opacity: 0.7, zIndex: 2 };
+                positions[nextIndex] = { x: 75, scale: 0.85, opacity: 0.7, zIndex: 2 };
+
+                return positions;
+            }
+
+            updateSlides() {
+                const positions = this.calculatePositions();
+                
+                this.slides.forEach((slide, index) => {
+                    // First, remove all classes
+                    slide.classList.remove('active', 'prev', 'next', 'hidden');
+                    
+                    // Calculate the shortest distance to the current index considering the circular nature
+                    const distance = Math.min(
+                        Math.abs(index - this.currentIndex),
+                        Math.abs(index - this.currentIndex + this.totalSlides),
+                        Math.abs(index - this.currentIndex - this.totalSlides)
+                    );
+                    
+                    if (index === this.currentIndex) {
+                        slide.classList.add('active');
+                        gsap.set(slide, { clearProps: 'all' });
+                    } else if (index === (this.currentIndex - 1 + this.totalSlides) % this.totalSlides) {
+                        slide.classList.add('prev');
+                    } else if (index === (this.currentIndex + 1) % this.totalSlides) {
+                        slide.classList.add('next');
+                    } else {
+                        slide.classList.add('hidden');
+                        // Ensure hidden slides are completely removed from tab order and accessibility tree
+                        slide.setAttribute('aria-hidden', 'true');
+                        slide.tabIndex = -1;
+                    }
+                });
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        // Initialize carousel when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const carousel = new Carousel();
+            carousel.animate();
+
+            // Optional: Add auto-rotation
+            let autoRotateInterval;
+            
+            function startAutoRotate() {
+                autoRotateInterval = setInterval(() => {
+                    if (!carousel.isAnimating) {
+                        carousel.navigate('next');
+                    }
+                }, 5000);
+            }
+
+            function stopAutoRotate() {
+                clearInterval(autoRotateInterval);
+            }
+
+            // Start auto-rotation and handle hover pause
+            startAutoRotate();
+            document.querySelector('.image-carousel').addEventListener('mouseenter', stopAutoRotate);
+            document.querySelector('.image-carousel').addEventListener('mouseleave', startAutoRotate);
+        });
+
+        // Update the circle showcase JavaScript
+        document.addEventListener('DOMContentLoaded', () => {
+            const circleShowcase = document.querySelector('.circle-showcase');
+            const circleImages = document.querySelectorAll('.circle-image');
+
+            function positionImages() {
+                circleImages.forEach((img) => {
+                    // Random rotation between -20 and 20 degrees
+                    const rotation = (Math.random() * 40 - 20);
+                    img.style.setProperty('--rotation', `${rotation}deg`);
+                });
+            }
+
+            function startFloatingAnimations() {
+                circleImages.forEach((img) => {
+                    // Start floating animation after the entrance animation
+                    setTimeout(() => {
+                        img.style.animation = `floatAnimation ${3 + Math.random() * 2}s ease-in-out infinite`;
+                    }, 1000); // Wait for entrance animation to complete
+                });
+            }
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        positionImages();
+                        // Add visible class with stagger
+                        circleImages.forEach((img, index) => {
+                            setTimeout(() => {
+                                img.classList.add('visible');
+                            }, index * 200);
+                        });
+                        // Start floating animations
+                        startFloatingAnimations();
+                    } else {
+                        circleImages.forEach(img => {
+                            img.classList.remove('visible');
+                            img.style.animation = 'none';
+                        });
+                    }
+                });
+            }, {
+                threshold: 0.3
+            });
+
+            observer.observe(circleShowcase);
+            window.addEventListener('resize', positionImages);
+        });
+
+        // Mobile menu functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const navLinks = document.querySelector('.nav-links');
+            const body = document.body;
+            
+            // Create and append overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'mobile-menu-overlay';
+            document.body.appendChild(overlay);
+
+            function toggleMenu() {
+                navLinks.classList.toggle('active');
+                overlay.classList.toggle('active');
+                body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            }
+
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu();
+            });
+
+            // Close menu when clicking overlay
+            overlay.addEventListener('click', () => {
+                toggleMenu();
+            });
+
+            // Close menu when clicking a link
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    toggleMenu();
+                });
+            });
+
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // Analytics initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if analytics is enabled
+            if (!window.isAnalyticsEnabled || !window.isAnalyticsEnabled()) {
+                console.log('Analytics is disabled');
+                return;
+            }
+            
+            // Initialize analytics
+            if (window.initAnalytics && window.ANALYTICS_CONFIG) {
+                const config = window.getAnalyticsConfig('MIXPANEL');
+                
+                window.initAnalytics(config.PROJECT_TOKEN, {
+                    debug: config.DEBUG || false,
+                    track_pageview: config.TRACK_PAGEVIEW || false,
+                    persistence: config.PERSISTENCE || 'localStorage',
+                    ...config.OPTIONS
+                });
+                
+                // Track visit started event
+                window.trackVisitStarted({
+                    page_type: 'landing',
+                    user_agent: navigator.userAgent,
+                    referrer: document.referrer
+                });
+                
+                if (window.isDebugLoggingEnabled && window.isDebugLoggingEnabled()) {
+                    console.log('Analytics initialized with config:', config);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

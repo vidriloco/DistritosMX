@@ -1,0 +1,24 @@
+
+{% extends "wikiando/layouts/map_simple.html" %}
+{% load static %}
+
+{% block body %}
+
+{% with active_tab="step-2" shrinkable=True %}
+    {% include 'lines/_navbar.html' %}
+{% endwith %}
+
+<div id='map' data-theme-url="{{ line.theme_url }}" data-theme-id={{ line.theme }} style='width: 100%; height: 100vh;'></div>
+
+<div id="left-card-container" class="card-container"></div>
+
+<div class="line-container scrollable">
+
+    <div style="height: calc(100vh - 150px);"></div>
+    {% include 'lines/shared/info.html' %}
+    </div>
+</div>
+
+{% include 'lines/show/custom_map_controls.html' %}
+
+{% endblock body %}

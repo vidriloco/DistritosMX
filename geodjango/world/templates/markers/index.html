@@ -1,0 +1,11 @@
+<div id="line-markers" class="card">
+    <div class="menu">
+        <div class="header-hidden" hx-get="{% url 'lines_stations' line_id=line.id %}" hx-target="#content-area-for-stations" hx-swap="outerHTML">
+            <h4 class="text">+ Marcadores</h4>
+        </div>
+
+        <div class="content container mb-3 mt-4" style="display: none;">
+            {% include 'markers/collection.html' %}
+        </div>
+    </div>
+</div>
