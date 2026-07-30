@@ -169,7 +169,8 @@ DEFAULT_FROM_EMAIL = "no-reply@tallerdeapps.mx"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "Wikiando MX - "
 
 # AWS settings
-# Read from environment variables (for Docker) or use defaults
+# Credentials come from the environment only — never a default in
+# source. See .env.production / docker-compose.yaml for how they are supplied.
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'wikiando')
