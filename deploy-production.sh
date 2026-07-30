@@ -233,6 +233,14 @@ if [ "$SEED_FGJ" = true ]; then
     echo "AGEB/neighbourhood/municipality aggregates updated from this data."
 fi
 
+# The despojos map caches full-table scans for 12 hours in a file cache that
+# survives restarts. Any deploy that changed the data — a seed, a restore, a
+# migration — leaves it stale, and a cache warmed against an empty table shows
+# "0 carpetas" for half a day. Cheap to redo, so it is unconditional.
+echo "==> Rebuilding the despojos map cache..."
+$COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py despojos_warm_cache" || \
+    echo "WARNING: could not warm the despojos cache." >&2
+
 echo "==> Health check..."
 sleep 3
 PORT="${APP_PORT:-8000}"

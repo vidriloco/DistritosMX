@@ -133,6 +133,22 @@ restore)
         echo "    pg_restore reported warnings (usually PostGIS extension objects)." >&2
     fi
 
+    if [ "$TARGET_DB" = "$DB_NAME" ]; then
+        # The despojos map caches its full-table scans for 12 hours in a file
+        # cache that outlives the database. After swapping the database under it
+        # the cache is stale by definition — and if it was warmed while the
+        # database was still empty, the map serves "0 carpetas" for half a day
+        # with nothing in any log to explain it. Recomputed here rather than
+        # left for someone to notice.
+        echo "==> Rebuilding the despojos map cache..."
+        if $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py despojos_warm_cache" 2>/dev/null; then
+            :
+        else
+            echo "    Could not reach the app container. Run this once it is up:" >&2
+            echo "    $COMPOSE exec -T app bash -c 'cd geodjango && python3 manage.py despojos_warm_cache'" >&2
+        fi
+    fi
+
     echo
     echo "==> Verifying..."
     db psql -U "$DB_USER" -d "$TARGET_DB" -c "
