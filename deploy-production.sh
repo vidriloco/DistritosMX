@@ -149,8 +149,34 @@ done
 echo "==> Starting app (collectstatic runs on container start)..."
 $COMPOSE up -d app
 
+echo "==> Verifying the app is really in production mode..."
+# The container command starts gunicorn regardless, so a misconfigured DEBUG
+# would only show up as tracebacks on a public page. Asked of the running
+# process rather than of the compose file, which is the thing that can lie.
+MODE="$($COMPOSE exec -T app bash -c "cd geodjango && python3 -c \"
+import django, os
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'geodjango.settings')
+django.setup()
+from django.conf import settings
+print('DEBUG=%s|HOSTS=%s|CSRF=%s' % (
+    settings.DEBUG, ','.join(settings.ALLOWED_HOSTS), ','.join(settings.CSRF_TRUSTED_ORIGINS)))
+\"" | tr -d '\r')"
+echo "    $MODE"
+case "$MODE" in
+    DEBUG=False*) ;;
+    *) echo "REFUSING TO CONTINUE: the app is running with DEBUG on. Check DJANGO_DEBUG in $ENV_FILE and docker-compose.prod.yaml." >&2
+       exit 1 ;;
+esac
+
 echo "==> Running migrations..."
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py migrate --noinput"
+
+echo "==> Preparing static assets..."
+# The container command already runs this on start; repeating it here is cheap,
+# idempotent, and makes a failure visible in the deploy output instead of only
+# in a restart loop. --clear drops files deleted from the source tree, which a
+# plain collectstatic leaves behind forever.
+$COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py collectstatic --noinput --clear" | tail -3
 
 if [ "$SEED" = true ]; then
     echo "==> Seeding database with datasets tracked in the repo..."

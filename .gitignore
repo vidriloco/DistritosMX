@@ -7,5 +7,11 @@ __pycache__/
 geodjango/data/
 
 # Deployment secrets
+.env
 .env.production
 .env.local
+
+# collectstatic output. Build artefact, not source: it is regenerated on every
+# deploy (see deploy-production.sh) and committing it means thousands of copied
+# files and a merge conflict every time an asset changes.
+geodjango/geodjango/static/

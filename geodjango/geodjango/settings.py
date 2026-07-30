@@ -11,11 +11,34 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "top_secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "true").strip().lower() in ("1", "true", "yes")
+# Defaults to OFF. Anything that forgets to pass DJANGO_DEBUG — a one-off
+# `docker compose run`, a cron container, a new compose file — then gets a
+# production-safe process instead of one serving tracebacks and settings to the
+# internet. Local development opts in explicitly, in docker-compose.yaml.
+DEBUG = os.getenv("DJANGO_DEBUG", "false").strip().lower() in ("1", "true", "yes")
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+
+# Secure cookies require HTTPS, so pinning them True makes a plain-HTTP local
+# server unable to hold a session at all: the browser accepts the login and
+# then drops the cookie, and /admin and /dashboard bounce back to the form
+# forever. Tied to DEBUG so production keeps them and localhost works.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# Off by default: switching this on without the proxy header below — or in
+# front of a load balancer that terminates TLS itself — produces a redirect
+# loop, so it is the operator's call, per environment.
+SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "false").strip().lower() in ("1", "true", "yes")
+if os.getenv("DJANGO_BEHIND_TLS_PROXY", "false").strip().lower() in ("1", "true", "yes"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# HSTS is close to irreversible for the duration it advertises — browsers honour
+# it even after the header stops being sent — so it stays 0 until switched on.
+SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS", "0") or 0)
+if SECURE_HSTS_SECONDS:
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 ALLOWED_HOSTS = [
     h.strip()
@@ -237,7 +260,31 @@ DEFAULT_HOST = 'www'
 
 TAGGIT_CASE_INSENSITIVE = True
 
-CSRF_TRUSTED_ORIGINS = ['https://wikiando.mx', 'https://www.wikiando.mx']
+# Django 4 rejects any POST whose Origin is not listed here, so a stale value is
+# not a warning — it is every form on the site failing at once: the contact
+# form, the despojo intake, the dashboard, the admin login. It was pinned to
+# wikiando.mx, which would have broken all of them the moment the site answered
+# on distritos.mx. Derived from ALLOWED_HOSTS instead, so moving domains is one
+# environment variable rather than a code change somebody has to remember.
+def _csrf_origins_from_hosts(hosts):
+    origins = []
+    for host in hosts:
+        if not host or host == "*":
+            continue
+        # A leading dot means "this domain and its subdomains"; CSRF spells the
+        # same idea with an explicit wildcard label.
+        origins.append(f"https://*{host}" if host.startswith(".") else f"https://{host}")
+        # Local development is served over plain HTTP.
+        if host in ("localhost", "127.0.0.1", "[::1]") or host.endswith(".localhost"):
+            origins.append(f"http://{host}")
+    return origins
+
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+] or _csrf_origins_from_hosts(ALLOWED_HOSTS)
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

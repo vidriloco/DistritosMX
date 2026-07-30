@@ -7,6 +7,9 @@ services:
       dockerfile: Dockerfile
     image: geodjango
     environment:
+      # Opt in explicitly: settings.py defaults DJANGO_DEBUG to false so that
+      # anything which forgets to set it runs production-safe.
+      DJANGO_DEBUG: "true"
       PYTHONDONTWRITEBYTECODE: "no-write"
       DB_HOST: db
       DB_PORT: 5432
