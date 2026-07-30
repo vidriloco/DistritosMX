@@ -19,12 +19,19 @@ DEBUG = os.getenv("DJANGO_DEBUG", "false").strip().lower() in ("1", "true", "yes
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 
-# Secure cookies require HTTPS, so pinning them True makes a plain-HTTP local
-# server unable to hold a session at all: the browser accepts the login and
-# then drops the cookie, and /admin and /dashboard bounce back to the form
-# forever. Tied to DEBUG so production keeps them and localhost works.
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+# Secure cookies require HTTPS, so switching them on over plain HTTP makes the
+# server unable to hold a session at all: the browser accepts the login and then
+# drops the cookie, and /admin and /dashboard bounce back to the form forever.
+#
+# Defaults to on whenever DEBUG is off, which is what a real deployment wants.
+# The override exists for the window before TLS is set up, when the site is
+# reached by IP over http — without it the only way to log in would be to turn
+# DEBUG on, which is far worse. Remove it from the environment once HTTPS works.
+SECURE_COOKIES = os.getenv(
+    "DJANGO_SECURE_COOKIES", "false" if DEBUG else "true"
+).strip().lower() in ("1", "true", "yes")
+SESSION_COOKIE_SECURE = SECURE_COOKIES
+CSRF_COOKIE_SECURE = SECURE_COOKIES
 
 # Off by default: switching this on without the proxy header below — or in
 # front of a load balancer that terminates TLS itself — produces a redirect

@@ -12,6 +12,8 @@ services:
       # Empty by default: settings.py derives the CSRF origins from
       # DJANGO_ALLOWED_HOSTS unless this overrides them.
       DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      # Leave unset once HTTPS is in place; see .env.production.example.
+      DJANGO_SECURE_COOKIES: ${DJANGO_SECURE_COOKIES:-true}
       # TLS knobs, all off unless .env.production turns them on. They have to be
       # forwarded explicitly — a variable that only exists in .env.production is
       # visible to compose for substitution but never reaches the process.
