@@ -15,3 +15,7 @@ geodjango/data/
 # deploy (see deploy-production.sh) and committing it means thousands of copied
 # files and a merge conflict every time an asset changes.
 geodjango/geodjango/static/
+
+# Database dumps — contain personal data. Never commit.
+dumps/
+*.dump
