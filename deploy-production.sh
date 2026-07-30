@@ -111,14 +111,27 @@ set -a; source "$ENV_FILE"; set +a
 
 if [ "$PULL" = true ]; then
     echo "==> Pulling latest code..."
-    git pull --ff-only
+    # Skip the LFS smudge filter. The only file still in LFS is a 94MB design
+    # asset that the server never opens and .dockerignore excludes anyway, so
+    # letting git try to fetch it means a deploy that dies on "Bad credentials"
+    # for something the app does not use. Everything the app needs at runtime is
+    # a normal git object.
+    GIT_LFS_SKIP_SMUDGE=1 git pull --ff-only
 fi
 
-# The data directories are tracked in git but ignored for new files; restore
-# them if missing so they get baked into the image for seeding.
-if [ ! -d geodjango/data ] || [ ! -f data/polygons.geojson ]; then
-    echo "==> Restoring data directories from git..."
-    git checkout -- data geodjango/data
+# Only `data/polygons.geojson` is in git. `geodjango/data/` is NOT — it is
+# gitignored, so `git checkout` can never restore it and asking it to just
+# produces a fatal pathspec error on a fresh clone. The directory is created
+# empty so the FGJ and DENUE downloads have somewhere to land; everything else
+# under it has to be copied onto the server by hand.
+mkdir -p geodjango/data
+if [ ! -f data/polygons.geojson ]; then
+    if git cat-file -e HEAD:data/polygons.geojson 2>/dev/null; then
+        echo "==> Restoring data/polygons.geojson from git..."
+        git checkout -- data/polygons.geojson
+    else
+        echo "WARNING: data/polygons.geojson is missing and not in this commit." >&2
+    fi
 fi
 
 if [ "$SEED_FGJ" = true ]; then
@@ -179,6 +192,15 @@ echo "==> Preparing static assets..."
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py collectstatic --noinput --clear" | tail -3
 
 if [ "$SEED" = true ]; then
+    # Every command below reads from geodjango/data/, which is not in git. On a
+    # fresh server it is empty, and `set -e` would otherwise kill the deploy on
+    # the first command with a traceback instead of an explanation.
+    if [ -z "$(ls -A geodjango/data 2>/dev/null)" ]; then
+        echo "Cannot --seed: geodjango/data/ is empty and is not tracked in git." >&2
+        echo "Copy it onto the server first, or use --seed-fgj / --seed-denue," >&2
+        echo "which download their own inputs." >&2
+        exit 1
+    fi
     echo "==> Seeding database with datasets tracked in the repo..."
     for cmd in \
         "geo_area_import --area-type ageb" \

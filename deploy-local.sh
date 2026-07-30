@@ -106,11 +106,19 @@ download_denue() {
     done
 }
 
-# The data directories are tracked in git but ignored for new files; restore
-# them if they are missing from the working tree.
-if [ ! -d geodjango/data ] || [ ! -f data/polygons.geojson ]; then
-    echo "==> Restoring data directories from git..."
-    git checkout -- data geodjango/data
+# Only `data/polygons.geojson` is in git. `geodjango/data/` is NOT — it is
+# gitignored, so `git checkout` can never restore it and asking it to just
+# produces a fatal pathspec error on a fresh clone. The directory is created
+# empty so the FGJ and DENUE downloads have somewhere to land; everything else
+# under it has to be copied onto the server by hand.
+mkdir -p geodjango/data
+if [ ! -f data/polygons.geojson ]; then
+    if git cat-file -e HEAD:data/polygons.geojson 2>/dev/null; then
+        echo "==> Restoring data/polygons.geojson from git..."
+        git checkout -- data/polygons.geojson
+    else
+        echo "WARNING: data/polygons.geojson is missing and not in this commit." >&2
+    fi
 fi
 
 if [ "$FRESH" = true ]; then
@@ -142,6 +150,15 @@ echo "==> Running migrations..."
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py migrate --noinput"
 
 if [ "$SEED" = true ]; then
+    # Every command below reads from geodjango/data/, which is not in git. On a
+    # fresh server it is empty, and `set -e` would otherwise kill the deploy on
+    # the first command with a traceback instead of an explanation.
+    if [ -z "$(ls -A geodjango/data 2>/dev/null)" ]; then
+        echo "Cannot --seed: geodjango/data/ is empty and is not tracked in git." >&2
+        echo "Copy it onto the server first, or use --seed-fgj / --seed-denue," >&2
+        echo "which download their own inputs." >&2
+        exit 1
+    fi
     echo "==> Seeding database with datasets tracked in the repo..."
     for cmd in \
         "geo_area_import --area-type ageb" \

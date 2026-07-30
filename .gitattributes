@@ -1,4 +1,9 @@
-*.geojson filter=lfs diff=lfs merge=lfs -text
-*.sketch filter=lfs diff=lfs merge=lfs -text
+# Only genuinely large, non-runtime files go through LFS.
+#
+# *.geojson used to be routed here too, which put two ~300KB files — one of them
+# a runtime asset the map fetches — behind an authenticated LFS endpoint. When
+# LFS auth fails on a server, git checks out a 130-byte pointer instead of the
+# data, collectstatic happily publishes the pointer, and the alcaldías layer
+# breaks with no error anywhere. Not worth it for 600KB.
 designs/Assets.sketch filter=lfs diff=lfs merge=lfs -text
-geodjango/data/denue/yucatan.geojson filter=lfs diff=lfs merge=lfs -text
+*.sketch filter=lfs diff=lfs merge=lfs -text
