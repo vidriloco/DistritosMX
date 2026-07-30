@@ -9,6 +9,19 @@ services:
       DJANGO_DEBUG: "false"
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set it in .env.production}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:?set it in .env.production}
+      # Empty by default: settings.py derives the CSRF origins from
+      # DJANGO_ALLOWED_HOSTS unless this overrides them.
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      # TLS knobs, all off unless .env.production turns them on. They have to be
+      # forwarded explicitly — a variable that only exists in .env.production is
+      # visible to compose for substitution but never reaches the process.
+      DJANGO_SECURE_SSL_REDIRECT: ${DJANGO_SECURE_SSL_REDIRECT:-false}
+      DJANGO_BEHIND_TLS_PROXY: ${DJANGO_BEHIND_TLS_PROXY:-false}
+      DJANGO_HSTS_SECONDS: ${DJANGO_HSTS_SECONDS:-0}
+      # The custom S3 URL builder in world/utils/s3_urls.py reads its own names,
+      # separate from the django-storages AWS_* pair below.
+      S3_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME:-wikiando}
+      S3_REGION: ${AWS_S3_REGION_NAME:-us-east-2}
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-wikiando_db}
