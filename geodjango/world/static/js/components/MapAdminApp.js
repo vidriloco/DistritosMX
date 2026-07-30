@@ -2359,23 +2359,6 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
         const SOURCE = 'despojos-source';
 
         let popup = null;
-        let caseTip = null;
-        let caseTipKey = null;
-        let caseTipTimer = null;
-        let caseTipClose = null;
-
-        const closeCaseTip = () => {
-            clearTimeout(caseTipTimer);
-            clearTimeout(caseTipClose);
-            caseTipKey = null;
-            if (caseTip) { caseTip.remove(); caseTip = null; }
-        };
-        // A short grace period so the pointer can travel from the point to the
-        // card without it vanishing on the way.
-        const scheduleCaseTipClose = () => {
-            clearTimeout(caseTipClose);
-            caseTipClose = setTimeout(closeCaseTip, 260);
-        };
         let cancelled = false;
         // The year the map is currently on. The player can emit one before the
         // GeoJSON has landed, so it is remembered here and applied as soon as
@@ -2647,7 +2630,6 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
 
             if (!nearState.active) {
                 if (nearMarker) { nearMarker.remove(); nearMarker = null; }
-                closeCaseTip();
                 [NEAR_LINE, NEAR_FILL].forEach(id => {
                     if (map.current.getLayer(id)) map.current.removeLayer(id);
                 });
@@ -2902,94 +2884,11 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                             // Off a point the cursor belongs to the marker again:
                             // clicking the bare map moves the search point.
                             map.current.getCanvas().style.cursor = nearState.active ? 'crosshair' : '';
-                            // Not closed immediately — the card holds a link, and
-                            // the cursor has to cross the gap to reach it.
-                            scheduleCaseTipClose();
                         });
 
-                        // Hover readout for a carpeta. In "cerca de mí" the click
-                        // is taken by the marker, so hovering is the only way to
-                        // read a point without going through the list.
-                        map.current.on('mousemove', ACTIVE_LAYER, (e) => {
-                            if (!nearState.active) return;
-                            const feature = e.features[0];
-                            if (!feature) return;
-                            const [flng, flat] = feature.geometry.coordinates;
-                            const key = `${flng},${flat}`;
-                            // mousemove fires continuously over the same point;
-                            // only rebuild the card when the point changes.
-                            clearTimeout(caseTipClose);
-                            if (key === caseTipKey) return;
-                            caseTipKey = key;
-                            clearTimeout(caseTipTimer);
-
-                            const distance = nearState.point
-                                ? metresBetween(nearState.point.lng, nearState.point.lat, flng, flat)
-                                : null;
-                            const cached = addressCache.has(key) ? addressCache.get(key) : undefined;
-                            const addressLine = cached === undefined
-                                ? '<span class="despojo-case-tip-address is-loading">Buscando dirección…</span>'
-                                : `<span class="despojo-case-tip-address">${cached || 'Dirección no disponible'}</span>`;
-                            const html = `
-                                <div class="despojo-case-tip">
-                                    ${addressLine}
-                                    <span class="despojo-case-tip-date">${formatDespojoDate(feature.properties.date, feature.properties.time)}</span>
-                                    ${distance === null ? '' :
-                                      `<span class="despojo-case-tip-dist">a unos ${Math.round(distance / 10) * 10} m del punto</span>`}
-                                    <a class="despojo-case-tip-street"
-                                       href="${streetViewUrl(flng, flat)}"
-                                       target="_blank" rel="noopener noreferrer">
-                                        Ver la calle en Street View
-                                        <span aria-hidden="true">↗</span>
-                                    </a>
-                                </div>`;
-                            if (!caseTip) {
-                                caseTip = new mapboxgl.Popup({
-                                    className: 'despojo-popup is-tip',
-                                    closeButton: false,
-                                    closeOnClick: false,
-                                    maxWidth: '260px',
-                                    // Pinned above the point rather than letting
-                                    // Mapbox flip it: a card that jumps sides as
-                                    // the cursor crosses the map is hard to read,
-                                    // and below the point it lands under the
-                                    // "cerca de mí" marker.
-                                    anchor: 'bottom',
-                                    offset: [0, -12]
-                                }).addTo(map.current);
-                            }
-                            caseTip.setLngLat(feature.geometry.coordinates.slice()).setHTML(html);
-
-                            // Hovering the card keeps it alive, so its link can
-                            // actually be reached. Bound after the first position
-                            // is set: Mapbox builds the container lazily, so
-                            // getElement() is undefined until then.
-                            const element = caseTip.getElement();
-                            if (element && !element.dataset.tipBound) {
-                                element.dataset.tipBound = '1';
-                                element.addEventListener('mouseenter', () => clearTimeout(caseTipClose));
-                                element.addEventListener('mouseleave', closeCaseTip);
-                            }
-
-                            if (cached !== undefined) return;
-                            // Sweeping the cursor across a dense patch must not
-                            // fire a lookup per point: only a point the reader
-                            // rests on for a moment is worth geocoding.
-                            caseTipTimer = setTimeout(() => {
-                                reverseGeocode(flng, flat).then(address => {
-                                    if (caseTipKey !== key || !caseTip) return;
-                                    const element = caseTip.getElement();
-                                    const slot = element && element.querySelector('.despojo-case-tip-address');
-                                    if (!slot) return;
-                                    slot.textContent = address || 'Dirección no disponible';
-                                    slot.classList.remove('is-loading');
-                                });
-                            }, 320);
-                        });
-
-                        // In "cerca de mí" a click anywhere moves the point; the
-                        // carpeta popups stay out of the way until the reader
-                        // goes back to browsing the city.
+                        // In "cerca de mí" a click on bare map moves the search
+                        // point; a click on a carpeta opens its card, the same
+                        // as when browsing the city.
                         map.current.on('click', (e) => {
                             if (!nearState.active) return;
                             // A click that lands on a carpeta belongs to that
@@ -3010,7 +2909,6 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                         });
 
                         map.current.on('click', ACTIVE_LAYER, (e) => {
-                            closeCaseTip();
                             const feature = e.features[0];
                             const props = feature.properties;
                             const coordinates = feature.geometry.coordinates.slice();
@@ -3140,7 +3038,6 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             window.removeEventListener('despojoNearFocus', handleNearFocus);
             if (nearFrame) cancelAnimationFrame(nearFrame);
             if (nearMarker) nearMarker.remove();
-            closeCaseTip();
             if (popup) popup.remove();
             if (boroughPopup) boroughPopup.remove();
             // map.current.style is undefined once the map itself has been

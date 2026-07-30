@@ -3685,32 +3685,6 @@
             font-variant-numeric: tabular-nums; color: var(--dsp-faint, #77827f);
         }
 
-        /* Hover readout for a carpeta while "cerca de mí" owns the click */
-        .despojo-popup.is-tip .mapboxgl-popup-content { border-radius: 8px; }
-        /* Over the draggable marker, which Mapbox paints in the same container */
-        .despojo-popup.is-tip { z-index: 5; }
-        .despojo-case-tip { padding: 9px 12px; display: grid; gap: 3px; }
-        .despojo-case-tip-address {
-            font-size: 12.5px; font-weight: 700; line-height: 1.3;
-            color: var(--dsp-ink, #1a2027);
-        }
-        .despojo-case-tip-address.is-loading {
-            font-weight: 500; font-style: italic; color: var(--dsp-faint, #77827f);
-        }
-        .despojo-case-tip-date { font-size: 11.5px; color: var(--dsp-dim, #4d5a5c); }
-        .despojo-case-tip-dist {
-            font-family: ui-monospace, monospace; font-size: 10.5px;
-            font-variant-numeric: tabular-nums; color: var(--dsp-faint, #77827f);
-        }
-        .despojo-case-tip-street {
-            display: flex; align-items: center; gap: 6px;
-            margin-top: 7px; padding-top: 7px;
-            border-top: 1px solid var(--dsp-line, #dce0da);
-            font-size: 11px; font-weight: 700; text-decoration: none;
-            color: var(--dsp-seal, #98122b);
-        }
-        .despojo-case-tip-street:hover { text-decoration: underline; text-underline-offset: 2px; }
-        .despojo-case-tip-street:focus-visible { outline: 2px solid var(--dsp-seal, #98122b); outline-offset: 2px; }
 
         .population-popup-content {
             display: flex;
