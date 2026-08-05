@@ -2488,6 +2488,7 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
         const BOROUGH_FILL = 'despojos-boroughs-fill';
         const BOROUGH_LINE = 'despojos-boroughs-line';
         const BOROUGH_PICKED = 'despojos-boroughs-picked';
+        const BOROUGH_LABEL = 'despojos-boroughs-label';
         const RAMP = window.DESPOJO_RAMP || ['#ffefef', '#eeb9b8', '#d58586', '#b85257', '#98122b'];
         const RAMP_EMPTY = window.DESPOJO_RAMP_EMPTY || '#dfe1dc';
 
@@ -2505,15 +2506,32 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             return borough && borough.population ? (count / borough.population) * 100000 : 0;
         };
 
-        const boroughColor = (year, code) => {
+        // Which class of the ramp a borough lands in, or -1 for a year with no
+        // carpetas at all — that one gets the neutral, off the ramp.
+        const boroughClass = (year, code) => {
             const count = ((boroughData.byYear || {})[year] || {})[code] || 0;
-            if (!count) return RAMP_EMPTY;
+            if (!count) return -1;
             const breaks = ((boroughData.breaks || {})[boroughMeasure]) || [];
             const value = boroughValue(year, code);
             for (let i = 0; i < breaks.length; i++) {
-                if (value <= breaks[i]) return RAMP[i];
+                if (value <= breaks[i]) return i;
             }
-            return RAMP[breaks.length];
+            return breaks.length;
+        };
+
+        const boroughColor = (year, code) => {
+            const index = boroughClass(year, code);
+            return index === -1 ? RAMP_EMPTY : RAMP[index];
+        };
+
+        // The number printed on the polygon, in whichever measure is painted.
+        // Same rounding as the panel's ranking, so the map and the list never
+        // disagree about what a borough is worth.
+        const boroughLabel = (year, code) => {
+            const value = boroughValue(year, code);
+            return boroughMeasure === 'rate'
+                ? value.toLocaleString('es-MX', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                : Math.round(value).toLocaleString('es-MX');
         };
 
         const paintBoroughs = () => {
@@ -2527,16 +2545,46 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             });
             expression.push(RAMP_EMPTY);
             map.current.setPaintProperty(BOROUGH_FILL, 'fill-color', expression);
+
+            if (!map.current.getLayer(BOROUGH_LABEL)) return;
+            // The number is worth nothing if it cannot be read off its own fill,
+            // and the fill runs from near-white to the seal. So the type flips
+            // with the class: ink over the pale end, white over the dark one,
+            // each with the opposite as a halo.
+            const text = ['match', ['get', 'cve_mun']];
+            const color = ['match', ['get', 'cve_mun']];
+            const halo = ['match', ['get', 'cve_mun']];
+            (boroughData.boroughs || []).forEach(borough => {
+                const onDark = boroughClass(year, borough.code) >= 3;
+                text.push(borough.code, boroughLabel(year, borough.code));
+                color.push(borough.code, onDark ? '#ffffff' : '#1a2027');
+                halo.push(borough.code, onDark ? 'rgba(74,6,18,.5)' : 'rgba(255,255,255,.92)');
+            });
+            // A polygon the matrix has never heard of says nothing rather than
+            // printing a zero it cannot stand behind.
+            text.push('');
+            color.push('#1a2027');
+            halo.push('rgba(255,255,255,.92)');
+            map.current.setLayoutProperty(BOROUGH_LABEL, 'text-field', text);
+            map.current.setPaintProperty(BOROUGH_LABEL, 'text-color', color);
+            map.current.setPaintProperty(BOROUGH_LABEL, 'text-halo-color', halo);
         };
 
         const applyBoroughView = () => {
             if (!map.current) return;
             const showing = boroughView === 'boroughs';
-            [BOROUGH_FILL, BOROUGH_LINE, BOROUGH_PICKED].forEach(id => {
+            [BOROUGH_FILL, BOROUGH_LINE, BOROUGH_PICKED, BOROUGH_LABEL].forEach(id => {
                 if (map.current.getLayer(id)) {
                     map.current.setLayoutProperty(id, 'visibility', showing ? 'visible' : 'none');
                 }
             });
+            // The points and the polygons load from two independent fetches, so
+            // whichever lands second sits on top. The numbers have to outrank
+            // both of them, and asking for that here costs nothing and does not
+            // depend on who won the race.
+            if (showing && map.current.getLayer(BOROUGH_LABEL)) {
+                map.current.moveLayer(BOROUGH_LABEL);
+            }
             // The points stay underneath instead of being removed: they give the
             // fill texture, they remind the reader the source data is punctual,
             // and coming back to them is instant.
@@ -2773,6 +2821,32 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                         filter: ['==', ['get', 'cve_mun'], '—'],
                         paint: { 'line-color': '#1a2027', 'line-width': 2.4 }
                     }, beforeId);
+
+                    // The value, printed on the polygon. Deliberately NOT placed
+                    // under the collision engine: a choropleth whose labels drop
+                    // out where the polygons crowd stops answering the question
+                    // exactly where it is asked — the centre of the city, where
+                    // the four smallest alcaldías meet. Every borough states its
+                    // number at every zoom, and the halo does the separating.
+                    map.current.addLayer({
+                        id: BOROUGH_LABEL,
+                        type: 'symbol',
+                        source: BOROUGH_SOURCE,
+                        layout: {
+                            visibility: 'none',
+                            'text-field': '',
+                            'text-font': ['DIN Pro Medium', 'Arial Unicode MS Regular'],
+                            'text-allow-overlap': true,
+                            'text-ignore-placement': true,
+                            'text-size': ['interpolate', ['linear'], ['zoom'], 9, 11, 13, 17],
+                            'text-letter-spacing': 0.01
+                        },
+                        paint: {
+                            'text-color': '#1a2027',
+                            'text-halo-color': 'rgba(255,255,255,.92)',
+                            'text-halo-width': 1.5
+                        }
+                    });
 
                     map.current.on('mouseenter', BOROUGH_FILL, () => {
                         map.current.getCanvas().style.cursor = 'pointer';
@@ -3043,8 +3117,8 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             // map.current.style is undefined once the map itself has been
             // removed (the map-init effect's cleanup runs first on unmount)
             if (map.current && map.current.style) {
-                [ACTIVE_LAYER, GHOST_LAYER, BOROUGH_PICKED, BOROUGH_LINE, BOROUGH_FILL,
-                 NEAR_LINE, NEAR_FILL].forEach(id => {
+                [ACTIVE_LAYER, GHOST_LAYER, BOROUGH_LABEL, BOROUGH_PICKED, BOROUGH_LINE,
+                 BOROUGH_FILL, NEAR_LINE, NEAR_FILL].forEach(id => {
                     if (map.current.getLayer(id)) map.current.removeLayer(id);
                 });
                 [SOURCE, BOROUGH_SOURCE, NEAR_SOURCE].forEach(id => {
