@@ -321,4 +321,14 @@ S3_SYSTEMS_PATH = os.getenv('S3_SYSTEMS_PATH', 'transports/systems')
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Content-hashed filenames. Without them every asset keeps its URL forever, so
+# a deploy that changes DespojoPage.js cannot tell any cache that it did: the
+# CDN holds the old file for its full max-age and the browser holds its own
+# copy on top of that, and the site serves last week's JavaScript against this
+# week's HTML. The hash goes in the name, so a changed file is a changed URL
+# and every cache invalidates itself.
+#
+# The manifest is written by collectstatic, so collectstatic must succeed for
+# the app to render at all — a template asking for a file the manifest has
+# never heard of raises rather than guessing.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

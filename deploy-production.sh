@@ -185,11 +185,39 @@ echo "==> Running migrations..."
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py migrate --noinput"
 
 echo "==> Preparing static assets..."
-# The container command already runs this on start; repeating it here is cheap,
-# idempotent, and makes a failure visible in the deploy output instead of only
-# in a restart loop. --clear drops files deleted from the source tree, which a
-# plain collectstatic leaves behind forever.
+# The container command already runs this on start; repeating it here makes a
+# failure visible in the deploy output instead of only in a restart loop, and
+# --clear drops files deleted from the source tree, which a plain collectstatic
+# leaves behind forever.
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py collectstatic --noinput --clear" | tail -3
+
+# ...and then the app has to come back. WhiteNoise reads every file's size and
+# ETag once, at startup, and serves from that index forever after. The line
+# above deletes the tree it indexed and writes a new one underneath it, so
+# without this restart it keeps answering with the old sizes: a file that grew
+# is delivered truncated at its previous length, which reaches the browser as a
+# syntax error partway through a line. Restarting re-runs collectstatic — by
+# then a no-op — and rebuilds the index against what is actually on disk.
+echo "==> Restarting app so it re-reads the static files..."
+$COMPOSE restart app
+
+# `restart` returns when the container is running, not when the app inside it
+# is. Coming back up means collectstatic over ~660 files and then gunicorn
+# booting its workers, which is comfortably longer than the health check's
+# patience — and the cache warm-up in between would otherwise be racing it too.
+PORT="${APP_PORT:-8000}"
+HOST_HEADER="$(echo "${DJANGO_ALLOWED_HOSTS:-localhost}" | cut -d, -f1)"
+HOST_HEADER="${HOST_HEADER#.}"
+for i in $(seq 1 45); do
+    if curl -fsS -o /dev/null --max-time 5 -H "Host: ${HOST_HEADER}" "http://127.0.0.1:${PORT}/" 2>/dev/null; then
+        echo "    app is back after ${i}s."
+        break
+    fi
+    if [ "$i" -eq 45 ]; then
+        echo "    app has not answered in 45s; continuing anyway — see the health check below." >&2
+    fi
+    sleep 1
+done
 
 if [ "$SEED" = true ]; then
     # Every command below reads from geodjango/data/, which is not in git. On a
@@ -242,11 +270,8 @@ $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py despojos_warm_ca
     echo "WARNING: could not warm the despojos cache." >&2
 
 echo "==> Health check..."
-sleep 3
-PORT="${APP_PORT:-8000}"
-# With DEBUG=false Django rejects Host: 127.0.0.1, so present an allowed host
-HOST_HEADER="$(echo "${DJANGO_ALLOWED_HOSTS:-localhost}" | cut -d, -f1)"
-HOST_HEADER="${HOST_HEADER#.}"
+# PORT and HOST_HEADER are set by the wait loop after the restart above. With
+# DEBUG=false Django rejects Host: 127.0.0.1, hence the allowed host.
 if curl -fsS -o /dev/null --max-time 10 -H "Host: ${HOST_HEADER}" "http://127.0.0.1:${PORT}/"; then
     echo "App is responding on port ${PORT}."
 else
