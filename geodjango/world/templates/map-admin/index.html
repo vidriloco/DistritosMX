@@ -3082,12 +3082,21 @@
         .despojo-countlabel { font-size: 12px; color: var(--dsp-dim, #4d5a5c); }
         /* The comparison, on the count line instead of a sentence under it.
            Sits at the far end so the eye lands on the count first. */
+        /* A button now, not a `span` with a `title`: the arithmetic it stands on
+           was unreachable on a touchscreen. Tapping it prints the sentence. */
         .despojo-delta-chip {
             margin-left: auto;
+            font-family: 'Ruda', sans-serif;
             font-size: 11px; font-weight: 700;
             font-variant-numeric: tabular-nums; white-space: nowrap;
-            padding: 3px 7px; border-radius: 3px;
-            cursor: help;
+            padding: 3px 7px; border: 0; border-radius: 3px;
+            cursor: pointer;
+        }
+        .despojo-delta-chip:focus-visible { outline: 2px solid var(--dsp-ink, #1a2027); outline-offset: 2px; }
+        .despojo-delta-note {
+            margin: 8px 0 0; font-size: 11.5px; line-height: 1.45;
+            color: var(--dsp-dim, #4d5a5c);
+            padding-left: 9px; border-left: 2px solid var(--dsp-line, #dce0da);
         }
         .despojo-delta-chip.is-up {
             color: var(--dsp-seal, #98122b); background: rgba(152,18,43,.09);
@@ -3447,15 +3456,24 @@
             transition: opacity .12s ease, transform .12s ease, visibility .12s;
         }
         .despojo-bartip em { font-style: normal; opacity: .65; }
+        /* The selected bar carries its own readout, without waiting for a hover.
+           A finger never hovers, so on a phone this number — the count for every
+           year but the one in the headline — simply did not exist. Left out of
+           the compact strip, where several bars are pressed at once and a dozen
+           tooltips would land on top of each other. */
+        .despojo-bars:not(.is-compact) .despojo-bar[aria-pressed="true"] .despojo-bartip,
         .despojo-bar:hover .despojo-bartip,
         .despojo-bar:focus-visible .despojo-bartip {
             opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
         }
+        .despojo-bars:not(.is-compact) .despojo-bar[aria-pressed="true"] { z-index: 2; }
         /* Keep the edge tooltips inside the panel instead of forcing a scrollbar */
         .despojo-bar:first-child .despojo-bartip { left: 0; transform: translateY(2px); }
+        .despojo-bars:not(.is-compact) .despojo-bar:first-child[aria-pressed="true"] .despojo-bartip,
         .despojo-bar:first-child:hover .despojo-bartip,
         .despojo-bar:first-child:focus-visible .despojo-bartip { transform: translateY(0); }
         .despojo-bar:last-child .despojo-bartip { left: auto; right: 0; transform: translateY(2px); }
+        .despojo-bars:not(.is-compact) .despojo-bar:last-child[aria-pressed="true"] .despojo-bartip,
         .despojo-bar:last-child:hover .despojo-bartip,
         .despojo-bar:last-child:focus-visible .despojo-bartip { transform: translateY(0); }
 
@@ -3544,8 +3562,18 @@
         .despojo-brand img { height: 25px; width: auto; display: block; }
 
         /* The page renders no navigation bar, so the panel owns the full height
-           left over by the wordmark above it. */
+           left over by the wordmark above it.
+           `dvh` after `vh`: on a phone `100vh` measures the viewport as if the
+           browser's toolbar were not there, which pushed the bottom edge of both
+           the map and the panel underneath it. */
+        .despojos-viviendas-page .map-container { height: 100vh; height: 100dvh; }
         .despojos-viviendas-page .despojo-panel { max-height: calc(100vh - 94px); }
+        .despojos-viviendas-page .despojo-panel { max-height: calc(100dvh - 94px); }
+
+        /* The sheet wrapper is inert above the breakpoint: the brand and the
+           panel stay direct flex children of the slot, exactly as before. */
+        .despojo-sheet { display: contents; }
+        .despojo-grab { display: none; }
 
         /* ---- news rail ---- */
         .despojo-news {
@@ -3585,6 +3613,19 @@
             color: var(--dsp-faint, #77827f);
         }
         .despojo-news-loading { padding: 12px 14px; font-size: 12px; color: var(--dsp-faint, #77827f); margin: 0; }
+
+        /* The same rail, folded into the sheet on a phone: no box of its own,
+           because inside the panel it is a section and not a second window. */
+        .despojo-news.is-inline {
+            position: static; width: auto; max-width: none;
+            border-radius: 0; box-shadow: none; overflow: visible;
+            margin-top: 16px; padding-top: 4px;
+            border-top: 1px solid var(--dsp-line, #dce0da);
+        }
+        .despojo-news.is-inline .despojo-news-head { padding: 12px 0; }
+        .despojo-news.is-inline .despojo-news-head:hover { background: none; }
+        .despojo-news.is-inline .despojo-news-list { max-height: none; overflow: visible; }
+        .despojo-news.is-inline .despojo-news-item { padding: 12px 0; }
 
         /* ---- case form modal ---- */
         .despojo-modal-backdrop {
@@ -3657,16 +3698,135 @@
         .despojo-sent .despojo-lede { margin: 10px auto 0; max-width: 40ch; }
         .despojo-sent .despojo-cta { max-width: 200px; margin-inline: auto; }
 
+        /* ============ phone ============
+           The panel stops being a card floating over the map and becomes a
+           bottom sheet with three heights. The card could not be dismissed, so
+           half the city — the half the map is about — sat permanently behind it.
+           DespojoPage drives `--dsp-sheet-y`; everything here is layout. */
         @media (max-width: 720px) {
             .despojo-formgrid { grid-template-columns: 1fr; }
-            .despojo-panel-slot { width: calc(100vw - 32px); }
-            .despojo-panel { max-height: 52vh; }
-            .despojo-news { display: none; }
+
+            .despojo-panel-slot {
+                left: 0; right: 0; bottom: 0; top: auto;
+                width: auto; max-width: none;
+                display: block; gap: 0;
+                /* The slot is as tall as the sheet's layout box — 88dvh — and a
+                   translate moves what you see, not what you can touch. Left
+                   solid it is an invisible pane over most of the map, swallowing
+                   every pan and tap meant for the city. Only the sheet itself and
+                   the wordmark take pointers back. */
+                pointer-events: none;
+            }
+            .despojo-sheet, .despojo-brand { pointer-events: auto; }
+
+            .despojo-sheet {
+                display: flex; flex-direction: column;
+                height: 88dvh;
+                background: #fff;
+                border-radius: 14px 14px 0 0;
+                box-shadow: 0 -3px 22px rgba(26,32,39,.17);
+                /* The fallback keeps the sheet at a sane height for the frame or
+                   two before the first measurement lands. */
+                transform: translateY(var(--dsp-sheet-y, 32dvh));
+                transition: transform .32s cubic-bezier(.32,.72,0,1);
+                will-change: transform;
+            }
+            .despojo-sheet.is-dragging { transition: none; }
+
+            .despojo-grab {
+                display: grid; place-items: center; flex: none;
+                width: 100%; height: 24px; padding: 0;
+                border: 0; background: none; cursor: grab;
+                touch-action: none;
+            }
+            .despojo-grab::before {
+                content: ""; width: 38px; height: 4px; border-radius: 2px;
+                background: #ccd2cb;
+            }
+            .despojo-grab:focus-visible { outline: 2px solid var(--dsp-seal, #98122b); outline-offset: -4px; }
+
+            .despojos-viviendas-page .despojo-panel,
+            .despojo-panel {
+                flex: 1; min-height: 0; max-height: none;
+                display: flex; flex-direction: column;
+                border-radius: 0; box-shadow: none;
+                padding: 0 16px calc(18px + env(safe-area-inset-bottom));
+                overscroll-behavior: contain;
+            }
+
+            /* The head floats above the intro and stays put while everything
+               scrolls under it, so the year and the count — the two things the
+               reader is holding — never leave the screen to reach a control.
+               The negative gutters let its background cover the panel padding. */
+            .despojo-head {
+                order: -1; position: sticky; top: 0; z-index: 4;
+                flex: none; background: #fff;
+                margin: 0 -16px 4px; padding: 12px 16px 11px;
+                border-bottom: 1px solid var(--dsp-line, #dce0da);
+            }
+            .despojo-intro { order: 0; padding-top: 12px; }
+            .despojo-rest { order: 1; }
+
+            /* A smaller headline is what makes the peek height a peek: at 52px
+               the year alone ate a third of what the old card had to give. */
+            .despojo-year { font-size: 38px; }
+            .despojo-count { font-size: 23px; }
+            .despojo-title { font-size: 21px; }
+            .despojo-title.is-near { font-size: 20px; margin-top: 8px; }
+            .despojo-controls { margin-top: 12px; }
+
+            /* Out of the sheet and onto the map: stacked above the panel it only
+               pushed the sheet down. The slot is untransformed, so `fixed` here
+               still resolves against the viewport. */
+            .despojo-brand {
+                position: fixed; z-index: 1001;
+                top: calc(10px + env(safe-area-inset-top)); left: 10px;
+                padding: 5px 10px;
+            }
+            .despojo-brand img { height: 19px; }
+
+            /* Targets a finger can actually land on. */
+            .despojo-play { min-height: 44px; padding: 0 16px; }
+            .despojo-scrub { height: 44px; }
+            .despojo-scrub::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -10px; }
+            .despojo-scrub::-moz-range-thumb { width: 22px; height: 22px; }
+            .despojo-switch button,
+            .despojo-measure button { min-height: 40px; }
+            .despojo-rank,
+            .despojo-case,
+            .despojo-geo,
+            .despojo-suggest button { min-height: 44px; }
+            .despojo-nearcta { min-height: 54px; }
+            .despojo-rank-more,
+            .despojo-scope-clear,
+            .despojo-yearlinks button { min-height: 34px; }
+            .despojo-info { width: 22px; height: 22px; font-size: 11px; }
+            /* The bars stay eleven-across on purpose — the shape of the decade is
+               the point, and scrolling it away would cost more than it buys — so
+               the height is where the target grows. */
+            .despojo-bars { height: 116px; }
+            .despojo-bars.is-compact { height: 64px; }
+
+            /* Under 16px iOS zooms the page on focus and leaves the map
+               off-centre with no way back. */
+            .despojo-search input,
+            .despojo-field input,
+            .despojo-field select,
+            .despojo-field textarea { font-size: 16px; }
+            .despojo-search input { padding: 12px 12px 12px 34px; }
+            .despojo-search-icon { top: 15px; }
+
+            /* The floating rail would cover the map; the copy inside the sheet
+               is the one that renders at this width. */
+            .despojo-news:not(.is-inline) { display: none; }
+
+            .despojo-modal { max-height: calc(100dvh - 40px); padding: 22px 18px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
             .despojo-stem, .despojo-barcap, .despojo-bartip, .despojo-play, .despojo-cta { transition: none; }
             .despojo-spinner { animation: none; }
+            .despojo-sheet { transition: none; }
         }
 
         /* Case card shown when a despojo point is clicked. The card owns its

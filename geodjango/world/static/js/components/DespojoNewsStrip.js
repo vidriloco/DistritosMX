@@ -7,16 +7,36 @@
  * despojo_news_fetch job. The hand-curated JSON in static/data is kept as a
  * fallback: if the job stops running or the endpoint is down, the rail shows
  * the last known set instead of an empty box.
+ *
+ * Mounted twice, and only ever one of the two renders: the floating rail on a
+ * desktop, and — with `inline` — a section inside the sheet on a phone, where
+ * a second floating box would cover the map. A phone used to get neither.
  */
 const DESPOJO_NEWS_ENDPOINT = '/api/despojos/news';
 const DESPOJO_NEWS_FALLBACK = '/static/data/despojo-news.json';
+const DESPOJO_NEWS_MOBILE = '(max-width: 720px)';
 
-function DespojoNewsStrip() {
+function DespojoNewsStrip({ inline }) {
     const [items, setItems] = React.useState(null);
-    const [open, setOpen] = React.useState(true);
+    // Inside the sheet the rail starts closed: it sits under everything else
+    // and a dozen headlines would double the length of the scroll.
+    const [open, setOpen] = React.useState(!inline);
     const [failed, setFailed] = React.useState(false);
+    const [mobile, setMobile] = React.useState(
+        () => window.matchMedia(DESPOJO_NEWS_MOBILE).matches
+    );
 
     React.useEffect(() => {
+        const query = window.matchMedia(DESPOJO_NEWS_MOBILE);
+        const sync = event => setMobile(event.matches);
+        query.addEventListener('change', sync);
+        return () => query.removeEventListener('change', sync);
+    }, []);
+
+    const active = inline ? mobile : !mobile;
+
+    React.useEffect(() => {
+        if (!active) return;
         let cancelled = false;
 
         const load = url => fetch(url).then(r => {
@@ -36,7 +56,10 @@ function DespojoNewsStrip() {
             .catch(() => { if (!cancelled) setFailed(true); });
 
         return () => { cancelled = true; };
-    }, []);
+    }, [active]);
+
+    // The other copy is the one on duty at this width.
+    if (!active) return null;
 
     // Nothing to show and nothing to explain — stay out of the way.
     if (failed || (items && items.length === 0)) return null;
@@ -51,7 +74,7 @@ function DespojoNewsStrip() {
     };
 
     return (
-        <div className={'despojo-news' + (open ? '' : ' is-collapsed')}>
+        <div className={'despojo-news' + (open ? '' : ' is-collapsed') + (inline ? ' is-inline' : '')}>
             <button
                 type="button"
                 className="despojo-news-head"

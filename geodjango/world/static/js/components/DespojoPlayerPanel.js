@@ -22,6 +22,7 @@ window.DESPOJO_RAMP = ['#ffefef', '#eeb9b8', '#d58586', '#b85257', '#98122b'];
 window.DESPOJO_RAMP_EMPTY = '#dfe1dc';
 
 function DespojoPlayerPanel() {
+    const NewsStrip = window.DespojoNewsStrip || (() => null);
     const [summary, setSummary] = React.useState(null);
     const [boroughs, setBoroughs] = React.useState(null);
     const [year, setYear] = React.useState(null);
@@ -33,6 +34,7 @@ function DespojoPlayerPanel() {
     const [measure, setMeasure] = React.useState('absolute');
     const [selected, setSelected] = React.useState(null);
     const [rankingOpen, setRankingOpen] = React.useState(false);
+    const [deltaOpen, setDeltaOpen] = React.useState(false);
     // ---- "cerca de mí" ----
     const [near, setNear] = React.useState(false);
     const [nearPoint, setNearPoint] = React.useState(null);
@@ -298,6 +300,14 @@ function DespojoPlayerPanel() {
         ? 'a unos ' + (Math.round(m / 10) * 10) + ' m'
         : 'a ' + (Math.round(m / 100) / 10).toString().replace('.', ',') + ' km');
 
+    // On a phone the sheet is asked to sit at mid height for both moves: the
+    // marker and its radius have to stay on screen while they are being set,
+    // and coming back should not leave the reader staring at a full-height
+    // sheet with the map they were just looking at hidden behind it.
+    const askSheet = (height) => window.dispatchEvent(
+        new CustomEvent('despojoSheetSnap', { detail: height })
+    );
+
     const openNear = () => {
         setPlaying(false);
         setView('points');
@@ -306,9 +316,11 @@ function DespojoPlayerPanel() {
         setNearResults(null);
         setNearNote('Toca el mapa o busca una dirección para poner el punto.');
         setNear(true);
+        askSheet('half');
     };
 
     const closeNear = () => {
+        askSheet('half');
         setNear(false);
         setNearPoint(null);
         setNearResults(null);
@@ -476,6 +488,10 @@ function DespojoPlayerPanel() {
     if (near) {
         return (
             <div className="despojo-panel">
+                {/* Same two regions as the city view. What has to survive at the
+                    sheet's lowest height is different here — the address box,
+                    not the count — so the head holds the search instead. */}
+                <div className="despojo-head">
                 <button type="button" className="despojo-back" onClick={closeNear}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
                          strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -509,6 +525,10 @@ function DespojoPlayerPanel() {
                         </div>
                     )}
                 </div>
+
+                </div>{/* /despojo-head */}
+
+                <div className="despojo-rest">
 
                 <div className="despojo-or">o</div>
 
@@ -636,51 +656,64 @@ function DespojoPlayerPanel() {
                 </div>
 
                 {reportButton}
+
+                </div>{/* /despojo-rest */}
             </div>
         );
     }
 
+    const chip = deltaChip();
+
     return (
         <div className="despojo-panel">
-            <h1 className="despojo-title">Despojos de vivienda</h1>
-            <p className="despojo-lede">
-                Carpetas de investigación por despojo abiertas ante la Fiscalía General de
-                Justicia de la Ciudad de México.
-            </p>
+            {/* Three regions, and on a phone they are reordered rather than
+                rewritten: the head floats to the top of the sheet and stays put
+                while the intro and the rest scroll under it, so the year and the
+                count are what the sheet shows at its lowest height. Above the
+                breakpoint they are three plain blocks in source order. */}
+            <div className="despojo-intro">
+                <h1 className="despojo-title">Despojos de vivienda</h1>
+                <p className="despojo-lede">
+                    Carpetas de investigación por despojo abiertas ante la Fiscalía General de
+                    Justicia de la Ciudad de México.
+                </p>
 
-            <div className="despojo-divider"></div>
+                <div className="despojo-divider"></div>
 
-            {/* Two readings of the same year. The switch changes how the year is
-                drawn, never which year: the player below keeps its place. */}
-            {boroughs && (
-                <div className="despojo-switch" role="group" aria-label="Modo de visualización">
-                    <button
-                        type="button"
-                        aria-pressed={view === 'points'}
-                        onClick={() => setView('points')}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                            <circle cx="7" cy="8" r="1.6" /><circle cx="15" cy="6" r="1.6" />
-                            <circle cx="11" cy="13" r="1.6" /><circle cx="18" cy="15" r="1.6" />
-                            <circle cx="6" cy="17" r="1.6" />
-                        </svg>
-                        Puntos
-                    </button>
-                    <button
-                        type="button"
-                        aria-pressed={view === 'boroughs'}
-                        onClick={() => setView('boroughs')}
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-                            <rect x="3" y="3" width="8" height="8" rx="1.5" />
-                            <rect x="13" y="3" width="8" height="8" rx="1.5" />
-                            <rect x="3" y="13" width="8" height="8" rx="1.5" />
-                            <rect x="13" y="13" width="8" height="8" rx="1.5" />
-                        </svg>
-                        Alcaldías
-                    </button>
-                </div>
-            )}
+                {/* Two readings of the same year. The switch changes how the year is
+                    drawn, never which year: the player below keeps its place. */}
+                {boroughs && (
+                    <div className="despojo-switch" role="group" aria-label="Modo de visualización">
+                        <button
+                            type="button"
+                            aria-pressed={view === 'points'}
+                            onClick={() => setView('points')}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                                <circle cx="7" cy="8" r="1.6" /><circle cx="15" cy="6" r="1.6" />
+                                <circle cx="11" cy="13" r="1.6" /><circle cx="18" cy="15" r="1.6" />
+                                <circle cx="6" cy="17" r="1.6" />
+                            </svg>
+                            Puntos
+                        </button>
+                        <button
+                            type="button"
+                            aria-pressed={view === 'boroughs'}
+                            onClick={() => setView('boroughs')}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                                <rect x="3" y="3" width="8" height="8" rx="1.5" />
+                                <rect x="13" y="3" width="8" height="8" rx="1.5" />
+                                <rect x="3" y="13" width="8" height="8" rx="1.5" />
+                                <rect x="13" y="13" width="8" height="8" rx="1.5" />
+                            </svg>
+                            Alcaldías
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            <div className="despojo-head">
 
             {/* Year, scope and count in two lines: the year stays the anchor of
                 the player, and the comparison rides along as a chip. */}
@@ -712,15 +745,25 @@ function DespojoPlayerPanel() {
             <div className="despojo-countrow">
                 <span className="despojo-count">{fmt(count)}</span>
                 <span className="despojo-countlabel">carpetas</span>
-                {(() => {
-                    const chip = deltaChip();
-                    return chip && (
-                        <span className={'despojo-delta-chip ' + chip.tone} title={chip.title}>
-                            {chip.label}
-                        </span>
-                    );
-                })()}
+                {chip && (
+                    /* A button, not a `title`: the arithmetic behind the chip is
+                       the whole reason it is trustworthy, and on a touchscreen a
+                       tooltip is a place data goes to disappear. */
+                    <button
+                        type="button"
+                        className={'despojo-delta-chip ' + chip.tone}
+                        aria-expanded={deltaOpen}
+                        aria-controls="despojo-delta-note"
+                        onClick={() => setDeltaOpen(o => !o)}
+                    >
+                        {chip.label}
+                    </button>
+                )}
             </div>
+
+            {chip && deltaOpen && (
+                <p className="despojo-delta-note" id="despojo-delta-note">{chip.title}</p>
+            )}
 
             {/* An incomplete year is not a low year. Said next to the number
                 rather than only as a tag, because the count is the one thing a
@@ -761,6 +804,10 @@ function DespojoPlayerPanel() {
                     aria-label="Año del hecho"
                 />
             </div>
+
+            </div>{/* /despojo-head */}
+
+            <div className="despojo-rest">
 
             {/* alcaldía view: measure, scale and the ranking that carries the
                 same information the colour does */}
@@ -930,6 +977,11 @@ function DespojoPlayerPanel() {
                 <span className="despojo-nearcta-arrow" aria-hidden="true">→</span>
             </button>
 
+            {/* On a phone the floating rail would cover the map, so the coverage
+                lives here instead of being dropped, as it used to be. This copy
+                renders itself only below the breakpoint. */}
+            <NewsStrip inline={true} />
+
             <div className="despojo-note">
                 {noteOpen && (
                 <p id="despojo-note-body">
@@ -963,6 +1015,8 @@ function DespojoPlayerPanel() {
                     </span>
                 </p>
             </div>
+
+            </div>{/* /despojo-rest */}
         </div>
     );
 }
