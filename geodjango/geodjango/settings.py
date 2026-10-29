@@ -56,6 +56,15 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+# The public domain is always accepted, whatever DJANGO_ALLOWED_HOSTS says.
+# The site moved from distritos.mx to laciudad.mx and the server's env file
+# still listed the old domain, so every request came back as a 400
+# (DisallowedHost). Hard-wiring the production hostname here means a stale env
+# file can no longer take the site down. CSRF_TRUSTED_ORIGINS below is derived
+# from this list, so the new domain is covered there too.
+PRODUCTION_HOSTS = ["laciudad.mx", "www.laciudad.mx", ".laciudad.mx"]
+ALLOWED_HOSTS += [h for h in PRODUCTION_HOSTS if h not in ALLOWED_HOSTS]
+
 # Site URL for password reset links
 SITE_URL = 'https://www.wikiando.mx'
 SITE_NAME = 'Wikiando MX'
