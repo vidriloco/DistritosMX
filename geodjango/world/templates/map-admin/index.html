@@ -148,6 +148,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="{% static 'css/map-admin.css' %}" rel="stylesheet" />
     <link href="{% static 'css/map-admin-theme.css' %}" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="{% static 'css/explorer.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/negocios.css' %}" rel="stylesheet" />
     <style>
         /* Ensure deck.gl canvas doesn't block map interactions when controller is disabled */
         canvas[class*="deckgl"] {
@@ -5865,7 +5868,7 @@
         <div class="loading-content">
             <img
                 src="{% static 'images/distritos-mx-logo.png' %}"
-                alt="Distritos MX Logo"
+                alt="Ciudad MX Logo"
                 class="loading-logo"
             />
             <img src="{% static 'images/walking-animation.gif' %}" alt="Loading Text" class="loading-animation">
@@ -6149,6 +6152,9 @@
     <script type="text/babel" src="{% static 'js/components/debug.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/MobilePrimaryPanel.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/VerticalPanelContainer.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/ExplorerSiteLinks.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/ExplorerTopBar.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/ExplorerInspector.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/MapAdminApp.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/StateShowcaser.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/CatchLeadPanel.js' %}"></script>
@@ -6157,6 +6163,9 @@
     <script type="text/babel" src="{% static 'js/components/ExplorePageWelcomeIntro.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/BusinessWizard.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/BusinessPageWelcomeIntro.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/BusinessTopBar.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/BusinessInspector.js' %}"></script>
+    <script type="text/babel" src="{% static 'js/components/BusinessPage.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/TransportPageWelcomeIntro.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/RotatingMap.js' %}"></script>
     <script type="text/babel" src="{% static 'js/components/TopNavigationBar.js' %}"></script>

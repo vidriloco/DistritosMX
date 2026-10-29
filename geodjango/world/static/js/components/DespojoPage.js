@@ -170,8 +170,8 @@ function DespojoPage() {
             </div>
 
             <div className="despojo-panel-slot">
-                <a className="despojo-brand" href="/" aria-label="Distritos MX — ir al inicio">
-                    <img src="/static/images/distritos-mx-logo-black.png" alt="Distritos MX" />
+                <a className="despojo-brand" href="/" aria-label="Ciudad MX — ir al inicio">
+                    <img src="/static/images/distritos-mx-logo-black.png" alt="Ciudad MX" />
                 </a>
 
                 {/* `display: contents` above the breakpoint, so on a desktop the

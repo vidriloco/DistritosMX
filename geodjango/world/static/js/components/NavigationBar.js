@@ -122,7 +122,7 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                 <div className="nav-logo">
                     <img 
                         src="/static/images/distritos-mx-logo.png" 
-                        alt="Distrito MX Logo" 
+                        alt="Ciudad MX Logo" 
                         className="logo-image"
                         onError={(e) => {
                             // Fallback to text if image fails to load

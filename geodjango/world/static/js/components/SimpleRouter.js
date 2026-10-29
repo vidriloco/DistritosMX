@@ -202,7 +202,7 @@ function SimpleRouter() {
     if (currentPath === '/explorar') {
         return <ExplorePageWelcomeIntro />;
     } else if (currentPath.startsWith('/negocios')) {
-        return <BusinessPageWelcomeIntro />;
+        return <BusinessPage />;
     } else if (currentPath === '/transporte') {
         return <TransportPageWelcomeIntro />;
     } else if (currentPath === '/proyectos/mundial-2025') {

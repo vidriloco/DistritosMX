@@ -69,12 +69,52 @@ function TransportSystemsPanel({
     onStationSelect,
     onShowFloatingActions,
     onLayerPanelCollapse,
-    lineDetailsPanelRef
+    lineDetailsPanelRef,
+    onTransportDataChange,
+    variant = 'panel'
 }) {
     // State for visible systems
     const [visibleSystems, setVisibleSystems] = React.useState({});
     const [transportData, setTransportData] = React.useState({});
     const [isLoading, setIsLoading] = React.useState(false);
+
+    // Report the loaded lines upward as {system: [line]} so the search
+    // dialog (LinesNavigator) can list and fit them.
+    React.useEffect(() => {
+        if (!onTransportDataChange) return;
+        const lines = {};
+        Object.entries(transportData).forEach(([system, geojson]) => {
+            if (!geojson || !geojson.features) return;
+            const stations = geojson.features.filter(f => f.properties && f.properties.type === 'station');
+            lines[system] = geojson.features
+                .filter(f => f.properties && f.properties.type === 'line' && f.geometry)
+                .map(f => {
+                    const g = f.geometry;
+                    const paths = g.type === 'MultiLineString'
+                        ? g.coordinates.map(c => ({ coordinates: c }))
+                        : [{ coordinates: g.coordinates || [] }];
+                    return {
+                        id: f.properties.id,
+                        line_number: f.properties.line_number,
+                        route: f.properties.route,
+                        name: f.properties.name,
+                        color: f.properties.color,
+                        paths,
+                        stations: stations
+                            .filter(s => (s.properties.lines_serving && s.properties.lines_serving.includes(f.properties.line_number))
+                                || s.properties.line_number === f.properties.line_number)
+                            .map(s => ({
+                                id: s.properties.id,
+                                name: s.properties.name,
+                                identifier: s.properties.identifier,
+                                latitude: s.geometry.coordinates[1],
+                                longitude: s.geometry.coordinates[0]
+                            }))
+                    };
+                });
+        });
+        onTransportDataChange(lines);
+    }, [transportData]);
         
     // Initialize visible systems based on transportSystems selected values
     React.useEffect(() => {
@@ -369,6 +409,34 @@ function TransportSystemsPanel({
         const systemInfo = transportSystems[system];
         return systemInfo ? systemInfo.name : system;
     };
+
+    if (variant === 'chips') {
+        const shortNames = {
+            'metro': 'Metro',
+            'rtp': 'RTP',
+            'concesionados': 'Concesionados',
+            'tren-interurbano': 'Interurbano',
+            'tren-suburbano': 'Suburbano'
+        };
+        return (
+            <div className="xb-transport" role="group" aria-label="Sistemas de transporte">
+                {Object.keys(transportSystems).map(system => (
+                    <button
+                        key={system}
+                        type="button"
+                        className={`xb-chip xb-chip-transport${visibleSystems[system] ? ' is-active' : ''}`}
+                        onClick={() => toggleSystem(system)}
+                        disabled={isLoading}
+                        aria-pressed={!!visibleSystems[system]}
+                        title={getSystemDisplayName(system)}
+                    >
+                        <img src={transportSystems[system].icon} alt="" aria-hidden="true" />
+                        <span>{shortNames[system] || getSystemDisplayName(system)}</span>
+                    </button>
+                ))}
+            </div>
+        );
+    }
 
     return (
         <div className="floating-actions-container">

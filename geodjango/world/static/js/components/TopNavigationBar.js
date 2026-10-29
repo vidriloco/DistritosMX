@@ -85,7 +85,7 @@ function TopNavigationBar({ onHelpClick }) {
                 <div className="nav-logo" onClick={() => handleNavigation('/')} style={{ cursor: 'pointer' }}>
                     <img 
                         src="/static/images/distritos-mx-logo-black.png" 
-                        alt="Distritos MX" 
+                        alt="Ciudad MX" 
                         className="logo-image"
                         onError={(e) => {
                             // Fallback to text if image fails to load

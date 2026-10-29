@@ -469,7 +469,7 @@ const generatePopupContent = (agebInfo, selectedIndicator, address = null, geogr
     return popupContent;
 };
 
-function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal = false, hideTopNavigation = false, mapStyle = 'mapbox://styles/mapbox/light-v11' }) {
+function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal = false, hideTopNavigation = false, mapStyle = 'mapbox://styles/mapbox/light-v11', layout = 'classic' }) {
     const mapContainer = React.useRef(null);
     const map = React.useRef(null);
     const deckglRef = React.useRef(null);
@@ -799,6 +799,10 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
         
     const [showSearchDialog, setShowSearchDialog] = React.useState(false);
     const [selectedLine, setSelectedLine] = React.useState(null);
+    // Inspector layout: the spatial unit is shared by the top bar and the
+    // inspector, and the transport lines feed the search dialog.
+    const [selectedAnalysis, setSelectedAnalysis] = React.useState(null);
+    const [transportLines, setTransportLines] = React.useState({});
     const [isLayerPanelCollapsed, setIsLayerPanelCollapsed] = React.useState(false);
     const [isochronasVisible, setIsochronasVisible] = React.useState(false);
     const [selectedNeighbourhood, setSelectedNeighbourhood] = React.useState(null);
@@ -925,11 +929,22 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
 
         // Expose map instance globally for other components to access
         window.map = map.current;
+
+        // The map container is sized by CSS; re-fit the canvas when it changes
+        // (e.g. the inspector opens or closes).
+        let resizeObserver = null;
+        if (window.ResizeObserver) {
+            resizeObserver = new ResizeObserver(() => {
+                if (map.current) map.current.resize();
+            });
+            resizeObserver.observe(mapContainer.current);
+        }
         
         // Initialize deck.gl overlay for better 3D performance
         // We'll initialize it after the map is fully loaded and when we have data
 
         return () => {
+            if (resizeObserver) resizeObserver.disconnect();
             if (map.current) {
                 map.current.remove();
             }
@@ -4287,13 +4302,63 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
         }
     }, [selectedYearCrime]);
 
+    const handleInspectorIndicatorSelect = (indicator) => {
+        setSelectedIndicator(indicator ? indicator.property : null);
+        // Set scope analysis to agebs when selecting indicators
+        setScopeAnalysis('agebs');
+        // Use marker coordinates if they exist, otherwise use map center
+        if (indicatorsVisible && map.current && !isClearingDueToSectionClose) {
+            // Ensure AGEBs layer is present when selecting indicators
+            if (indicatorsData && indicatorsData.features && !map.current.getLayer('agebs-layer')) {
+                addAgebsToMap(indicatorsData, 'ageb');
+            }
+
+            const position = markerCoordinates || [map.current.getCenter().lng, map.current.getCenter().lat];
+            const circle = turf.circle(position, currentRadiusRef.current, {
+                steps: 64,
+                units: 'meters'
+            });
+
+            drawIntersectingPolygons(circle);
+        }
+    };
+
+    const isInspectorLayout = layout === 'inspector';
+    const inspectorHidden = showFloatingActions || hideVerticalPanel;
+    const handleAnalysisSelect = (action) => {
+        setSelectedAnalysis(action);
+        handleElementAnalysisClick(action);
+    };
+
     return (
-        <div className="map-admin-container">
-            {!hideTopNavigation && <TopNavigationBar onHelpClick={onHelpClick} />}
+        <div className={`map-admin-container${isInspectorLayout ? ' xb-layout' : ''}${isInspectorLayout && inspectorHidden ? ' xb-no-inspector' : ''}`}>
+            {!hideTopNavigation && (isInspectorLayout ? (
+                <ExplorerTopBar
+                    selectedAnalysis={selectedAnalysis}
+                    onAnalysisSelect={handleAnalysisSelect}
+                    onSearchClick={() => setShowSearchDialog(true)}
+                    onHelpClick={onHelpClick}
+                />
+            ) : (
+                <TopNavigationBar onHelpClick={onHelpClick} />
+            ))}
 
             <div ref={mapContainer} className="map-container" />
 
-            {!isMobile && !hideLoadingModal && (
+            {isInspectorLayout && !isMobile && window.TransportSystemsPanel && (
+                <TransportSystemsPanel
+                    variant="chips"
+                    map={map}
+                    onTransportDataChange={setTransportLines}
+                    onLineSelect={handleLineSelect}
+                    onStationSelect={(station) => setSelectedStation(station)}
+                    onShowFloatingActions={(show) => setShowFloatingActions(show)}
+                    onLayerPanelCollapse={(collapsed) => setIsLayerPanelCollapsed(collapsed)}
+                    lineDetailsPanelRef={lineDetailsPanelRef}
+                />
+            )}
+
+            {!isMobile && !hideLoadingModal && !isInspectorLayout && (
                 <LoadingModal 
                     isVisible={indicatorsLoading} 
                     message="Cargando datos de indicadores..." 
@@ -4301,7 +4366,46 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                 />
             )}
 
-            {!showFloatingActions && !hideVerticalPanel && (
+            {!showFloatingActions && !hideVerticalPanel && isInspectorLayout && (
+                <ExplorerInspector
+                    map={map}
+                    showSearchDialog={showSearchDialog}
+                    setShowSearchDialog={setShowSearchDialog}
+                    transportData={transportLines}
+                    onLineSelect={handleLineSelect}
+                    indicatorsData={indicatorsData}
+                    indicatorsLoading={indicatorsLoading}
+                    downloadProgress={downloadProgress}
+                    indicatorsError={indicatorsError}
+                    indicatorsVisible={indicatorsVisible}
+                    setIndicatorsVisible={setIndicatorsVisible}
+                    intersectingFeatures={intersectingFeatures}
+                    hoveredFeature={hoveredFeature}
+                    selectedIndicator={selectedIndicator}
+                    onIndicatorSelect={handleInspectorIndicatorSelect}
+                    selectedRadius={selectedRadius}
+                    onRadiusChange={handleRadiusChange}
+                    selectedYearCrime={selectedYearCrime}
+                    onCrimeYearChange={handleCrimeYearChange}
+                    selectedStation={selectedStation}
+                    onCloseStationDetails={handleCloseStationDetails}
+                    selectedLine={selectedLine}
+                    onCloseLineDetails={handleCloseLineInfo}
+                    lineDetailsPanelRef={lineDetailsPanelRef}
+                    selectedGeozone={selectedGeozone}
+                    onCloseGeozoneDetails={handleGeozoneClose}
+                    geozoneDetailsPanelRef={geozoneDetailsPanelRef}
+                    removeAllAnalysisLayers={removeAllAnalysisLayers}
+                    removeAgebDataLayers={removeAgebDataLayers}
+                    setSelectedIndicator={setSelectedIndicator}
+                    setIsClearingDueToSectionClose={setIsClearingDueToSectionClose}
+                    selectedAnalysis={selectedAnalysis}
+                    onAnalysisSelect={handleAnalysisSelect}
+                    isMobile={isMobile}
+                />
+            )}
+
+            {!showFloatingActions && !hideVerticalPanel && !isInspectorLayout && (
                 <VerticalPanelContainer 
                     map={map}
                     showSearchDialog={showSearchDialog}
@@ -4316,26 +4420,7 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                     intersectingFeatures={intersectingFeatures}
                     hoveredFeature={hoveredFeature}
                     selectedIndicator={selectedIndicator}
-                    onIndicatorSelect={(indicator) => {
-                        setSelectedIndicator(indicator ? indicator.property : null);
-                        // Set scope analysis to agebs when selecting indicators
-                        setScopeAnalysis('agebs');
-                        // Use marker coordinates if they exist, otherwise use map center
-                        if (indicatorsVisible && map.current && !isClearingDueToSectionClose) {
-                            // Ensure AGEBs layer is present when selecting indicators
-                            if (indicatorsData && indicatorsData.features && !map.current.getLayer('agebs-layer')) {
-                                addAgebsToMap(indicatorsData, 'ageb');
-                            }
-                            
-                            const position = markerCoordinates || [map.current.getCenter().lng, map.current.getCenter().lat];
-                            const circle = turf.circle(position, currentRadiusRef.current, {
-                                steps: 64,
-                                units: 'meters'
-                            });
-
-                            drawIntersectingPolygons(circle);
-                        }
-                    }}
+                    onIndicatorSelect={handleInspectorIndicatorSelect}
                     selectedRadius={selectedRadius}
                     onRadiusChange={handleRadiusChange}
                     transportSystemsVisible={transportSystemsVisible}

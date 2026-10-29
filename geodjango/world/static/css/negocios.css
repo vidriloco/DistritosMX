@@ -1,0 +1,288 @@
+/* /negocios — the "barra + inspector" layout of /explorar, applied to the
+   business study. Shares explorer.css (xb-*) and adds only what the page
+   needs: an address input in the search slot, giro chips over the map, the
+   pin and the report rows. */
+
+.nb-page {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+.nb-page .map-admin-container { height: 100%; }
+
+/* ---------- Address search in the top bar ---------- */
+.nb-search-wrap {
+    position: relative;
+    flex: 1 1 280px;
+    max-width: 480px;
+    min-width: 0;
+}
+.nb-search {
+    width: 100%;
+    box-sizing: border-box;
+    cursor: text;
+}
+.nb-search:focus-within { outline: 2px solid var(--xb-accent); outline-offset: 2px; background: #FFFFFF; }
+.nb-search input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    color: var(--xb-ink);
+    outline: none;
+    padding: 0;
+}
+.nb-search input::placeholder { color: var(--xb-muted); }
+.nb-search-icon { flex: 0 0 auto; color: var(--xb-muted); }
+.nb-search-clear {
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    border: 0; border-radius: 6px;
+    background: transparent;
+    color: var(--xb-muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+.nb-search-clear:hover { background: #ECECE8; color: var(--xb-ink); }
+.nb-search-busy {
+    width: 14px; height: 14px; flex: 0 0 auto;
+    border: 2px solid var(--xb-line);
+    border-top-color: var(--xb-accent);
+    border-radius: 50%;
+    animation: nb-spin .8s linear infinite;
+}
+@keyframes nb-spin { to { transform: rotate(360deg); } }
+
+.nb-suggest {
+    position: absolute;
+    top: 46px; left: 0; right: 0;
+    background: #FFFFFF;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    box-shadow: var(--xb-shadow);
+    overflow: hidden;
+    z-index: 100001;
+    display: flex;
+    flex-direction: column;
+}
+.nb-suggest button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 8px 14px;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: var(--xb-ink);
+    text-align: left;
+    cursor: pointer;
+}
+.nb-suggest button:hover, .nb-suggest button:focus-visible { background: var(--xb-wash); outline: none; }
+.nb-suggest button + button { border-top: 1px solid var(--xb-line-soft); }
+.nb-suggest-main { display: block; }
+.nb-suggest-sub { display: block; font-size: 12px; color: var(--xb-muted); }
+.nb-suggest-empty { padding: 12px 14px; font-size: 13px; color: var(--xb-muted); }
+.nb-suggest svg { flex: 0 0 auto; color: var(--xb-muted); }
+
+/* ---------- Radius chips in the top bar ---------- */
+.nb-radius { align-items: center; }
+.nb-radius .xb-eyebrow { margin-right: 6px; }
+
+/* ---------- Giro chips over the map ---------- */
+.nb-chips {
+    position: absolute;
+    left: 20px;
+    right: calc(var(--xb-inspector) + 20px);
+    bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    z-index: 10000;
+    pointer-events: none;
+}
+.nb-chips .xb-chip, .nb-sheet-chips .xb-chip {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 10px;
+    color: var(--xb-muted);
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.nb-chips .xb-chip.is-active, .nb-sheet-chips .xb-chip.is-active {
+    background: #FFFFFF;
+    border-color: var(--xb-ink);
+    color: var(--xb-ink);
+    font-weight: 500;
+}
+.nb-chip-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+.xb-chip.is-off .nb-chip-dot { opacity: .35; }
+.nb-chip-count { color: var(--xb-muted); font-weight: 400; }
+.nb-chip-add { border-style: dashed; border-color: var(--xb-faint); }
+.nb-chip-add svg { flex: 0 0 auto; }
+
+/* The giro chips take the bottom-left corner, so the Mapbox wordmark moves
+   to the right, above the attribution, where it stays visible. */
+.nb-page .mapboxgl-ctrl-bottom-left { left: auto; right: 0; bottom: 22px; }
+
+/* ---------- Map pin and popup ---------- */
+.nb-pin {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--xb-ink, #111111);
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    box-sizing: border-box;
+    cursor: grab;
+}
+.nb-pin:active { cursor: grabbing; }
+.nb-popup .mapboxgl-popup-content {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #111111;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #E6E6E3;
+    box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
+}
+.nb-popup .mapboxgl-popup-tip { display: none; }
+.nb-popup-name { font-weight: 500; display: block; }
+.nb-popup-sub { display: block; color: #6B6B68; font-size: 12px; }
+
+/* ---------- Report rows in the inspector ---------- */
+.nb-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+}
+.nb-row.is-off { color: var(--xb-muted); border-style: dashed; }
+.nb-row-name { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nb-row-value { font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.nb-row-value small { font-size: 11px; color: var(--xb-muted); }
+.nb-row-remove {
+    flex: 0 0 auto;
+    width: 28px; height: 28px;
+    margin-right: -8px;
+    border: 0; border-radius: 6px;
+    background: transparent;
+    color: var(--xb-faint);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+.nb-row-remove:hover { background: var(--xb-wash); color: var(--xb-ink); }
+
+.nb-lede { margin: 0; font-size: 13px; color: var(--xb-muted); }
+.nb-callout {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 14px 16px;
+    background: var(--xb-wash-soft);
+    border-radius: 12px;
+    font-size: 13px;
+}
+.nb-callout-head { font-weight: 500; }
+.nb-sources { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--xb-muted); }
+.nb-sources .xb-eyebrow { margin-bottom: 4px; }
+.nb-error { font-size: 13px; color: #9B2C2C; }
+
+/* Giro picker */
+.nb-picker { display: flex; flex-direction: column; gap: 10px; }
+.nb-picker-input {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    background: #FFFFFF;
+    font: inherit;
+    color: var(--xb-ink);
+    width: 100%;
+    box-sizing: border-box;
+}
+.nb-picker-input:focus { outline: 2px solid var(--xb-accent); outline-offset: 1px; }
+.nb-picker-list { display: flex; flex-direction: column; gap: 6px; }
+.nb-picker-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 6px 14px;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    background: #FFFFFF;
+    font: inherit;
+    font-size: 13px;
+    color: var(--xb-ink);
+    text-align: left;
+    cursor: pointer;
+}
+.nb-picker-item:hover { border-color: var(--xb-faint); background: var(--xb-wash-soft); }
+.nb-picker-item:disabled { color: var(--xb-faint); cursor: default; }
+.nb-picker-item code { font-family: inherit; font-size: 11px; color: var(--xb-muted); flex: 0 0 auto; }
+
+/* Footer buttons */
+.nb-foot { padding: 12px 24px; border-top: 1px solid var(--xb-line-soft); display: flex; gap: 8px; }
+.nb-btn {
+    flex: 1 1 0;
+    height: 40px;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    background: #FFFFFF;
+    color: var(--xb-ink);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.nb-btn:hover { border-color: var(--xb-faint); }
+.nb-btn.is-primary { background: var(--xb-ink); border-color: var(--xb-ink); color: #FFFFFF; }
+.nb-btn.is-primary:hover { background: #000000; }
+.nb-btn:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: 2px; }
+
+/* ---------- Phone ---------- */
+.nb-sheet-chips { display: none; }
+@media (max-width: 768px) {
+    .nb-chips { display: none; }
+    /* The address gives way so the brand and the help button both stay on. */
+    .nb-search-wrap { flex: 1 1 100px; }
+    .nb-sheet-chips {
+        display: flex;
+        gap: 8px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--xb-line-soft);
+        overflow-x: auto;
+        scrollbar-width: none;
+        flex: 0 0 auto;
+    }
+    .nb-sheet-chips::-webkit-scrollbar { display: none; }
+    .nb-sheet-chips .xb-chip { flex: 0 0 auto; }
+    .nb-foot { padding: 10px 16px; }
+    .nb-btn { height: 44px; font-size: 14px; }
+    .nb-suggest { top: 44px; }
+}
+
+/* ---------- Print: the report alone ---------- */
+@media print {
+    .nb-page { height: auto; overflow: visible; }
+    .nb-page .map-admin-container, .nb-page .xb-topbar, .nb-page .nb-chips,
+    .nb-page .explore-help-panel, .nb-page .nb-foot, .nb-page .nb-row-remove,
+    .nb-page .nb-sheet-chips { display: none !important; }
+    .nb-page .xb-inspector {
+        position: static;
+        width: auto; height: auto;
+        border: 0; box-shadow: none; border-radius: 0;
+    }
+    .nb-page .xb-inspector .xb-scroll { overflow: visible; max-height: none; }
+}

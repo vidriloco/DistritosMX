@@ -141,6 +141,7 @@ function ExplorePageWelcomeIntro() {
                     <MapAdminApp 
                         onHelpClick={handleHelpClick} 
                         hideVerticalPanel={showHelpPanel && isHelpPanelAutomatic}
+                        layout="inspector"
                     />
                     <ContextualHelpPanel 
                         isVisible={showHelpPanel} 

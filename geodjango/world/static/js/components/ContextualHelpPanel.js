@@ -48,15 +48,15 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
                 steps: [
                     {
                         number: '1',
-                        text: 'Selecciona una agrupación espacial'
+                        text: 'Elige la unidad espacial en la barra superior: AGEB, colonia o isocronas'
                     },
                     {
                         number: '2',
-                        text: 'Selecciona una o más capas de la lista de capas disponibles'
+                        text: 'Elige un tema en el panel de la derecha y un indicador; las zonas se pintan según su valor'
                     },
                     {
                         number: '3',
-                        text: 'Pasa el cursor sobre el mapa para ver los datos de la(s) capa(s) seleccionada(s)'
+                        text: 'Pasa el cursor sobre el mapa para ver el valor de cada zona, o mueve el pin para cambiar el radio'
                     }
                 ]
             };
@@ -67,15 +67,15 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
                 steps: [
                     {
                         number: '1',
-                        text: 'Posiciona el pin en la ubicación de tu interés'
+                        text: 'Escribe una dirección en la barra superior, o haz clic en el mapa para poner el pin'
                     },
                     {
                         number: '2',
-                        text: 'Usa los filtros para encontrar tipos específicos de negocios'
+                        text: 'Elige hasta tres giros: los chips sobre el mapa los muestran u ocultan'
                     },
                     {
                         number: '3',
-                        text: 'Consulta los resultados de inteligencia espacial en el mapa'
+                        text: 'Lee el informe de la derecha, cambia el radio y descárgalo en PDF'
                     }
                 ]
             };
@@ -97,9 +97,10 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
 
     const content = getContentForRoute();
     if (!content) return null;
+    const route = routeType || (currentPath === '/explore' ? 'explore' : currentPath === '/negocios' ? 'negocios' : null);
 
     return (
-        <div className="explore-help-panel">
+        <div className={"explore-help-panel" + (route === 'explore' || route === 'negocios' ? ' xb-help' : '')}>
             <div className="help-panel-content">
                 <div className="help-panel-image-container">
                     <img 

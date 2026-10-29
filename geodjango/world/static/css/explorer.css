@@ -1,0 +1,583 @@
+/* /explorar — "Barra + inspector" layout.
+   White surfaces, one typeface, near-black text, hairline borders, one accent. */
+
+/* The help card can mount outside the layout element, so it carries the
+   tokens too. */
+.xb-layout, .xb-help {
+    --xb-ink: #111111;
+    --xb-muted: #6B6B68;
+    --xb-faint: #9A9A96;
+    --xb-line: #E6E6E3;
+    --xb-line-soft: #EFEFEC;
+    --xb-wash: #F3F3F0;
+    --xb-wash-soft: #F7F7F4;
+    --xb-accent: #2456B5;
+    --xb-accent-dark: #163A80;
+    --xb-shadow: 0 1px 3px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
+    --xb-topbar: 60px;
+    --xb-inspector: 400px;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    color: var(--xb-ink);
+    background: #EFF0EC;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.xb-layout .map-container {
+    top: var(--xb-topbar);
+    right: var(--xb-inspector);
+    bottom: 0;
+    left: 0;
+    width: auto;
+    /* The template's own `.map-container { height: 100% }` would otherwise win
+       over `bottom`, and the canvas would run a bar's height past the window. */
+    height: auto;
+}
+.xb-layout.xb-no-inspector .map-container { right: 0; }
+
+.explore-help-panel.xb-help { top: 72px; right: 412px; background: transparent; }
+.xb-layout.xb-no-inspector .explore-help-panel.xb-help { right: 12px; }
+
+/* The help card in the explorer language: a white card with hairline
+   border, an eyebrow, a short numbered list and one dark button. */
+.explore-help-panel.xb-help { max-width: 360px; width: calc(100% - 24px); }
+.xb-help .help-panel-content {
+    position: relative;
+    padding: 20px 22px 18px;
+    gap: 0;
+    border: 1px solid var(--xb-line);
+    border-radius: 14px;
+    box-shadow: var(--xb-shadow);
+    font-family: inherit;
+    color: var(--xb-ink);
+}
+.xb-help .help-panel-image-container { display: none; }
+.xb-help .help-panel-text { gap: 0; }
+.xb-help .help-panel-text::before {
+    content: 'Ayuda';
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--xb-muted);
+}
+.xb-help .help-panel-title {
+    margin: 0 0 14px;
+    text-align: left;
+    font-family: inherit;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    line-height: 1.3;
+    color: var(--xb-ink);
+}
+.xb-help .help-panel-steps {
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 18px;
+}
+.xb-help .help-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: none;
+    text-align: left;
+}
+.xb-help .step-number-large {
+    flex: 0 0 auto;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0;
+    border: 1px solid var(--xb-line);
+    border-radius: 50%;
+    background: var(--xb-wash-soft);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--xb-ink);
+}
+.xb-help .step-text-below {
+    margin: 2px 0 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--xb-muted);
+}
+.xb-help .help-panel-close-btn {
+    margin: 0;
+    height: 40px;
+    padding: 0 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--xb-ink);
+    color: #FFFFFF;
+    border-radius: 10px;
+    transform: none;
+    transition: background .15s ease;
+}
+.xb-help .help-panel-close-btn:hover, .xb-help .help-panel-close-btn:active { background: #000000; transform: none; }
+.xb-help .help-panel-close-btn:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: 2px; }
+
+/* ---------- Top bar ---------- */
+.xb-topbar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: var(--xb-topbar);
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--xb-line);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 100000;
+}
+
+.xb-brand { display: flex; align-items: center; flex: 0 0 auto; }
+.xb-brand img { height: 26px; width: auto; display: block; }
+
+.xb-search {
+    flex: 1 1 280px;
+    max-width: 480px;
+    min-width: 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--xb-wash);
+    color: var(--xb-muted);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.xb-search:hover { background: #ECECE8; }
+.xb-search:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: 2px; }
+.xb-search-placeholder { flex: 1 1 auto; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+.xb-units { display: flex; gap: 6px; margin-left: auto; }
+
+.xb-chip {
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--xb-line);
+    border-radius: 999px;
+    background: #FFFFFF;
+    color: var(--xb-ink);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.xb-chip:hover { border-color: var(--xb-faint); }
+.xb-chip.is-active { background: var(--xb-ink); border-color: var(--xb-ink); color: #FFFFFF; font-weight: 500; }
+.xb-chip.is-disabled, .xb-chip:disabled { color: var(--xb-faint); border-style: dashed; cursor: not-allowed; }
+.xb-chip:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: 2px; }
+
+.xb-links { display: flex; align-items: center; gap: 4px; }
+/* The site menu, in the home page's order, grouped on a light gray field. */
+.xb-links-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    background: var(--xb-wash);
+    border-radius: 10px;
+}
+.xb-links-group a, .xb-links-group > button, .xb-links-menu > button {
+    height: 30px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--xb-muted);
+    text-decoration: none;
+    font: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.xb-links-group a:hover, .xb-links-group > button:hover, .xb-links-menu > button:hover { color: var(--xb-ink); }
+.xb-links-group .is-active { background: #FFFFFF; color: var(--xb-ink); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.xb-links-group a:focus-visible, .xb-links-group button:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: -2px; }
+.xb-links-menu { position: relative; }
+.xb-links-menu > button[aria-expanded="true"] svg { transform: rotate(180deg); }
+.xb-links-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 160px;
+    padding: 4px;
+    background: #FFFFFF;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    box-shadow: var(--xb-shadow);
+    display: flex;
+    flex-direction: column;
+    z-index: 100001;
+}
+.xb-links-dropdown button {
+    height: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: var(--xb-ink);
+    text-align: left;
+    cursor: pointer;
+}
+.xb-links-dropdown button:hover { background: var(--xb-wash); }
+
+.xb-icon-button {
+    width: 36px; height: 36px;
+    border: 0; border-radius: 8px;
+    background: transparent;
+    color: var(--xb-muted);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+.xb-icon-button:hover { background: var(--xb-wash); color: var(--xb-ink); }
+
+/* ---------- Transport chips over the map ---------- */
+.xb-transport {
+    position: absolute;
+    left: 20px;
+    right: calc(var(--xb-inspector) + 20px);
+    bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    z-index: 10000;
+    pointer-events: none;
+}
+.xb-layout.xb-no-inspector .xb-transport { right: 20px; }
+.xb-transport .xb-chip {
+    pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 8px;
+    color: var(--xb-muted);
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.xb-transport .xb-chip img { width: 20px; height: 20px; object-fit: contain; border-radius: 4px; }
+.xb-transport .xb-chip.is-active { background: #FFFFFF; border-color: var(--xb-ink); color: var(--xb-ink); font-weight: 500; }
+.xb-transport .xb-chip:disabled { opacity: .6; cursor: progress; border-style: solid; }
+
+/* ---------- Inspector ---------- */
+.xb-inspector {
+    position: absolute;
+    top: var(--xb-topbar);
+    right: 0;
+    bottom: 0;
+    width: var(--xb-inspector);
+    background: #FFFFFF;
+    border-left: 1px solid var(--xb-line);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    z-index: 10000;
+}
+
+/* Indicator download progress: a hairline across the top of the inspector
+   instead of a modal over the map. */
+.xb-progress {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--xb-line-soft);
+    z-index: 1;
+}
+.xb-progress > span {
+    display: block;
+    height: 100%;
+    background: var(--xb-accent);
+    transition: width .3s ease;
+}
+
+.xb-tabs {
+    display: flex;
+    /* A scrolling flex child may shrink below its content; without this the
+       tall scroll area below squeezes the row and clips the tab labels. */
+    flex: 0 0 auto;
+    gap: 2px;
+    padding: 12px 16px 0;
+    border-bottom: 1px solid var(--xb-line-soft);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.xb-tabs::-webkit-scrollbar { display: none; }
+.xb-tab {
+    height: 40px;
+    padding: 0 12px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: var(--xb-muted);
+    cursor: pointer;
+    white-space: nowrap;
+}
+.xb-tab:hover { color: var(--xb-ink); }
+.xb-tab.is-active { color: var(--xb-ink); font-weight: 500; border-bottom-color: var(--xb-ink); }
+.xb-tab:disabled { color: var(--xb-faint); cursor: default; }
+.xb-tab:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: -2px; border-radius: 6px; }
+
+.xb-inspector .vertical-panel-content.xb-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    /* The legacy panel class is `width: 100%` content-box, so its padding
+       would stick out past the inspector (and past a phone's screen). */
+    box-sizing: border-box;
+    width: auto;
+    overflow-y: auto;
+    padding: 20px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scrollbar-width: thin;
+}
+
+.xb-title { margin: 0 0 4px; font-size: 18px; font-weight: 600; letter-spacing: -.01em; }
+.xb-muted { color: var(--xb-muted); font-size: 13px; margin: 0; }
+.xb-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--xb-muted);
+}
+.xb-link {
+    border: 0; background: transparent; padding: 0;
+    color: var(--xb-accent);
+    font: inherit; font-size: 13px; font-weight: 500;
+    cursor: pointer; white-space: nowrap;
+}
+.xb-link:hover { color: var(--xb-accent-dark); text-decoration: underline; }
+
+.xb-section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+
+.xb-empty { display: flex; flex-direction: column; gap: 10px; }
+/* Loading notice in the empty state: a tinted box with its own progress bar. */
+.xb-notice {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    margin: 2px 0 4px;
+    background: #EEF3FC;
+    border: 1px solid #CFDDF6;
+    border-radius: 10px;
+    color: var(--xb-accent-dark);
+    font-size: 13px;
+}
+.xb-notice-row { display: flex; align-items: center; gap: 10px; }
+.xb-notice-row span:not(.xb-notice-spinner) { flex: 1 1 auto; }
+.xb-notice-row strong { font-weight: 600; font-variant-numeric: tabular-nums; }
+.xb-notice-spinner {
+    width: 14px; height: 14px; flex: 0 0 auto;
+    border: 2px solid #CFDDF6;
+    border-top-color: var(--xb-accent);
+    border-radius: 50%;
+    animation: xb-spin .8s linear infinite;
+}
+@keyframes xb-spin { to { transform: rotate(360deg); } }
+.xb-notice-bar { height: 4px; border-radius: 2px; background: #D9E4F8; overflow: hidden; }
+.xb-notice-bar > span { display: block; height: 100%; background: var(--xb-accent); border-radius: 2px; transition: width .3s ease; }
+.xb-steps { margin: 4px 0 0; padding-left: 20px; color: var(--xb-muted); font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
+
+.xb-group { display: flex; flex-direction: column; gap: 6px; }
+.xb-group .xb-eyebrow { margin: 6px 0 2px; }
+
+.xb-indicator {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color .15s ease, background-color .15s ease;
+}
+.xb-indicator:hover { border-color: var(--xb-faint); }
+.xb-indicator.is-selected { border-color: var(--xb-ink); background: var(--xb-wash-soft); }
+.xb-indicator input { accent-color: var(--xb-accent); margin: 0; flex: 0 0 auto; }
+.xb-indicator-name { flex: 1 1 auto; min-width: 0; min-height: 44px; display: flex; align-items: center; }
+.xb-indicator-icon {
+    flex: 0 0 auto;
+    width: 18px; height: 18px;
+    object-fit: contain;
+    color: var(--xb-muted);
+}
+.xb-indicator.is-selected .xb-indicator-icon { color: var(--xb-ink); }
+img.xb-indicator-icon { border-radius: 4px; }
+.xb-indicator.is-selected .xb-indicator-name { font-weight: 500; }
+.xb-indicator-value { font-size: 13px; color: var(--xb-ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.xb-indicator-value small { font-size: 11px; color: var(--xb-muted); }
+/* Colour scale of the selected metric, on its own line inside the row. */
+.xb-indicator { flex-wrap: wrap; row-gap: 0; }
+.xb-indicator-scale {
+    flex: 1 0 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+.xb-scale-min {
+    flex: 0 0 auto;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 6px;
+    display: flex; align-items: center; justify-content: center;
+    background: #FFFFFF;
+    border: 1px solid var(--xb-line);
+    border-radius: 6px;
+    color: var(--xb-ink);
+    box-sizing: border-box;
+}
+.xb-scale-bar {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 24px;
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.xb-scale-bar > span { flex: 1 1 0; }
+.xb-scale-max {
+    position: absolute;
+    right: 8px; top: 0; bottom: 0;
+    display: flex; align-items: center;
+    color: #FFFFFF;
+    text-shadow: 0 0 2px rgba(0,0,0,.35);
+    flex: 0 0 auto !important;
+}
+
+.xb-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.xb-controls .xb-field:only-child { grid-column: 1 / -1; }
+.xb-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.xb-select {
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--xb-line);
+    border-radius: 10px;
+    background: #FFFFFF;
+    font: inherit;
+    color: var(--xb-ink);
+}
+.xb-segmented {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--xb-wash);
+    border-radius: 10px;
+}
+.xb-segmented button {
+    flex: 1 1 0;
+    height: 32px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--xb-muted);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.xb-segmented button.is-active { background: #FFFFFF; color: var(--xb-ink); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+.xb-legend {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 14px 16px;
+    background: var(--xb-wash-soft);
+    border-radius: 12px;
+}
+.xb-legend-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 500; font-size: 13px; }
+.xb-legend-bar { height: 10px; border-radius: 5px; }
+.xb-legend-ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--xb-muted); }
+
+.xb-stats { display: flex; flex-direction: column; gap: 10px; }
+.xb-stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.xb-stat { padding: 12px; border: 1px solid var(--xb-line); border-radius: 10px; min-width: 0; }
+.xb-stat-value { font-size: 20px; font-weight: 600; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.xb-foot {
+    padding: 12px 24px;
+    border-top: 1px solid var(--xb-line-soft);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 12px;
+    color: var(--xb-muted);
+}
+
+/* Legacy detail panels (station, line, geozone) inside the inspector */
+.xb-inspector .floating-actions-container {
+    position: relative;
+    bottom: auto; left: auto;
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+    border: 1px solid var(--xb-line);
+    border-radius: 12px;
+    font-family: inherit;
+    overflow: hidden;
+}
+.xb-inspector .floating-actions-header { background: #FFFFFF; border-bottom: 1px solid var(--xb-line-soft); }
+.xb-inspector .floating-actions-title { font-family: inherit; text-transform: none; letter-spacing: 0; font-size: 14px; }
+
+/* Mapbox chrome */
+.xb-layout .mapboxgl-ctrl-attrib { font-family: inherit; font-size: 11px; }
+
+/* ---------- Phone ---------- */
+@media (max-width: 768px) {
+    .xb-layout { --xb-topbar: 56px; }
+    .xb-topbar { gap: 10px; padding: 0 12px; }
+    .xb-brand img { height: 22px; }
+    .xb-units, .xb-links-group { display: none; }
+    .xb-layout .map-container { right: 0; bottom: 42vh; }
+    .xb-inspector {
+        top: auto; left: 0; right: 0; bottom: 0;
+        width: auto; height: 42vh;
+        border-left: 0; border-top: 1px solid var(--xb-line);
+        border-radius: 16px 16px 0 0;
+        box-shadow: var(--xb-shadow);
+    }
+    .xb-inspector .vertical-panel-content.xb-scroll { padding: 16px; }
+    .xb-transport { display: none; }
+    .explore-help-panel.xb-help { top: 68px; right: 12px; left: 12px; width: auto; max-width: none; }
+}
+
+/* The legacy "not available on phones" card is fixed-positioned elsewhere;
+   inside the sheet it flows like any other block. */
+.xb-inspector .mobile-primary-panel {
+    position: relative !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    bottom: auto !important;
+    left: auto !important;
+}
+
+.xb-layout .mapboxgl-popup-content { font-family: inherit; }
+.xb-controls:empty { display: none; }
