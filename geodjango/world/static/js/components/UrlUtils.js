@@ -16,9 +16,11 @@ const UrlUtils = {
                 prod: 'https://wikiando.s3.us-east-2.amazonaws.com/agebs',
                 dev: `${window.location.origin}/data/agebs`
             },
+            // Always the bucket: it holds every system, while a local
+            // data/transports folder may only have a few of them.
             transports: {
                 prod: 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons',
-                dev: `${window.location.origin}/data/transports`
+                dev: 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons'
             },
             transportAssets: {
                 prod: 'https://wikiando.s3.us-east-2.amazonaws.com/transports/systems',

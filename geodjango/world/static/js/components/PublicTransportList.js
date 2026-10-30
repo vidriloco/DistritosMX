@@ -1,4 +1,8 @@
 // PublicTransportList component - Generic transport system list with collapsible functionality
+
+// The systems this list knows how to show; their GeoJSON comes from UrlUtils.
+const PUBLIC_TRANSPORT_SYSTEMS = ['metro', 'metrobus', 'tren-ligero', 'trolebus'];
+
 function PublicTransportList({ system, title }) {
     const [transportLayers, setTransportLayers] = React.useState([]);
     const [loadingTransport, setLoadingTransport] = React.useState(false);
@@ -13,17 +17,10 @@ function PublicTransportList({ system, title }) {
     const loadTransportData = async () => {
         setLoadingTransport(true);
         try {
-            const systemUrls = {
-                'metro': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/metro.geojson',
-                'metrobus': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/metrobus.geojson',
-                'tren-ligero': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/tren-ligero.geojson',
-                'trolebus': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/trolebus.geojson'
-            };
-
-            const url = systemUrls[system];
-            if (!url) {
+            if (!PUBLIC_TRANSPORT_SYSTEMS.includes(system)) {
                 throw new Error(`Unsupported transport system: ${system}`);
             }
+            const url = window.UrlUtils.getTransportUrl(system);
 
             const response = await fetch(url);
             if (!response.ok) {
@@ -309,14 +306,7 @@ function PublicTransportList({ system, title }) {
                 }
 
                 // Fetch the full transport data
-                const systemUrls = {
-                    'metro': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/metro.geojson',
-                    'metrobus': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/metrobus.geojson',
-                    'tren-ligero': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/tren-ligero.geojson',
-                    'trolebus': 'https://wikiando.s3.us-east-2.amazonaws.com/transports/geojsons/trolebus.geojson'
-                };
-
-                const response = await fetch(systemUrls[layer.system]);
+                const response = await fetch(window.UrlUtils.getTransportUrl(layer.system));
                 if (!response.ok) {
                     throw new Error(`Failed to fetch transport data: ${response.status}`);
                 }

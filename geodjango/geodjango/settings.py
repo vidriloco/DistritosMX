@@ -71,6 +71,13 @@ SITE_NAME = 'Wikiando MX'
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
+# Foot traffic for the zone report: counts per cell and hour, built from the
+# phone panel by `manage.py build_foot_traffic`. Without the file the report
+# simply leaves the block out.
+FOOT_TRAFFIC_FILE = os.environ.get(
+    'FOOT_TRAFFIC_FILE', os.path.join(BASE_DIR, 'data', 'foot_traffic', 'foot_traffic.parquet')
+)
+
 # Application definition
 
 INSTALLED_APPS = [

@@ -172,6 +172,30 @@
 .nb-row-name { flex: 1 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .nb-row-value { font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .nb-row-value small { font-size: 11px; color: var(--xb-muted); }
+/* Label, bar, value rows: robbery times and competitor sizes. */
+.nb-bar-row {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr) 40px;
+    align-items: center;
+    column-gap: 10px;
+    min-height: 28px;
+    font-size: 13px;
+}
+.nb-bar-name small { font-size: 11px; color: var(--xb-muted); }
+.nb-bar { height: 10px; border-radius: 3px; background: var(--xb-wash); overflow: hidden; }
+.nb-bar span { display: block; height: 100%; border-radius: 3px; background: #B8541A; }
+.nb-bar.is-size span { background: var(--xb-ink); }
+.nb-bar-value { text-align: right; font-variant-numeric: tabular-nums; color: var(--xb-muted); }
+
+/* Foot traffic by hour: 24 columns, busiest = full height. */
+.nb-hours { display: grid; grid-template-columns: repeat(24, minmax(0, 1fr)); gap: 2px; align-items: end; height: 72px; }
+.nb-hours span { display: block; border-radius: 2px 2px 0 0; background: #2253A5; min-height: 2px; }
+.nb-hours span.is-peak { background: #12305F; }
+.nb-hours span.is-withheld {
+    height: 100%;
+    background: repeating-linear-gradient(135deg, var(--xb-wash) 0 3px, transparent 3px 6px);
+}
+.nb-hours-axis { display: flex; justify-content: space-between; font-size: 11px; color: var(--xb-muted); font-variant-numeric: tabular-nums; }
 .nb-row-remove {
     flex: 0 0 auto;
     width: 28px; height: 28px;
@@ -185,6 +209,88 @@
 .nb-row-remove:hover { background: var(--xb-wash); color: var(--xb-ink); }
 
 .nb-lede { margin: 0; font-size: 13px; color: var(--xb-muted); }
+
+/* ---------- Report hierarchy ----------
+   Header, then the verdict (one plain sentence and three figures), then
+   titled sections split by a rule, each made of small sub-blocks. Data reads
+   in ink; notes and empty states stay quiet so they never outweigh it. */
+.nb-report-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.nb-verdict { display: flex; flex-direction: column; gap: 14px; }
+.nb-verdict-text { margin: 0; font-size: 15px; line-height: 1.45; color: var(--xb-ink); }
+.nb-verdict-text b { font-weight: 600; }
+.nb-verdict-text small { display: block; margin-top: 4px; font-size: 13px; color: var(--xb-muted); }
+.nb-verdict-text.is-loading { color: var(--xb-muted); }
+.xb-stat-value.is-empty { color: var(--xb-faint); }
+
+.nb-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--xb-line);
+}
+.nb-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 2px; }
+.nb-section-head h3 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+.nb-section-note { font-size: 12px; color: var(--xb-muted); }
+
+/* Competition by giro: one card, rows split by hairlines, numbers in
+   aligned columns, and a bar in the giro's colour for its share. */
+.nb-giros { border: 1px solid var(--xb-line); border-radius: 12px; overflow: hidden; background: #FFFFFF; }
+.nb-giros-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 64px 64px 28px;
+    align-items: center;
+    column-gap: 8px;
+    padding: 12px 8px 12px 14px;
+    border-top: 1px solid var(--xb-line-soft);
+}
+.nb-giros-row:first-child { border-top: 0; }
+.nb-giros-row.is-head {
+    padding-top: 10px; padding-bottom: 8px;
+    background: var(--xb-wash-soft);
+    font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--xb-muted);
+}
+.nb-giros-row.is-off .nb-giros-text, .nb-giros-row.is-off .nb-num { color: var(--xb-faint); }
+.nb-giros-name { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.nb-giros-label { display: flex; align-items: flex-start; gap: 10px; min-width: 0; font-size: 14px; line-height: 1.35; }
+.nb-giros-label .nb-chip-dot { margin-top: 5px; flex: 0 0 auto; }
+/* DENUE names are long ("Restaurantes con servicio de preparación…"): two
+   lines say enough; the full name is in the tooltip. */
+.nb-giros-text {
+    min-width: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+.nb-giros-bar { display: block; height: 4px; margin-left: 20px; border-radius: 2px; background: var(--xb-wash); overflow: hidden; }
+.nb-giros-bar span { display: block; height: 100%; border-radius: 2px; transition: width .3s ease; }
+.nb-num { text-align: right; font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.nb-giros-row.is-head .nb-num { font-size: 11px; }
+.nb-num.is-zero { color: var(--xb-faint); font-weight: 500; }
+.nb-giros-add {
+    display: flex; align-items: center; gap: 8px; width: 100%;
+    min-height: 44px; padding: 0 14px;
+    border: 0; border-top: 1px dashed var(--xb-line); background: transparent;
+    font: inherit; font-size: 13px; font-weight: 500; color: var(--xb-accent);
+    cursor: pointer; text-align: left;
+}
+.nb-giros-add:hover { background: var(--xb-wash-soft); }
+.nb-giros-add:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: -2px; }
+.nb-giros-add-left { color: var(--xb-muted); font-weight: 400; }
+
+.nb-sub { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+/* A wrapper that is only there to hide part of a sub-block on paper keeps
+   the sub-block's own spacing. */
+.nb-sub > .nb-screen-only { display: flex; flex-direction: column; gap: 8px; }
+.nb-sub-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.nb-insight { margin: 0; font-size: 14px; color: var(--xb-ink); }
+.nb-insight b { font-weight: 600; }
+.nb-note { margin: 0; font-size: 12px; line-height: 1.45; color: var(--xb-muted); }
+.nb-empty-note { margin: 0; font-size: 13px; color: var(--xb-muted); }
+
+.xb-segmented.is-compact { padding: 3px; }
+.xb-segmented.is-compact button { height: 28px; padding: 0 10px; font-size: 12px; }
 .nb-callout {
     display: flex; flex-direction: column; gap: 6px;
     padding: 14px 16px;
@@ -193,7 +299,7 @@
     font-size: 13px;
 }
 .nb-callout-head { font-weight: 500; }
-.nb-sources { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--xb-muted); }
+.nb-sources { display: flex; flex-direction: column; gap: 4px; padding-top: 16px; border-top: 1px solid var(--xb-line); font-size: 12px; color: var(--xb-muted); }
 .nb-sources .xb-eyebrow { margin-bottom: 4px; }
 .nb-error { font-size: 13px; color: #9B2C2C; }
 
@@ -268,21 +374,69 @@
     }
     .nb-sheet-chips::-webkit-scrollbar { display: none; }
     .nb-sheet-chips .xb-chip { flex: 0 0 auto; }
+    .nb-sheet-radius {
+        flex: 0 0 auto;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--xb-line-soft);
+    }
+    /* One line: the label beside the three options. */
+    .nb-sheet-radius .xb-field { flex-direction: row; align-items: center; gap: 12px; }
+    .nb-sheet-radius .xb-segmented { flex: 1 1 auto; }
+    .nb-sheet-radius .xb-segmented button { height: 36px; }
     .nb-foot { padding: 10px 16px; }
+    /* Before a point is chosen the sheet only holds the short intro and the
+       radius, so it fits its content and the map runs underneath it. */
+    .nb-page:has(.xb-inspector.is-empty) .map-container { bottom: 0; }
+    .nb-page .xb-inspector.is-empty { height: auto; max-height: var(--xb-sheet); }
     .nb-btn { height: 44px; font-size: 14px; }
     .nb-suggest { top: 44px; }
 }
 
+.nb-btn:disabled { opacity: .55; cursor: default; }
+
 /* ---------- Print: the report alone ---------- */
+/* What only the paper copy carries: the date, a picture of the map, both
+   foot-traffic curves and the link back. */
+.nb-print-only { display: none; }
+.nb-print-head {
+    justify-content: space-between; align-items: baseline;
+    padding-bottom: 10px; margin-bottom: 4px;
+    border-bottom: 1px solid var(--xb-line);
+    font-size: 11px; color: var(--xb-muted);
+}
+.nb-print-brand { font-size: 13px; font-weight: 600; color: var(--xb-ink); }
+.nb-print-map { margin: 0; }
+.nb-print-map img { display: block; width: auto; max-width: 100%; max-height: 100mm; margin: 0 auto; border: 1px solid var(--xb-line); border-radius: 8px; }
+.nb-print-map figcaption { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--xb-muted); }
+.nb-print-hours { display: flex; flex-direction: column; gap: 6px; }
+.nb-print-hours + .nb-print-hours { margin-top: 14px; }
+.nb-print-link { font-size: 11px; color: var(--xb-muted); }
+.nb-print-link span { color: var(--xb-ink); word-break: break-all; }
+
 @media print {
+    @page { margin: 14mm 14mm 16mm; }
     .nb-page { height: auto; overflow: visible; }
     .nb-page .map-admin-container, .nb-page .xb-topbar, .nb-page .nb-chips,
     .nb-page .explore-help-panel, .nb-page .nb-foot, .nb-page .nb-row-remove,
-    .nb-page .nb-sheet-chips { display: none !important; }
+    .nb-page .nb-sheet-chips, .nb-page .nb-sheet-radius, .nb-page .nb-giros-add,
+    .nb-page .nb-screen-only { display: none !important; }
+    .nb-page .nb-print-only { display: block; }
+    .nb-page .nb-print-head { display: flex; }
+    .nb-page span.nb-print-only { display: inline; }
     .nb-page .xb-inspector {
         position: static;
-        width: auto; height: auto;
+        width: auto; height: auto; max-height: none;
         border: 0; box-shadow: none; border-radius: 0;
     }
-    .nb-page .xb-inspector .xb-scroll { overflow: visible; max-height: none; }
+    .nb-page .xb-inspector .xb-scroll { overflow: visible; max-height: none; padding: 0; }
+    /* Bars, dots and charts are backgrounds, which browsers leave out of a
+       print unless told otherwise. */
+    .nb-page .xb-inspector * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    /* Paper has no tooltip: the full giro name. */
+    .nb-page .nb-giros-text { display: block; -webkit-line-clamp: unset; overflow: visible; }
+    /* Never split a block, a row or a chart across pages. */
+    .nb-page .nb-verdict, .nb-page .nb-print-map, .nb-page .nb-sub, .nb-page .nb-callout,
+    .nb-page .nb-giros-row, .nb-page .nb-row, .nb-page .nb-bar-row, .nb-page .nb-print-hours,
+    .nb-page .nb-sources { break-inside: avoid; }
+    .nb-page .nb-section-head { break-after: avoid; }
 }

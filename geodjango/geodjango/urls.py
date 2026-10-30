@@ -37,9 +37,14 @@ import os
 urlpatterns = [
     re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),
+    # Crawlers. The slash variants below redirect so each page has one URL;
+    # the client router only knows the bare paths, and /explorar/ used to
+    # render the home page under the explorer's tags.
+    path('robots.txt', robots_txt, name='robots_txt'),
+    path('sitemap.xml', sitemap_xml, name='sitemap_xml'),
     path('', map_admin_page, name='map_admin_page'),
     path('explorar', map_admin_page, name='explorar_page'),
-    path('explorar/', map_admin_page, name='explorar_page_with_slash'),
+    path('explorar/', RedirectView.as_view(url='/explorar', permanent=True, query_string=True), name='explorar_page_with_slash'),
     path('negocios', map_admin_page, name='negocios_page'),
     path('negocios/review', map_admin_page, name='negocios_page'),
     path('negocios/stats', map_admin_page, name='negocios_page'),
@@ -48,20 +53,20 @@ urlpatterns = [
     path('proyectos/mapas/turistas-cdmx-2024-2025', turistas_cdmx_2024_2025_page, name='turistas_cdmx_page'),
     path('proyectos/mapas/despojos-viviendas', despojos_viviendas_page, name='despojos_viviendas_page'),
     path('colonias', neighbourhoods_map_page, name='neighbourhoods_map_page'),
-    path('colonias/', neighbourhoods_map_page, name='neighbourhoods_map_page_with_slash'),
+    path('colonias/', RedirectView.as_view(url='/colonias', permanent=True, query_string=True), name='neighbourhoods_map_page_with_slash'),
     path('vivienda', map_admin_page, name='negocios_indicators_page'),
     # Trip Faker page
     #path('trip-faker', map_admin_page, name='trip_faker_page'),
     #path('trip-faker/', map_admin_page, name='trip_faker_page_with_slash'),
-    path('negocios/', map_admin_page, name='negocios_page_with_slash'),
+    path('negocios/', RedirectView.as_view(url='/negocios', permanent=True, query_string=True), name='negocios_page_with_slash'),
     path('acerca-de', map_admin_page, name='acerca_de_page'),
-    path('acerca-de/', map_admin_page, name='acerca_de_page_with_slash'),
+    path('acerca-de/', RedirectView.as_view(url='/acerca-de', permanent=True, query_string=True), name='acerca_de_page_with_slash'),
 
     # Legal pages, linked from every form that collects personal data
     path('privacidad', privacy_page, name='privacy_page'),
-    path('privacidad/', privacy_page, name='privacy_page_with_slash'),
+    path('privacidad/', RedirectView.as_view(url='/privacidad', permanent=True, query_string=True), name='privacy_page_with_slash'),
     path('terminos', terms_page, name='terms_page'),
-    path('terminos/', terms_page, name='terms_page_with_slash'),
+    path('terminos/', RedirectView.as_view(url='/terminos', permanent=True, query_string=True), name='terms_page_with_slash'),
 
     # API for AGEBs
     path('api/agebs/all', get_all_agebs, name='get_all_agebs'),

@@ -11,6 +11,7 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import ContentFile
 from django.contrib.gis.geos import Point
+from django.contrib.admin.views.decorators import staff_member_required
 import base64
 import time
 from django.utils import timezone
@@ -1330,6 +1331,53 @@ def get_user_reviews(request):
             'message': str(e)
         }, status=500)
 
+# Robbery from businesses is counted from this year on, so the split reflects
+# the city of the last few years rather than every case since 2016.
+BUSINESS_ROBBERY_FROM_YEAR = 2019
+
+
+def business_robbery_by_time(point, radius):
+    """
+    Robberies from businesses within `radius` metres of `point`, by time of day.
+
+    A time of exactly 00:00:00 is left out: in the FGJ files it is mostly a
+    date with no recorded hour, and counting it would pile false cases into
+    the night. Morning is 6–12, afternoon 12–19, night 19–6.
+    """
+    from django.contrib.gis.measure import Distance
+    from django.db.models import Count, Min
+
+    robberies = Felony.objects.filter(
+        location__distance_lte=(point, Distance(m=radius)),
+        crime_type__in=Felony.BUSINESS_ROBBERY_TYPES,
+        crime_date__year__gte=BUSINESS_ROBBERY_FROM_YEAR,
+    ).exclude(crime_time='00:00:00')
+
+    counts = robberies.aggregate(
+        morning=Count('id', filter=Q(crime_time__hour__gte=6, crime_time__hour__lt=12)),
+        afternoon=Count('id', filter=Q(crime_time__hour__gte=12, crime_time__hour__lt=19)),
+        night=Count('id', filter=Q(crime_time__hour__gte=19) | Q(crime_time__hour__lt=6)),
+        from_date=Min('crime_date'),
+        to_date=Max('crime_date'),
+    )
+    return {
+        'morning': counts['morning'],
+        'afternoon': counts['afternoon'],
+        'night': counts['night'],
+        'total': counts['morning'] + counts['afternoon'] + counts['night'],
+        'from_year': counts['from_date'].year if counts['from_date'] else None,
+        'to_year': counts['to_date'].year if counts['to_date'] else None,
+    }
+
+
+def foot_traffic_by_hour(lng, lat, radius):
+    """Relative foot traffic around a point; see world/foot_traffic.py."""
+    from django.conf import settings
+    from world.foot_traffic import hourly_index
+
+    return hourly_index(lng, lat, radius, settings.FOOT_TRAFFIC_FILE)
+
+
 @csrf_exempt
 def get_business_location_stats(request):
     """Get business statistics within a radius of given coordinates"""
@@ -1452,7 +1500,9 @@ def get_business_location_stats(request):
                         'radius_meters': radius,
                         'coordinates': coordinates
                     },
-                    'category_stats': category_stats
+                    'category_stats': category_stats,
+                    'business_robbery_by_time': business_robbery_by_time(point, radius),
+                    'foot_traffic': foot_traffic_by_hour(coordinates['lng'], coordinates['lat'], radius),
                 }
             })
             
@@ -1617,7 +1667,12 @@ def get_business_indicators(request):
             'message': 'Only POST method is allowed'
         }, status=405)
 
+# The three phone endpoints return raw pings: advertising IDs, IP addresses
+# and exact positions. Nothing on the site calls them; they stay for staff
+# pulling data out, behind the same login as the dashboard. Public pages only
+# ever get aggregates (see foot_traffic_by_hour).
 @csrf_exempt
+@staff_member_required
 def get_phone_locations_by_date(request, date):
     """Get phone locations for a specific date in GeoJSON or CSV format"""
     try:
@@ -1797,6 +1852,7 @@ def get_phone_locations_by_date(request, date):
         }, status=500)
 
 @csrf_exempt
+@staff_member_required
 def get_phone_locations_by_date_range(request, start_date, end_date):
     """Get phone locations between two dates in GeoJSON or CSV format"""
     try:
@@ -1997,6 +2053,7 @@ def get_phone_locations_by_date_range(request, start_date, end_date):
         }, status=500)
 
 @csrf_exempt
+@staff_member_required
 def get_phone_locations_batches(request, hour_num, start_date, end_date):
     """Generate batches of phone locations based on hour intervals and return as ZIP file"""
     try:

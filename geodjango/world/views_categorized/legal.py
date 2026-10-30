@@ -10,6 +10,8 @@ through two templates.
 from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
+from world.seo import absolute
+
 # Shared by both documents. `company_address` is published as the responsable's
 # domicilio under the LFPDPPP, so it should be the address you are willing to
 # receive an ARCO request at.
@@ -23,7 +25,7 @@ LEGAL_CONTEXT = {
 
 
 def _legal_context(active):
-    return dict(LEGAL_CONTEXT, active=active)
+    return dict(LEGAL_CONTEXT, active=active, canonical=absolute(f'/{active}'))
 
 
 @require_GET

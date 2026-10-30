@@ -12,6 +12,8 @@ unidecode
 djangorestframework
 pandas
 pyarrow
+# Foot-traffic build: counts distinct devices over Parquet files larger than memory.
+duckdb==1.1.3
 django-hosts
 requests
 matplotlib

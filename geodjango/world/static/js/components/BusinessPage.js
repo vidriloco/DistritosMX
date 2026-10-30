@@ -320,6 +320,10 @@ function BusinessPage() {
             // The points layer, when it exists, goes above the ring.
             if (map.getLayer(NB_LAYER_POINTS)) map.moveLayer(NB_LAYER_POINTS);
 
+            // On a phone the first point grows the sheet and shrinks the map in
+            // the same render; Mapbox has to know its new size before it fits,
+            // or the ring is centred for the old, taller map.
+            map.resize();
             map.fitBounds(turf.bbox(circle), { padding: isMobile ? 40 : 70, maxZoom: 17, duration: 600 });
         });
     }, [point && point.lat, point && point.lng, radius]);
