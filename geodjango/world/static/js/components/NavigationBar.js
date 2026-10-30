@@ -3,7 +3,9 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
     const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
     const [analisisOpen, setAnalisisOpen] = React.useState(false);
     const [contactOpen, setContactOpen] = React.useState(false);
+    const [phoneMenuOpen, setPhoneMenuOpen] = React.useState(false);
     const analisisRef = React.useRef(null);
+    const phoneMenuRef = React.useRef(null);
 
     // Listen for path changes
     React.useEffect(() => {
@@ -79,8 +81,37 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
         };
     }, [analisisOpen]);
 
+    // On a phone the links don't fit next to the logo; they open from a menu
+    // button instead, closed the same way as the Análisis dropdown.
+    React.useEffect(() => {
+        if (!phoneMenuOpen) return;
+
+        const handleClickOutside = (e) => {
+            if (phoneMenuRef.current && !phoneMenuRef.current.contains(e.target)) {
+                setPhoneMenuOpen(false);
+            }
+        };
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                setPhoneMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('touchstart', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('touchstart', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [phoneMenuOpen]);
+
     const handleDespojosClick = () => {
         setAnalisisOpen(false);
+        setPhoneMenuOpen(false);
         if (window.navigate) {
             window.navigate('/proyectos/mapas/despojos-viviendas');
         } else {
@@ -90,6 +121,7 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
 
     const handleContactoClick = () => {
         setAnalisisOpen(false);
+        setPhoneMenuOpen(false);
         setContactOpen(true);
     };
 
@@ -134,20 +166,20 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                 
                 <div className="nav-actions">
                     <button 
-                        className="nav-button"
+                        className="nav-button nav-desktop-only"
                         onClick={handleExplorarClick}
                         style={{ color: '#fff' }}
                     >
                         Explorar
                     </button>
                     <button
-                        className="nav-button"
+                        className="nav-button nav-desktop-only"
                         onClick={handleNegociosClick}
                         style={{ color: '#fff' }}
                     >
                         Negocios
                     </button>
-                    <div className="nav-dropdown" ref={analisisRef}>
+                    <div className="nav-dropdown nav-desktop-only" ref={analisisRef}>
                         <button
                             className="nav-button nav-dropdown-toggle"
                             onClick={() => setAnalisisOpen(!analisisOpen)}
@@ -171,12 +203,34 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                         )}
                     </div>
                     <button
-                        className="nav-button"
+                        className="nav-button nav-desktop-only"
                         onClick={handleContactoClick}
                         style={{ color: '#fff' }}
                     >
                         Contacto
                     </button>
+                    <div className="nav-dropdown nav-phone-only" ref={phoneMenuRef}>
+                        <button
+                            className="nav-button nav-menu-toggle"
+                            onClick={() => setPhoneMenuOpen(!phoneMenuOpen)}
+                            style={{ color: '#fff' }}
+                            aria-label="Menú"
+                            aria-haspopup="true"
+                            aria-expanded={phoneMenuOpen}
+                        >
+                            <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                                <path d="M4 7h16M4 12h16M4 17h16" />
+                            </svg>
+                        </button>
+                        {phoneMenuOpen && (
+                            <div className="nav-dropdown-menu" role="menu">
+                                <button className="nav-dropdown-item" onClick={handleExplorarClick} role="menuitem">Explorar</button>
+                                <button className="nav-dropdown-item" onClick={handleNegociosClick} role="menuitem">Negocios</button>
+                                <button className="nav-dropdown-item" onClick={handleDespojosClick} role="menuitem">Despojos</button>
+                                <button className="nav-dropdown-item" onClick={handleContactoClick} role="menuitem">Contacto</button>
+                            </div>
+                        )}
+                    </div>
                     {isMundial2025 && (
                         <div 
                             className="nav-title"

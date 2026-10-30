@@ -42,9 +42,6 @@ function ExploreIntroduction({ onComplete }) {
                         <p className="intro-small-text">
                             Esta herramienta está en modo beta, por lo que puede presentar errores.
                         </p>
-                        <p className="intro-tiny-text">
-                            Se recomienda usar esta herramienta en un navegador de escritorio.
-                        </p>
                         <div className="intro-actions-container">
                             <div className="intro-checkbox-container">
                                 <input 

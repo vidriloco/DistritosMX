@@ -551,21 +551,60 @@ img.xb-indicator-icon { border-radius: 4px; }
 .xb-layout .mapboxgl-ctrl-attrib { font-family: inherit; font-size: 11px; }
 
 /* ---------- Phone ---------- */
+/* The phone menu and the sheet's unit chips only exist below the breakpoint. */
+.xb-phone-menu { display: none; position: relative; }
+.xb-sheet-units { display: none; }
+
 @media (max-width: 768px) {
-    .xb-layout { --xb-topbar: 56px; }
-    .xb-topbar { gap: 10px; padding: 0 12px; }
+    .xb-layout { --xb-topbar: 56px; --xb-sheet: 46vh; --xb-sheet: 46dvh; }
+    .xb-topbar { gap: 8px; padding: 0 8px 0 12px; }
     .xb-brand img { height: 22px; }
+    .xb-search { height: 40px; padding: 0 12px; }
     .xb-units, .xb-links-group { display: none; }
-    .xb-layout .map-container { right: 0; bottom: 42vh; }
+    .xb-links { gap: 0; }
+    .xb-icon-button { width: 40px; height: 40px; }
+    .xb-phone-menu { display: block; }
+    .xb-phone-menu .xb-links-dropdown { min-width: 180px; }
+    .xb-phone-menu .xb-links-dropdown button { height: 44px; font-size: 15px; }
+    .xb-phone-menu .xb-links-dropdown .is-active { font-weight: 600; }
+
+    .xb-layout .map-container { right: 0; bottom: var(--xb-sheet); }
     .xb-inspector {
         top: auto; left: 0; right: 0; bottom: 0;
-        width: auto; height: 42vh;
+        width: auto; height: var(--xb-sheet);
         border-left: 0; border-top: 1px solid var(--xb-line);
         border-radius: 16px 16px 0 0;
         box-shadow: var(--xb-shadow);
     }
+    .xb-sheet-units {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 8px;
+        padding: 12px 16px 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .xb-sheet-units::-webkit-scrollbar { display: none; }
+    .xb-sheet-units .xb-chip { flex: 0 0 auto; }
+    .xb-tabs { padding: 4px 8px 0; overflow-x: auto; }
+    .xb-tab { height: 44px; flex: 0 0 auto; }
     .xb-inspector .vertical-panel-content.xb-scroll { padding: 16px; }
-    .xb-transport { display: none; }
+    .xb-foot { padding: 10px 16px; padding-bottom: max(10px, env(safe-area-inset-bottom)); }
+
+    /* One row of transport chips just above the sheet, swiped sideways. */
+    .xb-transport {
+        left: 0; right: 0;
+        bottom: calc(var(--xb-sheet) + 10px);
+        padding: 0 12px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        pointer-events: auto;
+    }
+    .xb-layout.xb-no-inspector .xb-transport { right: 0; bottom: 20px; }
+    .xb-transport::-webkit-scrollbar { display: none; }
+    .xb-transport .xb-chip { flex: 0 0 auto; }
+
     .explore-help-panel.xb-help { top: 68px; right: 12px; left: 12px; width: auto; max-width: none; }
 }
 
@@ -578,6 +617,10 @@ img.xb-indicator-icon { border-radius: 4px; }
     bottom: auto !important;
     left: auto !important;
 }
+
+/* The search dialog opens inside the inspector; it has to cover the detail
+   cards there, which carry the legacy panels' z-index of 10000. */
+.xb-inspector > .overlay { z-index: 10001; }
 
 .xb-layout .mapboxgl-popup-content { font-family: inherit; }
 .xb-controls:empty { display: none; }

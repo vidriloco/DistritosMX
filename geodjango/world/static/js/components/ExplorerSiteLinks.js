@@ -1,18 +1,22 @@
 // ExplorerSiteLinks - the site's main menu (Explorar, Negocios, Análisis,
 // Contacto), in the same order as on the home page, inside the light gray
 // group at the right of the /explorar and /negocios top bars. The help
-// button sits after the group.
+// button sits after the group. On a phone the group gives way to a menu
+// button that lists the same links.
 
 function ExplorerSiteLinks({ onHelpClick }) {
     const [analisisOpen, setAnalisisOpen] = React.useState(false);
     const [contactOpen, setContactOpen] = React.useState(false);
+    const [phoneMenuOpen, setPhoneMenuOpen] = React.useState(false);
     const menuRef = React.useRef(null);
+    const phoneMenuRef = React.useRef(null);
 
     const path = window.location.pathname;
     const isActive = (prefix) => path === prefix || path.startsWith(prefix + '/');
 
     const navigate = (to) => {
         setAnalisisOpen(false);
+        setPhoneMenuOpen(false);
         if (window.navigate) window.navigate(to); else window.location.href = to;
     };
 
@@ -24,6 +28,20 @@ function ExplorerSiteLinks({ onHelpClick }) {
         document.addEventListener('keydown', onKey);
         return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey); };
     }, [analisisOpen]);
+
+    React.useEffect(() => {
+        if (!phoneMenuOpen) return undefined;
+        const onDown = (e) => { if (phoneMenuRef.current && !phoneMenuRef.current.contains(e.target)) setPhoneMenuOpen(false); };
+        const onKey = (e) => { if (e.key === 'Escape') setPhoneMenuOpen(false); };
+        document.addEventListener('mousedown', onDown);
+        document.addEventListener('touchstart', onDown);
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('mousedown', onDown);
+            document.removeEventListener('touchstart', onDown);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [phoneMenuOpen]);
 
     const ContactModal = window.ContactForm || (() => null);
     const link = (to, label) => (
@@ -57,6 +75,22 @@ function ExplorerSiteLinks({ onHelpClick }) {
                     <circle cx="12" cy="17" r=".6" fill="currentColor" />
                 </svg>
             </button>
+            <div className="xb-phone-menu" ref={phoneMenuRef}>
+                <button type="button" className="xb-icon-button" aria-label="Menú" aria-haspopup="true" aria-expanded={phoneMenuOpen}
+                        onClick={() => setPhoneMenuOpen((v) => !v)}>
+                    <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                        <path d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                </button>
+                {phoneMenuOpen && (
+                    <div className="xb-links-dropdown" role="menu">
+                        <button type="button" role="menuitem" className={isActive('/explorar') ? 'is-active' : ''} onClick={() => navigate('/explorar')}>Explorar</button>
+                        <button type="button" role="menuitem" className={isActive('/negocios') ? 'is-active' : ''} onClick={() => navigate('/negocios')}>Negocios</button>
+                        <button type="button" role="menuitem" onClick={() => navigate('/proyectos/mapas/despojos-viviendas')}>Despojos</button>
+                        <button type="button" role="menuitem" onClick={() => { setPhoneMenuOpen(false); setContactOpen(true); }}>Contacto</button>
+                    </div>
+                )}
+            </div>
             <ContactModal open={contactOpen} onClose={() => setContactOpen(false)} />
         </nav>
     );

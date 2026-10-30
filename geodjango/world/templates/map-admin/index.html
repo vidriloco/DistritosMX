@@ -4263,6 +4263,35 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* The menu button that replaces the links on a phone. */
+        .nav-phone-only {
+            display: none;
+        }
+
+        .nav-menu-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+        }
+
+        @media (max-width: 640px) {
+            .nav-desktop-only {
+                display: none !important;
+            }
+
+            .nav-phone-only {
+                display: block;
+            }
+
+            .nav-phone-only .nav-dropdown-item {
+                font-size: 1rem;
+                padding: 12px 16px;
+            }
+        }
+
         /* ---- contact form modal (opened from the nav "Contacto" entry) ---- */
         .contact-modal-backdrop {
             position: fixed; inset: 0; background: rgba(2, 1, 62, 0.55);
@@ -5092,6 +5121,7 @@
                 left: 0;
                 right: 0;
                 width: 100%;
+                transform: none; /* full width now, so no centering shift */
                 display: flex;
                 justify-content: center;
                 align-items: center;

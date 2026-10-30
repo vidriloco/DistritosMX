@@ -1,30 +1,53 @@
 // ExplorerTopBar - the slim white bar at the top of /explorar.
 // Logo, search, the spatial unit as chips and the section links.
+
+// On a phone the unit chips move into the inspector sheet, which reads them
+// from here.
+const EXPLORER_UNITS = [
+    { id: 'hexbin', label: 'Hexbin', disabled: true },
+    { id: 'agebs', label: 'AGEB' },
+    { id: 'neighborhood', label: 'Colonia' },
+    { id: 'isochrones', label: 'Isocronas' }
+];
+
+function ExplorerUnitChips({ selectedAnalysis, onAnalysisSelect, className }) {
+    const handleUnitClick = (unit) => {
+        if (unit.disabled) return;
+        // Clicking the active chip again clears the spatial unit.
+        onAnalysisSelect(selectedAnalysis === unit.id ? null : unit.id);
+    };
+
+    return (
+        <div className={className} role="group" aria-label="Unidad espacial">
+            {EXPLORER_UNITS.map((unit) => (
+                <button
+                    key={unit.id}
+                    type="button"
+                    className={`xb-chip${selectedAnalysis === unit.id ? ' is-active' : ''}${unit.disabled ? ' is-disabled' : ''}`}
+                    onClick={() => handleUnitClick(unit)}
+                    disabled={unit.disabled}
+                    title={unit.disabled ? 'Próximamente' : undefined}
+                    aria-pressed={selectedAnalysis === unit.id}
+                >
+                    {unit.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
 function ExplorerTopBar({
     selectedAnalysis,
     onAnalysisSelect,
     onSearchClick,
     onHelpClick
 }) {
-    const units = [
-        { id: 'hexbin', label: 'Hexbin', disabled: true },
-        { id: 'agebs', label: 'AGEB' },
-        { id: 'neighborhood', label: 'Colonia' },
-        { id: 'isochrones', label: 'Isocronas' }
-    ];
-
     const navigate = (path) => {
         if (window.navigate) {
             window.navigate(path);
         } else {
             window.location.href = path;
         }
-    };
-
-    const handleUnitClick = (unit) => {
-        if (unit.disabled) return;
-        // Clicking the active chip again clears the spatial unit.
-        onAnalysisSelect(selectedAnalysis === unit.id ? null : unit.id);
     };
 
     return (
@@ -46,21 +69,11 @@ function ExplorerTopBar({
                 <span className="xb-search-placeholder">Buscar línea o estación</span>
             </button>
 
-            <div className="xb-units" role="group" aria-label="Unidad espacial">
-                {units.map((unit) => (
-                    <button
-                        key={unit.id}
-                        type="button"
-                        className={`xb-chip${selectedAnalysis === unit.id ? ' is-active' : ''}${unit.disabled ? ' is-disabled' : ''}`}
-                        onClick={() => handleUnitClick(unit)}
-                        disabled={unit.disabled}
-                        title={unit.disabled ? 'Próximamente' : undefined}
-                        aria-pressed={selectedAnalysis === unit.id}
-                    >
-                        {unit.label}
-                    </button>
-                ))}
-            </div>
+            <ExplorerUnitChips
+                className="xb-units"
+                selectedAnalysis={selectedAnalysis}
+                onAnalysisSelect={onAnalysisSelect}
+            />
 
             <ExplorerSiteLinks onHelpClick={onHelpClick} />
         </header>
@@ -68,3 +81,4 @@ function ExplorerTopBar({
 }
 
 window.ExplorerTopBar = ExplorerTopBar;
+window.ExplorerUnitChips = ExplorerUnitChips;

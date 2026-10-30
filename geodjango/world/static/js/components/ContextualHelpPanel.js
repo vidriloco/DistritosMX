@@ -48,15 +48,15 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
                 steps: [
                     {
                         number: '1',
-                        text: 'Elige la unidad espacial en la barra superior: AGEB, colonia o isocronas'
+                        text: 'Elige la unidad espacial: AGEB, colonia o isocronas'
                     },
                     {
                         number: '2',
-                        text: 'Elige un tema en el panel de la derecha y un indicador; las zonas se pintan según su valor'
+                        text: 'Elige un tema en el panel y un indicador; las zonas se pintan según su valor'
                     },
                     {
                         number: '3',
-                        text: 'Pasa el cursor sobre el mapa para ver el valor de cada zona, o mueve el pin para cambiar el radio'
+                        text: 'Pasa el cursor o toca el mapa para ver el valor de cada zona, o mueve el pin para cambiar el radio'
                     }
                 ]
             };
@@ -75,7 +75,7 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
                     },
                     {
                         number: '3',
-                        text: 'Lee el informe de la derecha, cambia el radio y descárgalo en PDF'
+                        text: 'Lee el informe en el panel, cambia el radio y descárgalo en PDF'
                     }
                 ]
             };

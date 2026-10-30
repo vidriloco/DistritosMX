@@ -736,7 +736,7 @@ function TransportPageWelcomeIntro() {
                     />
                     
                     {/* GeoJSON Layers Panel */}
-                    <div className="floating-actions-container" style={{
+                    <div className="floating-actions-container transport-layers-panel" style={{
                         position: 'absolute',
                         bottom: '20px',
                         left: '20px',

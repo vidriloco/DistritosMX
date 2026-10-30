@@ -3802,8 +3802,13 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
 
             // Mouseleave event
             const mouseleaveHandler = () => {
+                // Every tap ends with a synthetic mouseout, which would close
+                // the tooltip the tap just opened; on a phone it stays until
+                // another AGEB is tapped.
+                if (window.matchMedia('only screen and (max-width: 767px)').matches) return;
+
                 map.current.getCanvas().style.cursor = '';
-                
+
                 // Check if the source exists before calling setData
                 const hoverSource = map.current.getSource('agebs-hover-source');
                 if (hoverSource) {
@@ -3859,6 +3864,13 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             
             // Add click event listener for AGEB selection
             const clickHandler = (e) => {
+                // A phone has no hover, so a tap shows the hover tooltip
+                // instead of opening the AGEB card in the bottom sheet.
+                if (window.matchMedia('only screen and (max-width: 767px)').matches) {
+                    mouseenterHandler(e);
+                    return;
+                }
+
                 const features = map.current.queryRenderedFeatures(e.point, {
                     layers: ['agebs-hover-detection']
                 });
@@ -4345,7 +4357,7 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
 
             <div ref={mapContainer} className="map-container" />
 
-            {isInspectorLayout && !isMobile && window.TransportSystemsPanel && (
+            {isInspectorLayout && window.TransportSystemsPanel && (
                 <TransportSystemsPanel
                     variant="chips"
                     map={map}

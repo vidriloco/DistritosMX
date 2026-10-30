@@ -368,131 +368,131 @@ function ExplorerInspector({
                     <span style={{ width: `${Math.max(4, Math.min(100, downloadProgress || 0))}%` }}></span>
                 </div>
             )}
-            {!isMobile && (
-                <div className="xb-tabs" role="tablist" aria-label="Temas">
-                    {EXPLORER_SECTIONS.map((s) => (
-                        <button
-                            key={s.id}
-                            type="button"
-                            role="tab"
-                            aria-selected={activeSection === s.id}
-                            className={`xb-tab${activeSection === s.id ? ' is-active' : ''}`}
-                            onClick={() => handleTabClick(s.id)}
-                            disabled={tabsDisabled}
-                        >
-                            {s.label}
-                        </button>
-                    ))}
-                </div>
+            {/* On a phone the top bar has no room for the unit chips. */}
+            {isMobile && (
+                <ExplorerUnitChips
+                    className="xb-sheet-units"
+                    selectedAnalysis={selectedAnalysis}
+                    onAnalysisSelect={onAnalysisSelect}
+                />
             )}
+            <div className="xb-tabs" role="tablist" aria-label="Temas">
+                {EXPLORER_SECTIONS.map((s) => (
+                    <button
+                        key={s.id}
+                        type="button"
+                        role="tab"
+                        aria-selected={activeSection === s.id}
+                        className={`xb-tab${activeSection === s.id ? ' is-active' : ''}`}
+                        onClick={() => handleTabClick(s.id)}
+                        disabled={tabsDisabled}
+                    >
+                        {s.label}
+                    </button>
+                ))}
+            </div>
 
             <div className="vertical-panel-content xb-scroll" ref={scrollRef}>
-                {isMobile ? (
-                    <MobilePrimaryPanel />
-                ) : (
+                {selectedGeozone && (
+                    <GeozoneDetailsPanel
+                        ref={geozoneDetailsPanelRef}
+                        selectedGeozone={selectedGeozone}
+                        onClose={onCloseGeozoneDetails}
+                    />
+                )}
+                {selectedLine && (
+                    <LineDetailsPanel
+                        ref={lineDetailsPanelRef}
+                        selectedLine={selectedLine}
+                        transportSystems={transportSystems}
+                        onClose={onCloseLineDetails}
+                    />
+                )}
+                {selectedStation && (
+                    <StationDetailsPanel
+                        ref={stationPanelRef}
+                        selectedStation={selectedStation}
+                        onClose={onCloseStationDetails}
+                    />
+                )}
+
+                {!selectedGeozone && !section && (
+                    <section className="xb-empty">
+                        <h2 className="xb-title">Explora el territorio</h2>
+                        {indicatorsLoading && (
+                            <div className="xb-notice" role="status" aria-live="polite">
+                                <div className="xb-notice-row">
+                                    <span className="xb-notice-spinner" aria-hidden="true"></span>
+                                    <span>Cargando los datos de las zonas…</span>
+                                    <strong>{Math.round(downloadProgress || 0)}%</strong>
+                                </div>
+                                <div className="xb-notice-bar" aria-hidden="true">
+                                    <span style={{ width: `${Math.max(2, Math.min(100, downloadProgress || 0))}%` }}></span>
+                                </div>
+                            </div>
+                        )}
+                        <p className="xb-muted">Elige un tema arriba. Las zonas se pintan según el indicador que selecciones.</p>
+                    </section>
+                )}
+
+                {!selectedGeozone && section && (
                     <React.Fragment>
-                        {selectedGeozone && (
-                            <GeozoneDetailsPanel
-                                ref={geozoneDetailsPanelRef}
-                                selectedGeozone={selectedGeozone}
-                                onClose={onCloseGeozoneDetails}
-                            />
-                        )}
-                        {selectedLine && (
-                            <LineDetailsPanel
-                                ref={lineDetailsPanelRef}
-                                selectedLine={selectedLine}
-                                transportSystems={transportSystems}
-                                onClose={onCloseLineDetails}
-                            />
-                        )}
-                        {selectedStation && (
-                            <StationDetailsPanel
-                                ref={stationPanelRef}
-                                selectedStation={selectedStation}
-                                onClose={onCloseStationDetails}
-                            />
+                        <section className="xb-section-head">
+                            <div>
+                                <h2 className="xb-title">{section.label}</h2>
+                                <p className="xb-muted">{section.description}</p>
+                            </div>
+                            <button type="button" className="xb-link" onClick={handleClearSection}>Quitar</button>
+                        </section>
+
+                        {activeSection === 'rentas_temporales' ? (
+                            EXPLORER_AIRBNB_GROUPS.map((g) => (
+                                <div key={g.key} className="xb-group" role="radiogroup" aria-label={g.label}>
+                                    <div className="xb-eyebrow">{g.label}</div>
+                                    {EXPLORER_AIRBNB_INDICATORS(g.suffix).map(renderIndicator)}
+                                </div>
+                            ))
+                        ) : (
+                            <div className="xb-group" role="radiogroup" aria-label="Indicador">
+                                {activeIndicators.map(renderIndicator)}
+                            </div>
                         )}
 
-                        {!selectedGeozone && !section && (
-                            <section className="xb-empty">
-                                <h2 className="xb-title">Explora el territorio</h2>
-                                {indicatorsLoading && (
-                                    <div className="xb-notice" role="status" aria-live="polite">
-                                        <div className="xb-notice-row">
-                                            <span className="xb-notice-spinner" aria-hidden="true"></span>
-                                            <span>Cargando los datos de las zonas…</span>
-                                            <strong>{Math.round(downloadProgress || 0)}%</strong>
-                                        </div>
-                                        <div className="xb-notice-bar" aria-hidden="true">
-                                            <span style={{ width: `${Math.max(2, Math.min(100, downloadProgress || 0))}%` }}></span>
-                                        </div>
-                                    </div>
-                                )}
-                                <p className="xb-muted">Elige un tema arriba. Las zonas se pintan según el indicador que selecciones.</p>
-                            </section>
-                        )}
+                        <section className="xb-controls">
+                            {activeSection === 'inseguridad' && (
+                                <div className="xb-field">
+                                    <label htmlFor="xb-year" className="xb-eyebrow">Año</label>
+                                    <select
+                                        id="xb-year"
+                                        className="xb-select"
+                                        value={selectedYearCrime}
+                                        onChange={(e) => onCrimeYearChange(Number(e.target.value))}
+                                    >
+                                        {EXPLORER_CRIME_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                                    </select>
+                                </div>
+                            )}
+                            {isRadiusScope && (
+                            <div className="xb-field">
+                                <div className="xb-eyebrow">Radio · {explorerFormatRadius(selectedRadius)}</div>
+                                <div className="xb-segmented" role="group" aria-label="Radio de análisis">
+                                    {EXPLORER_RADII.map((r) => (
+                                        <button
+                                            key={r}
+                                            type="button"
+                                            className={selectedRadius === r ? 'is-active' : ''}
+                                            onClick={() => onRadiusChange(r)}
+                                            aria-pressed={selectedRadius === r}
+                                        >
+                                            {explorerFormatRadius(r)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            )}
+                        </section>
 
-                        {!selectedGeozone && section && (
-                            <React.Fragment>
-                                <section className="xb-section-head">
-                                    <div>
-                                        <h2 className="xb-title">{section.label}</h2>
-                                        <p className="xb-muted">{section.description}</p>
-                                    </div>
-                                    <button type="button" className="xb-link" onClick={handleClearSection}>Quitar</button>
-                                </section>
-
-                                {activeSection === 'rentas_temporales' ? (
-                                    EXPLORER_AIRBNB_GROUPS.map((g) => (
-                                        <div key={g.key} className="xb-group" role="radiogroup" aria-label={g.label}>
-                                            <div className="xb-eyebrow">{g.label}</div>
-                                            {EXPLORER_AIRBNB_INDICATORS(g.suffix).map(renderIndicator)}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="xb-group" role="radiogroup" aria-label="Indicador">
-                                        {activeIndicators.map(renderIndicator)}
-                                    </div>
-                                )}
-
-                                <section className="xb-controls">
-                                    {activeSection === 'inseguridad' && (
-                                        <div className="xb-field">
-                                            <label htmlFor="xb-year" className="xb-eyebrow">Año</label>
-                                            <select
-                                                id="xb-year"
-                                                className="xb-select"
-                                                value={selectedYearCrime}
-                                                onChange={(e) => onCrimeYearChange(Number(e.target.value))}
-                                            >
-                                                {EXPLORER_CRIME_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
-                                            </select>
-                                        </div>
-                                    )}
-                                    {isRadiusScope && (
-                                    <div className="xb-field">
-                                        <div className="xb-eyebrow">Radio · {explorerFormatRadius(selectedRadius)}</div>
-                                        <div className="xb-segmented" role="group" aria-label="Radio de análisis">
-                                            {EXPLORER_RADII.map((r) => (
-                                                <button
-                                                    key={r}
-                                                    type="button"
-                                                    className={selectedRadius === r ? 'is-active' : ''}
-                                                    onClick={() => onRadiusChange(r)}
-                                                    aria-pressed={selectedRadius === r}
-                                                >
-                                                    {explorerFormatRadius(r)}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    )}
-                                </section>
-
-                                {renderRadiusStats()}
-                            </React.Fragment>
-                        )}
+                        {renderRadiusStats()}
                     </React.Fragment>
                 )}
             </div>

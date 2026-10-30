@@ -3609,6 +3609,81 @@
     }
 }
 
+/* On a phone both intro cards have to fit the screen: a shorter picture, the
+   card scrolls if the text still doesn't fit, and the checkbox sits above a
+   full-width button instead of being squeezed beside it. */
+@media (max-width: 768px) {
+    .explore-introduction-overlay,
+    .transport-introduction-overlay {
+        height: 100dvh;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    .explore-introduction-container,
+    .transport-introduction-container {
+        width: 100%;
+        margin: 0;
+        max-height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .explore-intro-image,
+    .transport-intro-image {
+        min-height: 0;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+
+    .explore-intro-image .intro-image,
+    .transport-intro-image img {
+        max-height: 150px;
+    }
+
+    .explore-intro-text,
+    .transport-intro-text {
+        padding: 24px;
+    }
+
+    .intro-actions-container {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .intro-checkbox-container {
+        margin-bottom: 0;
+        min-height: 44px;
+    }
+
+    .intro-checkbox {
+        width: 22px;
+        height: 22px;
+    }
+
+    .intro-actions-container button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* The /transporte layers panel. The phone rule above that makes every
+   floating panel `position: relative` would drop it below the full-height
+   map, out of sight; on a phone it is a sheet along the bottom instead. */
+@media (max-width: 768px) {
+    .transport-page .transport-layers-panel {
+        position: fixed !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 8px !important;
+        bottom: max(8px, env(safe-area-inset-bottom)) !important;
+        max-width: none !important;
+        max-height: 45dvh !important;
+        box-sizing: border-box;
+    }
+}
+
 /* Animation keyframes for dynamic loading */
 @keyframes fadeInLayer {
     from {
