@@ -162,6 +162,12 @@ function BusinessInspector({
         if (scrollRef.current) scrollRef.current.scrollTo({ top: 0 });
     }, [point && point.lat, point && point.lng, showPicker]);
 
+    // On a phone the report opens the sheet to nearly the full screen; the
+    // picker and the start screen keep it at half height, under the map.
+    const showReport = Boolean(point && hasGiros && !pickerOpen);
+    const [sheetExpanded, setSheetExpanded] = React.useState(false);
+    React.useEffect(() => { setSheetExpanded(showReport); }, [showReport]);
+
     const copyLink = async () => {
         try {
             await navigator.clipboard.writeText(window.location.href);
@@ -920,7 +926,8 @@ function BusinessInspector({
     );
 
     return (
-        <aside className={`xb-inspector${point ? '' : ' is-empty'}`} aria-label="Informe de la zona">
+        <aside className={`xb-inspector${point ? '' : ' is-empty'}${isMobile && point && sheetExpanded ? ' is-expanded' : ''}`} aria-label="Informe de la zona">
+            {isMobile && point && <XbSheetHandle expanded={sheetExpanded} onChange={setSheetExpanded} />}
             {chipsSlot}
             {/* On a phone the top bar has no room for the radius, so once a
                 point is set it stays pinned above the sheet's scroll: it can

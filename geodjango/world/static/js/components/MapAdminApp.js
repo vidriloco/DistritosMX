@@ -3999,19 +3999,13 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             };
 
             const clickHandler = (e) => {
-                // A phone has no hover, so a tap shows the hover tooltip
-                // instead of opening the AGEB card in the bottom sheet;
-                // tapping the tooltip then opens the card.
+                // A phone has no hover, and a tooltip there sits under the
+                // transport chips and the sheet: a tap highlights the zone and
+                // opens its card straight in the bottom sheet.
                 if (isPhoneScreen()) {
                     const feature = mouseenterHandler(e);
-                    if (feature && popupRef.current) {
-                        const element = popupRef.current.getElement();
-                        element.style.cursor = 'pointer';
-                        element.addEventListener('click', () => {
-                            removePopup();
-                            selectFeature(feature);
-                        });
-                    }
+                    removePopup();
+                    if (feature) selectFeature(feature);
                     return;
                 }
 

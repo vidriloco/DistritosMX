@@ -45,6 +45,32 @@ const EXPLORER_CARD_AXES = [
     { label: 'Agua', color: '#06B6D4' }, { label: 'Riesgo', color: '#64748B' }
 ];
 
+// The grab bar on top of a phone's bottom sheet, shared with the business
+// inspector: a tap or a swipe up opens the sheet to nearly the full screen, a
+// swipe down (or another tap) returns it to its half height.
+function XbSheetHandle({ expanded, onChange }) {
+    const startY = React.useRef(null);
+    const swiped = React.useRef(false);
+    return (
+        <button
+            type="button"
+            className="xb-sheet-handle"
+            aria-expanded={expanded}
+            aria-label={expanded ? 'Reducir el panel' : 'Ampliar el panel'}
+            onPointerDown={(e) => { startY.current = e.clientY; swiped.current = false; }}
+            onPointerUp={(e) => {
+                if (startY.current === null) return;
+                const dy = e.clientY - startY.current;
+                startY.current = null;
+                if (Math.abs(dy) > 20) { swiped.current = true; onChange(dy < 0); }
+            }}
+            onClick={() => { if (swiped.current) { swiped.current = false; return; } onChange(!expanded); }}
+        >
+            <span aria-hidden="true"></span>
+        </button>
+    );
+}
+
 // The livability-index axis each tab belongs to, highlighted in the area card.
 const EXPLORER_SECTION_AXES = {
     oportunidades: 'oportunidades',
@@ -252,6 +278,10 @@ function ExplorerInspector({
             setTimeout(() => geozoneDetailsPanelRef.current && geozoneDetailsPanelRef.current.scrollIntoView(), 100);
         }
     }, [selectedGeozone]);
+    // On a phone a zone's card opens the sheet to nearly the full screen;
+    // closing it returns the sheet to half height.
+    const [sheetExpanded, setSheetExpanded] = React.useState(false);
+    React.useEffect(() => { setSheetExpanded(Boolean(selectedGeozone)); }, [selectedGeozone]);
 
     const handleTabClick = (section) => {
         if (section === activeSection) return;
@@ -344,11 +374,18 @@ function ExplorerInspector({
     const isRadiusScope = selectedAnalysis === 'isochrones';
     const zoneNoun = selectedAnalysis === 'neighborhood' ? 'colonias' : 'AGEB';
 
+    const totalFor = (indicator) => (intersectingFeatures || []).reduce((sum, f) => {
+        const v = f.properties ? f.properties[indicator.property] : 0;
+        return sum + (typeof v === 'number' ? v : 0);
+    }, 0);
+
     const renderRadiusStats = () => {
         const count = intersectingFeatures ? intersectingFeatures.length : 0;
         if (!count) return null;
         const current = activeIndicators.find((i) => i.property === selectedIndicator);
-        const total = { value: current ? explorerFormatValue(valueFor(current), current) : '—', label: current ? (current.unit || current.name) : 'indicador' };
+        // The sum over the zones, not the hovered one: on a phone a tapped
+        // zone stays hovered, and its value would read as the city's total.
+        const total = { value: current ? explorerFormatValue(totalFor(current), current) : '—', label: current ? (current.unit || current.name) : 'indicador' };
         return (
             <section className="xb-stats" aria-label={isRadiusScope ? 'Totales en el radio' : 'Totales de la ciudad'}>
                 <div className="xb-eyebrow">{isRadiusScope ? 'En el radio' : 'Total de la ciudad'}</div>
@@ -384,7 +421,8 @@ function ExplorerInspector({
     const tabsDisabled = !indicatorsData || indicatorsLoading;
 
     return (
-        <aside className="xb-inspector" aria-label="Inspector de capas">
+        <aside className={`xb-inspector${isMobile && sheetExpanded ? ' is-expanded' : ''}`} aria-label="Inspector de capas">
+            {isMobile && <XbSheetHandle expanded={sheetExpanded} onChange={setSheetExpanded} />}
             {indicatorsLoading && (
                 <div className="xb-progress" role="progressbar" aria-label="Cargando datos de indicadores" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(downloadProgress || 0)}>
                     <span style={{ width: `${Math.max(4, Math.min(100, downloadProgress || 0))}%` }}></span>

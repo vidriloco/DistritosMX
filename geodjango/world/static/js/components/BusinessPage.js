@@ -73,6 +73,15 @@ const nbReadRecent = () => {
 const nbWriteRecent = (list) => {
     try { window.localStorage.setItem(NB_RECENT_KEY, JSON.stringify(list)); } catch (error) { /* storage off */ }
 };
+// A giro's name as a recent report stored it, for a shared link's giros
+// before the catalogue arrives.
+const nbRecentGiroName = (code) => {
+    for (const entry of nbReadRecent()) {
+        const giro = (entry.giros || []).find((g) => g.codigo_act === code);
+        if (giro && giro.nombre_act) return giro.nombre_act;
+    }
+    return null;
+};
 // One entry per place and giros; trying another radius updates it.
 const nbRecentKey = (entry) => [entry.lat.toFixed(5), entry.lng.toFixed(5),
     entry.giros.map((g) => g.codigo_act).sort().join(',')].join('|');
@@ -182,7 +191,13 @@ function BusinessPage() {
     const [point, setPoint] = React.useState(initial.point);
     const [address, setAddress] = React.useState('');
     const [radius, setRadius] = React.useState(initial.radius);
-    const [giros, setGiros] = React.useState([]);
+    // A shared link's giros start the report at once, named from the recent
+    // reports when this browser has seen them and by their code otherwise;
+    // the catalogue, which can take seconds, fills in the names when it comes.
+    const [giros, setGiros] = React.useState(() => initial.codes
+        .filter((code) => /^\d{6}$/.test(code))
+        .slice(0, NB_MAX_GIROS)
+        .map((code, index) => ({ codigo_act: code, nombre_act: nbRecentGiroName(code) || 'Giro ' + code, color: NB_COLORS[index], visible: true })));
     const pendingCodes = React.useRef(initial.codes);
     const [stats, setStats] = React.useState(null);
     const [statsLoading, setStatsLoading] = React.useState(false);
@@ -248,13 +263,16 @@ function BusinessPage() {
     // ---- giros -------------------------------------------------------------
     React.useEffect(() => {
         if (!categoriesData || pendingCodes.current.length === 0) return;
-        const found = pendingCodes.current
-            .map((code) => categoriesData.find((c) => c.codigo_act === code))
-            .filter(Boolean)
-            .slice(0, NB_MAX_GIROS)
-            .map((c, index) => ({ codigo_act: c.codigo_act, nombre_act: c.nombre_act, color: NB_COLORS[index], visible: true }));
+        const pending = pendingCodes.current;
         pendingCodes.current = [];
-        setGiros(found);
+        // Catalogue names for the link's giros; a code that is not a giro goes.
+        setGiros((current) => current
+            .map((g) => {
+                if (!pending.includes(g.codigo_act)) return g;
+                const found = categoriesData.find((c) => c.codigo_act === g.codigo_act);
+                return found ? { ...g, nombre_act: found.nombre_act } : null;
+            })
+            .filter(Boolean));
     }, [categoriesData]);
 
     const addGiro = (category) => {
@@ -298,7 +316,7 @@ function BusinessPage() {
             nbWriteRecent(next);
             return next;
         });
-    }, [stats, address]);
+    }, [stats, address, giros.map((g) => g.nombre_act).join('|')]);
 
     const openRecent = (entry) => {
         choosePoint({ lat: entry.lat, lng: entry.lng }, entry.address || null);

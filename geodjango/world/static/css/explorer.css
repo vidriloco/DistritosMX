@@ -650,6 +650,33 @@ img.xb-indicator-icon { border-radius: 4px; }
     .explore-help-panel.xb-help { top: 68px; right: 12px; left: 12px; width: auto; max-width: none; }
 }
 
+/* The sheet's grab bar (shared with /negocios): a tap or a swipe up opens the
+   sheet to nearly the full screen over the map, leaving a strip of map above. */
+.xb-sheet-handle { display: none; }
+@media (max-width: 768px) {
+    .xb-sheet-handle {
+        display: flex; flex: 0 0 auto; align-items: center; justify-content: center;
+        width: 100%; height: 30px; margin: 0; padding: 0;
+        border: 0; background: transparent; cursor: pointer; touch-action: none;
+    }
+    .xb-sheet-handle span { width: 40px; height: 5px; border-radius: 3px; background: var(--xb-line); }
+    .xb-sheet-handle:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: -4px; }
+    .xb-inspector { transition: height .25s ease; }
+    .xb-layout .xb-inspector.is-expanded { height: calc(100dvh - var(--xb-topbar) - 56px); max-height: none; }
+    .xb-layout:has(.xb-inspector.is-expanded) .xb-transport { display: none; }
+    /* Without the sheet (while the help is open) the map runs to the bottom. */
+    .xb-layout.xb-no-inspector .map-container { bottom: 0; }
+    /* Mapbox's logo and attribution sit above the row of transport chips. */
+    .xb-layout:has(.xb-transport) .mapboxgl-ctrl-bottom-left,
+    .xb-layout:has(.xb-transport) .mapboxgl-ctrl-bottom-right { bottom: 52px; }
+
+    /* Touch targets of at least 44px; text links keep their line height. */
+    .xb-icon-button { width: 44px; height: 44px; }
+    .xb-link { padding: 13px 0; margin: -13px 0; }
+    .xb-indicator-value small, .xb-legend-ticks { font-size: 12px; }
+}
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) { .xb-inspector { transition: none; } }
+
 /* The legacy "not available on phones" card is fixed-positioned elsewhere;
    inside the sheet it flows like any other block. */
 .xb-inspector .mobile-primary-panel {
