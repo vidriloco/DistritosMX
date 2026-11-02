@@ -13,7 +13,8 @@ const UrlUtils = {
         // (docker-compose maps 8110:8000) and 8000 may belong to another project
         const baseUrls = {
             agebs: {
-                prod: 'https://wikiando.s3.us-east-2.amazonaws.com/agebs',
+                // gzip-encoded copies (36.7 MB -> 6.8 MB) with a day's cache; same data as wikiando/agebs
+                prod: 'https://distritosmexico.s3.us-east-2.amazonaws.com/agebs',
                 dev: `${window.location.origin}/data/agebs`
             },
             // Always the bucket: it holds every system, while a local

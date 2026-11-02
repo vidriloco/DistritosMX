@@ -11,7 +11,8 @@ const UrlUtils = {
         
         const baseUrls = {
             agebs: {
-                prod: 'https://wikiando.s3.us-east-2.amazonaws.com/agebs',
+                // gzip-encoded copies (36.7 MB -> 6.8 MB) with a day's cache; same data as wikiando/agebs
+                prod: 'https://distritosmexico.s3.us-east-2.amazonaws.com/agebs',
                 dev: '/data/agebs'  // Use relative URL for development
             },
             transports: {
