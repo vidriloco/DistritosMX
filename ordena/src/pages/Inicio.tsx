@@ -1,4 +1,4 @@
-import { Link, useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext, useParams } from 'react-router-dom';
 
 import { Check } from '../components/Check';
 import { HeroSlider } from '../components/HeroSlider';
@@ -14,11 +14,14 @@ import { PostalesCarousel } from '../components/PostalesCarousel';
 import { GRUPOS, LAMINAS, LAMINAS_BASE } from '../lib/laminas';
 
 
+const rutaLamina = (slug: string) => `/lamina/${slug}`;
 const fecha = (iso: string) => new Date(iso + 'T12:00:00-06:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
 
 export function Inicio() {
   useSeo('/');
   const consulta = useOutletContext<Consulta | null>();
+  // /lamina/<slug>, a shared slide's address, opens the viewer on it
+  const { lamina } = useParams();
   const { data: areas, error } = useFetch(api.areas, []);
   const { data: resultados } = useFetch(api.resultados, []);
   const { elecciones } = useRespuestas();
@@ -72,6 +75,8 @@ export function Inicio() {
           postales={LAMINAS}
           grupos={GRUPOS}
           label="Láminas del plan"
+          inicial={lamina}
+          ruta={rutaLamina}
           footer={(grupo) => {
             const g = GRUPOS.find((x) => x.id === grupo);
             return <Link to={g?.tema ?? '/temas'} className="btn yellow postales-cta" onClick={() => track('inicio_cta', { accion: 'opinar_desde_laminas', grupo: grupo ?? 'todas' })}>{g?.cta ?? 'Empezar a opinar'}<Check size={22} /></Link>;

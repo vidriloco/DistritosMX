@@ -21,6 +21,13 @@ const crumbs = (items) => ({ '@type': 'BreadcrumbList', itemListElement: items.m
 
 const areas = data.areas;
 const temasList = areas.map((a) => `<li><a href="${a.slug === 'quien-paga' ? '/quien-paga' : '/area/' + a.slug}">${esc(a.titulo)}</a>: ${esc(first(a.resumen, 200))}</li>`).join('');
+// The slides, read from their TypeScript list (each entry sits on one line)
+const laminasTs = fs.readFileSync(path.resolve('src/lib/laminas.ts'), 'utf8');
+const LAMINAS_BASE = laminasTs.match(/LAMINAS_BASE = '([^']+)'/)[1];
+const q = "'((?:[^'\\\\]|\\\\.)*)'";
+const laminas = [...laminasTs.matchAll(new RegExp(`\\{ slug: ${q}, grupo: ${q}, titulo: ${q}, alt: ${q} \\}`, 'g'))].map((m) => ({ slug: m[1], titulo: m[3].replace(/\\'/g, "'"), alt: m[4].replace(/\\'/g, "'") }));
+if (!laminas.length) throw new Error('No slides found in src/lib/laminas.ts');
+
 const routes = [
   { url: '/', title: '¿Qué opinas? · Consulta pública del plan del Valle de México (POZMVM)', description: `Entiende el plan del Valle de México a 2050 por temas, responde preguntas cortas y arma tu opinión con citas para la consulta pública de SEDATU, abierta hasta el ${cierre}.`, priority: '1.0',
     body: `<h1>¿Qué opinas? Tu opinión sobre el plan del Valle de México a 2050</h1><p>El gobierno decide cómo será el Valle de México en 2050. El ${esc(data.consulta.nombre)} está en consulta pública hasta el ${cierre}. Aquí lo resumimos por tema, te preguntamos qué piensas y armamos tu carta con las páginas del documento.</p><h2>Los temas</h2><ul>${temasList}</ul>` },
@@ -40,9 +47,18 @@ const routes = [
     body: `<h1>Tu opinión, lista para enviar</h1><p>Responde las preguntas de los temas y aquí aparece tu carta para enviarla a ${esc(data.consulta.correo)} antes del ${cierre}.</p>` },
   { url: '/resultados', title: 'Qué opinan otras personas sobre el POZMVM · ¿Qué opinas?', description: 'Lo más elegido por tema entre quienes han usado este sitio para opinar sobre el plan del Valle de México.', priority: '0.5',
     body: '<h1>Qué opinan otras personas</h1><p>Lo más elegido por tema entre quienes han usado este sitio. Es una muestra, no una encuesta representativa.</p>' },
+  ...laminas.map((l) => ({
+    url: '/lamina/' + l.slug, title: `${l.titulo} · ¿Qué opinas?`, priority: '0.4',
+    description: 'Una lámina sobre el Programa de Ordenación de la Megalópolis en consulta pública. Lee el plan por temas y manda tu opinión.',
+    image: { src: `${LAMINAS_BASE}/${l.slug}.jpg`, width: 1080, height: 1350, alt: l.alt },
+    body: `<h1>${esc(l.titulo)}</h1><img src="${LAMINAS_BASE}/${l.slug}.jpg" width="1080" height="1350" alt="${esc(l.alt)}">`,
+  })),
 ];
 
+const OG_DEFAULT = { src: `${SITE}/og.png`, width: 1200, height: 630, alt: 'Silueta de la Ciudad de México y el título Opine' };
+
 for (const r of routes) {
+  const img = r.image ?? OG_DEFAULT;
   const url = SITE + (r.url === '/' ? '/' : r.url);
   const graph = [website, org, { '@type': 'WebPage', '@id': url + '#page', url, name: r.title, description: r.description, inLanguage: 'es-MX', isPartOf: { '@id': website['@id'] }, about: { '@type': 'CreativeWork', name: data.consulta.nombre, url: data.consulta.sitio } }];
   if (r.crumbs) graph.push(crumbs(r.crumbs));
@@ -52,8 +68,8 @@ for (const r of routes) {
     `<link rel="canonical" href="${url}">`,
     `<meta property="og:type" content="website">`, `<meta property="og:site_name" content="¿Qué opinas? · Consulta del Valle de México">`, `<meta property="og:locale" content="es_MX">`,
     `<meta property="og:title" content="${esc(r.title)}">`, `<meta property="og:description" content="${esc(r.description)}">`, `<meta property="og:url" content="${url}">`,
-    `<meta property="og:image" content="${SITE}/og.png">`, `<meta property="og:image:width" content="1200">`, `<meta property="og:image:height" content="630">`, `<meta property="og:image:alt" content="Silueta de la Ciudad de México y el título Opine">`,
-    `<meta name="twitter:card" content="summary_large_image">`, `<meta name="twitter:title" content="${esc(r.title)}">`, `<meta name="twitter:description" content="${esc(r.description)}">`, `<meta name="twitter:image" content="${SITE}/og.png">`,
+    `<meta property="og:image" content="${img.src}">`, `<meta property="og:image:width" content="${img.width}">`, `<meta property="og:image:height" content="${img.height}">`, `<meta property="og:image:alt" content="${esc(img.alt)}">`,
+    `<meta name="twitter:card" content="summary_large_image">`, `<meta name="twitter:title" content="${esc(r.title)}">`, `<meta name="twitter:description" content="${esc(r.description)}">`, `<meta name="twitter:image" content="${img.src}">`,
     `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c')}</script>`,
   ].join('\n    ');
   let html = shell.replace(/<title>[\s\S]*?<\/title>/, '').replace(/<meta name="description"[^>]*>/, '');

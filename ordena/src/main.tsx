@@ -28,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
       <Routes>
         <Route element={<PageError><App /></PageError>}>
           <Route index element={<Inicio />} />
+          <Route path="lamina/:lamina" element={<Inicio />} />
           <Route path="temas" element={<Temas />} />
           <Route path="area/:slug" element={<AreaPage />} />
           <Route path="quien-paga" element={<Suspense fallback={fallback}><QuienPaga /></Suspense>} />
