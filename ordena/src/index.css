@@ -187,7 +187,7 @@ svg { max-width: 100%; }
 
 /* The viewer: one slide at a time over a dark scrim, thumbnails underneath */
 .visor {
-  position: fixed; inset: 0; z-index: 60; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  position: fixed; inset: 0; z-index: 60; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; grid-template-columns: minmax(0, 1fr);
   background: #140a23; color: var(--bone);
 }
 .visor-bar { display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 16px; }
@@ -228,7 +228,7 @@ svg { max-width: 100%; }
 }
 .visor-arrow.is-prev { left: 10px; } .visor-arrow.is-next { right: 10px; }
 /* On a phone the slide fills the width: arrows would cover it, so swipe and the thumbnails do the moving */
-@media (max-width: 600px) { .visor-arrow { display: none; } }
+@media (max-width: 600px) { .visor-arrow { display: none; } .visor-num { display: none; } }
 .visor-arrow:hover { background: var(--bone); }
 .visor-thumbs { list-style: none; margin: 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; overflow-x: auto; justify-content: safe center; }
 .visor-thumbs button { position: relative; display: block; padding: 0; border: 2px solid transparent; background: none; cursor: pointer; opacity: .55; }
