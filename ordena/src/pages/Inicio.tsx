@@ -10,6 +10,9 @@ import { useFetch } from '../lib/useFetch';
 import { useRespuestas } from '../lib/respuestas';
 import { useSeo } from '../lib/seo';
 import { track } from '../lib/analytics';
+import { PostalesCarousel } from '../components/PostalesCarousel';
+import { GRUPOS, LAMINAS, LAMINAS_BASE } from '../lib/laminas';
+
 
 const fecha = (iso: string) => new Date(iso + 'T12:00:00-06:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
 
@@ -57,6 +60,24 @@ export function Inicio() {
           <li><span className="num n">03</span><strong>Mándala</strong><span>tú la envías</span></li>
         </ol>
         <a href="#temas" className="btn steps-cta" onClick={() => track('inicio_cta', { accion: 'empezar_por_tema' })}>Empezar por un tema<Check size={22} /></a>
+      </section>
+
+      {/* A band of its own colour, so the slides read as a block apart from the rest of the page */}
+      <section className="laminas-band" aria-labelledby="laminas">
+        <div className="wrap section">
+        <h2 className="h-light h2" id="laminas">Movilidad <strong>en el plan de ordenamiento</strong></h2>
+        <p className="muted postales-intro">Infografías que explican los aspectos más importantes del plan con datos de Wikiando</p>
+        <PostalesCarousel
+          base={LAMINAS_BASE}
+          postales={LAMINAS}
+          grupos={GRUPOS}
+          label="Láminas del plan"
+          footer={(grupo) => {
+            const g = GRUPOS.find((x) => x.id === grupo);
+            return <Link to={g?.tema ?? '/temas'} className="btn yellow postales-cta" onClick={() => track('inicio_cta', { accion: 'opinar_desde_laminas', grupo: grupo ?? 'todas' })}>{g?.cta ?? 'Empezar a opinar'}<Check size={22} /></Link>;
+          }}
+        />
+        </div>
       </section>
 
       {error ? <p className="wrap error">No se pudo cargar el contenido: {error}</p> : null}

@@ -23,6 +23,8 @@ export default function App() {
     return () => { document.body.style.overflow = prev; document.removeEventListener('keydown', onKey); };
   }, [open]);
   const n = Object.keys(elecciones).length;
+  // The main laciudad.mx site, whichever host this is (ordena.laciudad.mx, ordena.localhost locally)
+  const ciudadUrl = `${location.protocol}//${location.hostname.replace(/^ordena\./, '')}${location.port ? `:${location.port}` : ''}/`;
   const total = consulta ? Math.max(1, Math.round((new Date(consulta.cierre + 'T23:59:59-06:00').getTime() - new Date(consulta.inicio + 'T00:00:00-06:00').getTime()) / 86400000)) : 60;
   const dias = consulta ? Math.max(0, Math.ceil((new Date(consulta.cierre + 'T23:59:59-06:00').getTime() - Date.now()) / 86400000)) : null;
 
@@ -41,6 +43,7 @@ export default function App() {
             <NavLink to="/quien-paga" onClick={nav('/quien-paga')}><span className="nav-n" aria-hidden="true">02</span><span className="nav-t"><span>¿Quién paga?</span><small>De dónde saldría el dinero del plan</small></span></NavLink>
             <NavLink to="/mi-opinion" onClick={nav('/mi-opinion')}><span className="nav-n" aria-hidden="true">03</span><span className="nav-t"><span>Mi opinión{n > 0 ? <span className="badge" aria-label={`${n} respuestas`}>{n}</span> : null}</span><small>{n > 0 ? `Tu carta lleva ${n} ${n === 1 ? 'punto' : 'puntos'}` : 'Tu carta, lista para enviar'}</small></span></NavLink>
             <NavLink to="/resultados" onClick={nav('/resultados')}><span className="nav-n" aria-hidden="true">04</span><span className="nav-t"><span>Qué opinan otros</span><small>Lo más elegido por tema</small></span></NavLink>
+            <a href={ciudadUrl} className="nav-city"><span className="nav-n" aria-hidden="true" /><span className="nav-t"><span><img className="nav-city-ico" src="/ciudad-mx-icon.png" alt="" width="20" height="20" />La Ciudad</span><small>Mapas y datos de la Ciudad de México</small></span></a>
             {dias !== null ? (
               <span className="deadline">
                 <span>{dias > 0 ? <>Consulta abierta · quedan <strong>{dias} días</strong></> : 'La consulta cerró'}</span>

@@ -11,3 +11,6 @@ documentos
 *.sql
 ordena/node_modules
 ordena/dist
+
+# Raw datasets kept next to the repo, never part of the image
+IDM_NM_dic25.csv

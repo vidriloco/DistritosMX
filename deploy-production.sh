@@ -316,6 +316,22 @@ if curl -fsS -o /dev/null --max-time 10 -H "Host: ${HOST_HEADER}" "http://127.0.
 else
     echo "WARNING: app is not responding yet on port ${PORT}. Check: $COMPOSE logs app" >&2
 fi
+# ordena (¿Qué opinas?) and despojos are their own host configs in hosts.py, so the
+# main site answering says nothing about them. ordena is checked on its API too:
+# an empty topic list means load_content did not run.
+BASE_DOMAIN="${HOST_HEADER#www.}"
+for sub in ordena despojos; do
+    if curl -fsS -o /dev/null --max-time 10 -H "Host: ${sub}.${BASE_DOMAIN}" "http://127.0.0.1:${PORT}/"; then
+        echo "${sub}.${BASE_DOMAIN} is responding."
+    else
+        echo "WARNING: ${sub}.${BASE_DOMAIN} is not responding. Check: $COMPOSE logs app" >&2
+    fi
+done
+if curl -fsS --max-time 10 -H "Host: ordena.${BASE_DOMAIN}" "http://127.0.0.1:${PORT}/api/areas/" | grep -q '"slug"'; then
+    echo "ordena.${BASE_DOMAIN} has its consultation topics."
+else
+    echo "WARNING: ordena.${BASE_DOMAIN}/api/areas/ has no topics. Run: $COMPOSE exec app bash -c 'cd geodjango && python3 manage.py load_content'" >&2
+fi
 
 echo
 echo "Done. Logs: $COMPOSE logs -f app"

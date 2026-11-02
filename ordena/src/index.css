@@ -43,6 +43,7 @@ svg { max-width: 100%; }
 .nav-t { display: flex; flex-direction: column; gap: 2px; }
 .nav-t > span { font-weight: 700; font-size: 22px; letter-spacing: -.02em; line-height: 1.15; display: inline-flex; align-items: center; gap: 8px; }
 .nav-t small { font-size: 13px; color: #c9b8ff; font-weight: 400; }
+.nav-city-ico { width: 22px; height: 22px; flex: none; display: block; }
 .top nav a.active:not(.btn) .nav-t > span { color: var(--yellow); }
 .top nav a.active:not(.btn) .nav-n { color: var(--yellow); }
 .top nav a.active:not(.btn)::before { content: ''; position: absolute; left: calc(var(--pad) * -1); top: 14px; bottom: 14px; width: 4px; background: var(--yellow); }
@@ -115,6 +116,117 @@ svg { max-width: 100%; }
 .steps > li > span:last-child { opacity: .85; }
 .steps .n { font-size: 20px; color: inherit; opacity: 1; margin-bottom: 4px; }
 .steps-cta { margin-top: 14px; }
+
+/* Movilidad: the POZMVM social slides as a horizontal carousel (PostalesCarousel). One slide and a peek of the
+   next on a phone, three and a peek on a desktop; scroll-snap keeps a swipe landing on a slide. */
+.postales-intro { margin: 0; font-size: 15px; max-width: 60ch; }
+.postales-carrusel { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+.postales {
+  list-style: none; margin: 0; padding: 0 0 10px;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 80%; column-gap: 12px;
+  overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: thin;
+}
+.postales > li { scroll-snap-align: start; }
+.postales a { display: block; border: 1px solid var(--line); background: #fff; }
+.postales a:focus-visible { outline: 3px solid var(--violet); outline-offset: -3px; }
+.postales img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; }
+/* A card's slide while it loads: the slide's own grey and shape, a gentle pulse and the site's loader */
+.postal-img { position: relative; display: block; aspect-ratio: 4 / 5; background: #F2F3F5; overflow: hidden; }
+.postal-img img { transition: opacity .35s ease; }
+.postal-img.is-cargando img, .postal-img.is-error img { opacity: 0; }
+.postal-img.is-cargando { animation: postalPulso 1.6s ease-in-out infinite; }
+@keyframes postalPulso { 50% { background: #E6E8EC; } }
+.postal-cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+.postal-cargando .ld { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.postal-cargando .ld-t { font-size: 13px; font-weight: 600; color: #5A606A; }
+.postal-error { font-size: 13px; font-weight: 600; line-height: 1.4; color: #5A606A; }
+@media (prefers-reduced-motion: reduce) { .postal-img.is-cargando { animation: none; } .postal-img img { transition: none; } }
+.postales a { color: var(--ink); text-decoration: none; cursor: zoom-in; }
+.postal-pie { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.postal-pie .num { display: inline-flex; align-items: center; justify-content: center; flex: none; min-width: 28px; height: 28px; background: var(--g, var(--ink)); color: #fff; font-size: 13px; font-weight: 800; }
+.postal-titulo { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.3; min-height: 2.6em; }
+
+/* The slides' groups: chips above the row on a phone, a toolbar beside it on a desktop */
+.laminas { display: flex; flex-direction: column; gap: 14px; margin-top: 4px; }
+.laminas-filtros { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+.laminas-filtros::-webkit-scrollbar { display: none; }
+.laminas-filtros button {
+  display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 40px; padding: 8px 12px;
+  border: 1.5px solid var(--line); background: #fff; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.laminas-filtros button:hover { border-color: var(--ink); }
+.laminas-filtros button[aria-pressed="true"] { background: var(--g, var(--ink)); border-color: var(--g, var(--ink)); color: #fff; }
+.laminas-filtros button:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+.laminas-swatch { width: 12px; height: 12px; flex: none; background: var(--g); box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.laminas-swatch.is-todas { background: conic-gradient(#3AA597 0 17%, #2347C8 0 33%, #C2410C 0 50%, #111317 0 67%, #0F766E 0 83%, #0B5D56 0); }
+.laminas-filtros button[aria-pressed="true"] .laminas-swatch { box-shadow: inset 0 0 0 2px #fff; }
+.laminas-n { font-size: 12px; font-weight: 700; opacity: .6; }
+.laminas .postales-carrusel { min-width: 0; }
+.visor-num { display: inline-block; margin-right: 10px; font-weight: 800; opacity: .7; }
+
+/* The slides' band: deep ink across the full width, everything inside switched to light */
+.laminas-band { background: var(--ink); color: var(--bone); margin-top: 40px; padding: 12px 0 44px; }
+.laminas-band .h2, .laminas-band h2 { color: var(--bone); }
+.laminas-band .muted { color: #c9b8ff; }
+/* One line of subtitle: no reading-width cap here, it wraps only when the screen is too narrow */
+.laminas-band .postales-intro { max-width: none; }
+.laminas-band .postales a { border-color: rgba(243, 241, 236, .14); }
+.laminas-band .postales a:focus-visible { outline-color: var(--yellow); }
+.laminas-band .postales-arrow { border-color: rgba(243, 241, 236, .6); color: var(--bone); }
+.laminas-band .postales-arrow:hover:not(:disabled) { background: var(--bone); color: var(--ink); }
+.laminas-band .postales-arrow:focus-visible, .laminas-band .laminas-filtros button:focus-visible { outline-color: var(--yellow); }
+.laminas-band .laminas-filtros button { background: rgba(243, 241, 236, .06); border-color: rgba(243, 241, 236, .2); color: var(--bone); }
+.laminas-band .laminas-filtros button:hover { border-color: var(--bone); }
+.laminas-band .laminas-filtros button[aria-pressed="true"] { background: var(--g, var(--bone)); border-color: var(--bone); color: #fff; }
+.laminas-band .laminas-filtros button[aria-pressed="true"]:not([style]) { color: var(--ink); }
+.laminas-band .laminas-swatch { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); }
+.laminas-band .postales { scrollbar-color: rgba(243, 241, 236, .3) transparent; }
+
+/* The viewer: one slide at a time over a dark scrim, thumbnails underneath */
+.visor {
+  position: fixed; inset: 0; z-index: 60; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  background: #140a23; color: var(--bone);
+}
+.visor-bar { display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 16px; }
+.visor-count { font-size: 15px; font-weight: 800; letter-spacing: .04em; white-space: nowrap; }
+.visor-title { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.visor-orig { color: var(--bone); font-size: 14px; white-space: nowrap; padding: 10px 6px; }
+.visor-close { width: 44px; height: 44px; border: 0; background: none; color: var(--bone); font-size: 22px; cursor: pointer; }
+.visor-stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 4px 8px; }
+.visor-stage img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
+.visor-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 1;
+  width: 48px; height: 48px; border-radius: 50%; border: 0; display: inline-flex; align-items: center; justify-content: center;
+  background: rgba(243, 241, 236, .92); color: var(--ink); cursor: pointer;
+}
+.visor-arrow.is-prev { left: 10px; } .visor-arrow.is-next { right: 10px; }
+/* On a phone the slide fills the width: arrows would cover it, so swipe and the thumbnails do the moving */
+@media (max-width: 600px) { .visor-arrow { display: none; } }
+.visor-arrow:hover { background: var(--bone); }
+.visor-thumbs { list-style: none; margin: 0; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; gap: 8px; overflow-x: auto; justify-content: safe center; }
+.visor-thumbs button { position: relative; display: block; padding: 0; border: 2px solid transparent; background: none; cursor: pointer; opacity: .55; }
+.visor-thumbs button[aria-current] { border-color: var(--yellow); opacity: 1; }
+.visor-thumbs button:hover { opacity: 1; }
+.visor-thumbs img { display: block; width: 54px; height: 68px; object-fit: cover; }
+.visor-thumbs .num { position: absolute; left: 0; bottom: 0; padding: 1px 5px; background: var(--ink); color: var(--bone); font-size: 11px; font-weight: 800; }
+.visor button:focus-visible, .visor a:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.postales-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.postales-cta { width: auto; }
+.postales-nav { display: flex; gap: 8px; margin-left: auto; }
+.postales-arrow {
+  width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer;
+}
+.postales-arrow:hover:not(:disabled) { background: var(--ink); color: var(--bone); }
+.postales-arrow:disabled { opacity: .3; cursor: default; }
+.postales-arrow:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+@media (min-width: 861px) {
+  .visor-bar { padding: 14px 20px 10px 28px; }
+  .visor-stage { padding: 8px 88px; }
+  .visor-arrow { width: 56px; height: 56px; }
+  .visor-arrow.is-prev { left: 20px; } .visor-arrow.is-next { right: 20px; }
+  .visor-thumbs img { width: 64px; height: 80px; }
+}
 
 /* ruled grid of cards */
 .rgrid { display: grid; grid-template-columns: 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); }
@@ -239,6 +351,7 @@ footer { margin-top: 32px; padding: 20px 0 24px; border-top: 1px solid var(--lin
   .top nav a:not(.btn) { display: inline-flex; color: var(--ink); font-weight: 600; font-size: 14px; padding: 10px 16px; min-height: 0; border-bottom: 0; }
   .top nav a:not(.btn)::after, .top nav a:not(.btn)::before, .nav-n, .nav-t small, .deadline-bar, .nav-cta { display: none !important; }
   .nav-t > span { font-size: 14px; font-weight: 600; letter-spacing: 0; color: inherit !important; }
+  .nav-city-ico { width: 20px; height: 20px; }
   .top nav a.active:not(.btn) { background: var(--ink); color: var(--bone); }
   .top nav a.active:not(.btn) .nav-t > span { color: var(--bone) !important; }
   .deadline { margin: 0 0 0 auto; padding-top: 0; font-size: 14px; font-weight: 600; color: #a2420f; display: block; }
@@ -283,6 +396,14 @@ footer { margin-top: 32px; padding: 20px 0 24px; border-top: 1px solid var(--lin
   .steps { gap: 12px; margin-top: 24px; }
   .steps > li { padding: 20px 22px 24px; font-size: 16px; }
   .steps > li > strong { font-size: 20px; }
+  .postales-intro { font-size: 17px; }
+  .postales { grid-auto-columns: calc((100% - 3 * 18px) / 3.3); column-gap: 18px; }
+  .laminas { flex-direction: row; align-items: flex-start; gap: 28px; }
+  .laminas .postales-carrusel { flex: 1; order: 1; }
+  .laminas .postales { grid-auto-columns: calc((100% - 2 * 18px) / 2.6); }
+  .laminas-filtros { order: 2; flex: 0 0 250px; flex-direction: column; overflow: visible; padding: 0; position: sticky; top: 96px; }
+  .laminas-filtros button { width: 100%; justify-content: flex-start; white-space: normal; text-align: left; }
+  .laminas-n { margin-left: auto; }
   .steps .n { font-size: 32px; }
   .steps-cta { margin-top: 24px; width: auto; display: inline-flex; align-self: flex-start; }
   .rgrid.c4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
