@@ -127,6 +127,24 @@ function ImagenLamina({ src, srcSet, alt }: { src: string; srcSet: string; alt: 
 
 const SITIO = 'https://ordena.laciudad.mx';
 
+/** The viewer's slide, hidden behind the loading bars until it has arrived. */
+function ImagenVisor({ src, alt }: { src: string; alt: string }) {
+  const [estado, setEstado] = useState<'cargando' | 'lista' | 'error'>('cargando');
+  const img = useRef<HTMLImageElement>(null);
+  // An image the browser already had can finish before React is listening
+  useEffect(() => {
+    const el = img.current;
+    if (el?.complete) setEstado(el.naturalWidth ? 'lista' : 'error');
+  }, [src]);
+  return (
+    <>
+      <img ref={img} className={`is-${estado}`} src={src} width={1080} height={1350} alt={alt} onLoad={() => setEstado('lista')} onError={() => setEstado('error')} />
+      {estado === 'cargando' ? <span className="visor-cargando"><Spinner label="Cargando lámina" /></span> : null}
+      {estado === 'error' ? <span className="visor-cargando">No se pudo cargar la lámina. <a href={src} target="_blank" rel="noopener">Ábrela aquí ↗</a></span> : null}
+    </>
+  );
+}
+
 /**
  * Shares the slide on view. Where the browser can share files (phones, Safari) the image itself goes with the text and
  * link; elsewhere a small menu offers WhatsApp, X, Facebook or copying the link.
@@ -142,7 +160,7 @@ function Compartir({ src, postal }: { src: string; postal: Postal }) {
   useEffect(() => {
     if (!puedeArchivos) return;
     let vivo = true;
-    fetch(src, { mode: 'cors' }).then((r) => (r.ok ? r.blob() : null)).then((b) => {
+    fetch(`${src}?compartir`, { mode: 'cors' }).then((r) => (r.ok ? r.blob() : null)).then((b) => {
       if (vivo && b) archivo.current = new File([b], `${postal.slug}.jpg`, { type: 'image/jpeg' });
     }).catch(() => {});
     return () => { vivo = false; };
@@ -203,7 +221,7 @@ function Visor({ base, postales, total, index, onIndex, onClose }: { base: strin
   const salir = (via: string) => { track('visor_cerrado', { vistas: vistas.current.size, via }); onClose(); };
 
   // Every slide full size as soon as the viewer opens, so moving between them is instant
-  useEffect(() => { postales.forEach((s) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.src = `${base}/${s.slug}.jpg`; }); }, [base, postales]);
+  useEffect(() => { postales.forEach((s) => { const img = new Image(); img.src = `${base}/${s.slug}.jpg`; }); }, [base, postales]);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -250,7 +268,7 @@ function Visor({ base, postales, total, index, onIndex, onClose }: { base: strin
         }}
       >
         <button type="button" className="visor-arrow is-prev" aria-label="Lámina anterior" onClick={() => ir(index - 1, 'flecha')}><Arrow d={PREV} size={24} /></button>
-        <img key={p.slug} src={`${base}/${p.slug}.jpg`} crossOrigin="anonymous" width={1080} height={1350} alt={p.alt} />
+        <ImagenVisor key={p.slug} src={`${base}/${p.slug}.jpg`} alt={p.alt} />
         <button type="button" className="visor-arrow is-next" aria-label="Lámina siguiente" onClick={() => ir(index + 1, 'flecha')}><Arrow d={NEXT} size={24} /></button>
       </div>
       <ol className="visor-thumbs" ref={thumbs} aria-label="Todas las láminas">

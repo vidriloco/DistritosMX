@@ -203,6 +203,14 @@ svg { max-width: 100%; }
 .visor-close { width: 44px; height: 44px; border: 0; background: none; color: var(--bone); font-size: 22px; cursor: pointer; }
 .visor-stage { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; padding: 4px 8px; }
 .visor-stage img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
+.visor-stage img { transition: opacity .25s ease; }
+.visor-stage img.is-cargando, .visor-stage img.is-error { opacity: 0; }
+.visor-cargando { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 24px; text-align: center; font-size: 14px; font-weight: 600; color: var(--bone); pointer-events: none; }
+.visor-cargando a { color: inherit; pointer-events: auto; }
+.visor-cargando .ld { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.visor-cargando .ld-t { font-size: 13px; color: var(--bone); opacity: .8; }
+.visor-cargando .ld-bars i { background: var(--bone); }
+@media (prefers-reduced-motion: reduce) { .visor-stage img { transition: none; } }
 .visor-arrow {
   position: absolute; top: 50%; transform: translateY(-50%); z-index: 1;
   width: 48px; height: 48px; border-radius: 50%; border: 0; display: inline-flex; align-items: center; justify-content: center;
