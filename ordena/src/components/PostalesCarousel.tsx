@@ -125,6 +125,66 @@ function ImagenLamina({ src, srcSet, alt }: { src: string; srcSet: string; alt: 
   );
 }
 
+const SITIO = 'https://ordena.laciudad.mx';
+
+/**
+ * Shares the slide on view. Where the browser can share files (phones, Safari) the image itself goes with the text and
+ * link; elsewhere a small menu offers WhatsApp, X, Facebook or copying the link.
+ */
+function Compartir({ src, postal }: { src: string; postal: Postal }) {
+  const [menu, setMenu] = useState(false);
+  const [copiado, setCopiado] = useState(false);
+  const archivo = useRef<File | null>(null);
+  const texto = `${postal.titulo}. Lee el plan del Valle de México por temas y opina en la consulta pública:`;
+  const puedeArchivos = typeof navigator.canShare === 'function' && navigator.canShare({ files: [new File([''], 'x.jpg', { type: 'image/jpeg' })] });
+
+  // Fetched ahead, so the share sheet opens straight from the tap (Safari drops a share started after a slow await)
+  useEffect(() => {
+    if (!puedeArchivos) return;
+    let vivo = true;
+    fetch(src, { mode: 'cors' }).then((r) => (r.ok ? r.blob() : null)).then((b) => {
+      if (vivo && b) archivo.current = new File([b], `${postal.slug}.jpg`, { type: 'image/jpeg' });
+    }).catch(() => {});
+    return () => { vivo = false; };
+  }, [src, postal.slug, puedeArchivos]);
+
+  const compartir = async () => {
+    const files = archivo.current ? [archivo.current] : undefined;
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title: postal.titulo, text: texto, url: SITIO, ...(files && navigator.canShare({ files }) ? { files } : {}) });
+        track('visor_compartir', { postal: postal.slug, via: files ? 'imagen' : 'enlace' });
+      } catch (e) {
+        if ((e as DOMException).name !== 'AbortError') setMenu(true);
+      }
+      return;
+    }
+    setMenu((m) => !m);
+  };
+  const red = (via: string) => track('visor_compartir', { postal: postal.slug, via });
+  const copiar = async () => {
+    try { await navigator.clipboard.writeText(`${texto} ${SITIO}`); setCopiado(true); red('copiar'); setTimeout(() => setCopiado(false), 1800); } catch { /* the menu stays open */ }
+  };
+  const msg = encodeURIComponent(`${texto} ${SITIO}`);
+
+  return (
+    <div className="visor-share">
+      <button type="button" className="visor-share-btn" aria-expanded={menu} onClick={compartir}>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" /></svg>
+        Compartir
+      </button>
+      {menu ? (
+        <div className="visor-share-menu">
+          <a href={`https://wa.me/?text=${msg}`} target="_blank" rel="noopener" onClick={() => red('whatsapp')}>WhatsApp</a>
+          <a href={`https://x.com/intent/post?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(SITIO)}`} target="_blank" rel="noopener" onClick={() => red('x')}>X</a>
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITIO)}`} target="_blank" rel="noopener" onClick={() => red('facebook')}>Facebook</a>
+          <button type="button" onClick={copiar}>{copiado ? 'Enlace copiado' : 'Copiar enlace'}</button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /** Full-screen viewer: one slide at a time in order, with arrows, keys, swipe and a strip of thumbnails. */
 function Visor({ base, postales, total, index, onIndex, onClose }: { base: string; postales: Postal[]; total: number; index: number; onIndex: (i: number) => void; onClose: () => void }) {
   const n = postales.length;
@@ -143,7 +203,7 @@ function Visor({ base, postales, total, index, onIndex, onClose }: { base: strin
   const salir = (via: string) => { track('visor_cerrado', { vistas: vistas.current.size, via }); onClose(); };
 
   // Every slide full size as soon as the viewer opens, so moving between them is instant
-  useEffect(() => { postales.forEach((s) => { const img = new Image(); img.src = `${base}/${s.slug}.jpg`; }); }, [base, postales]);
+  useEffect(() => { postales.forEach((s) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.src = `${base}/${s.slug}.jpg`; }); }, [base, postales]);
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -176,7 +236,7 @@ function Visor({ base, postales, total, index, onIndex, onClose }: { base: strin
       <div className="visor-bar">
         <span className="visor-count num" aria-live="polite">{index + 1} / {n}</span>
         <span className="visor-title"><span className="visor-num">{numero(p, index)}/{total}</span>{p.titulo}</span>
-        <a className="visor-orig" href={`${base}/${p.slug}.jpg`} target="_blank" rel="noopener" onClick={() => track('visor_original', { postal: p.slug })}>Original ↗</a>
+        <Compartir key={p.slug} src={`${base}/${p.slug}.jpg`} postal={p} />
         <button ref={closeRef} type="button" className="visor-close" aria-label="Cerrar" onClick={() => salir('boton')}>✕</button>
       </div>
       <div
@@ -190,7 +250,7 @@ function Visor({ base, postales, total, index, onIndex, onClose }: { base: strin
         }}
       >
         <button type="button" className="visor-arrow is-prev" aria-label="Lámina anterior" onClick={() => ir(index - 1, 'flecha')}><Arrow d={PREV} size={24} /></button>
-        <img key={p.slug} src={`${base}/${p.slug}.jpg`} width={1080} height={1350} alt={p.alt} />
+        <img key={p.slug} src={`${base}/${p.slug}.jpg`} crossOrigin="anonymous" width={1080} height={1350} alt={p.alt} />
         <button type="button" className="visor-arrow is-next" aria-label="Lámina siguiente" onClick={() => ir(index + 1, 'flecha')}><Arrow d={NEXT} size={24} /></button>
       </div>
       <ol className="visor-thumbs" ref={thumbs} aria-label="Todas las láminas">

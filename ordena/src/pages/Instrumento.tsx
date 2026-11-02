@@ -23,7 +23,7 @@ export function Instrumento() {
   const { comentar, comentarios } = useRespuestas();
   const page = PAGES[slug];
   const nombre = ({ baldios: 'Impuesto al desperdicio urbano', plusvalias: 'Captura de plusvalías', mejoras: 'Contribución de mejoras', 'predial-fideicomiso': 'Predial y Fideicomiso Metropolitano' } as Record<string, string>)[slug];
-  useSeo(`/quien-paga/${slug}`, nombre ? { title: `${nombre}: cómo funcionaría · Opine`, description: `Cómo funcionaría el instrumento "${nombre}" que propone el POZMVM, a quién afectaría y qué puedes pedir en la consulta pública.` } : null);
+  useSeo(`/quien-paga/${slug}`, nombre ? { title: `${nombre}: cómo funcionaría · ¿Qué opinas?`, description: `Cómo funcionaría el instrumento "${nombre}" que propone el POZMVM, a quién afectaría y qué puedes pedir en la consulta pública.` } : null);
   if (!page) return <p className="wrap error">No existe ese instrumento.</p>;
   const Body = page.el;
   const added = (comentarios['quien-paga'] ?? '').includes(page.ask.slice(0, 40));

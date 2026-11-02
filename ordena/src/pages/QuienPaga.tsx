@@ -69,7 +69,7 @@ export function QuienPaga() {
             <span className="k">3 · En qué se gasta</span>
             <div className="col">
               {fin.destinos.map((d) => <div key={d.nombre} className="dst"><span>{d.nombre}</span><CitaLink pagina={d.pagina} cita={d.cita} origen="destino" className="pg-link" /></div>)}
-              <div className="dst gap"><svg aria-hidden="true" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 3L2 21h20L12 3z" /><path d="M12 10v5" strokeLinecap="round" /><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" /></svg><strong>Sin monto, sin calendario, sin orden de prioridad de gasto</strong></div>
+              <div className="dst gap"><svg aria-hidden="true" width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"><path d="M12 3L2 21h20L12 3z" /><path d="M12 10v5" strokeLinecap="round" /><circle cx="12" cy="18" r="1" fill="currentColor" stroke="none" /></svg><strong>Riesgo de robo de recursos y corrupción</strong><span>El plan no dice cuánto se juntará, cuándo se gastará ni qué obra va primero, y las reglas del fideicomiso están por escribir (pp. 175 y 176). Sin eso, nadie puede vigilar a dónde va el dinero.</span></div>
             </div>
             <p className="small" style={{ margin: 0 }}>Los instrumentos naranjas y amarillos requieren cambiar leyes fiscales estatales y municipales (pp. 170 y 176). Toca uno para ver cómo funciona.</p>
           </div>

@@ -41,6 +41,12 @@ export function HeroSlider() {
     const dx = e.changedTouches[0].clientX - startX.current; startX.current = null;
     if (Math.abs(dx) > 48) go(dx < 0 ? i + 1 : i - 1, 'deslizar');
   };
+  // On phones the coloured card is a tap target, like stories: the left third goes back, the rest forward.
+  const onCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!window.matchMedia('(max-width: 860px)').matches) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    go(e.clientX - r.left < r.width / 3 ? i - 1 : i + 1, 'tocar');
+  };
 
   return (
     <section className="hero" aria-roledescription="carrusel" aria-label="La consulta y cinco temas del plan" style={{ ['--hero-bg' as string]: s.bg, ['--hero-ink' as string]: s.ink, ['--arrow-ink' as string]: s.bg }} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
@@ -57,7 +63,7 @@ export function HeroSlider() {
         </div>
       </div>
       <div className="hero-desk">
-      <div className="hero-top">
+      <div className="hero-top" onClick={onCardClick}>
       <div className="wrap hero-grid">
         <div className="hero-text hero-head" aria-live="polite" aria-atomic="true">
           <span className="k long" style={{ opacity: .75 }}>{intro ? s.tema : `Tema ${i} de ${SLIDES.length - 1} · ${s.tema}`}</span><span className="k short" style={{ opacity: .8 }}>{s.tema}</span>

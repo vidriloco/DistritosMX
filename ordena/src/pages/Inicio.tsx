@@ -28,7 +28,7 @@ export function Inicio() {
 
   return (
     <>
-      <h1 className="sr-only">Opine: tu opinión sobre el plan del Valle de México a 2050 (POZMVM)</h1>
+      <h1 className="sr-only">¿Qué opinas? Tu opinión sobre el plan del Valle de México a 2050 (POZMVM)</h1>
       <HeroSlider />
       <section className="wrap framing">
         <SkylineCDMX className="skyline" />
@@ -66,7 +66,7 @@ export function Inicio() {
       <section className="laminas-band" aria-labelledby="laminas">
         <div className="wrap section">
         <h2 className="h-light h2" id="laminas">Movilidad <strong>en el plan de ordenamiento</strong></h2>
-        <p className="muted postales-intro">Infografías que explican los aspectos más importantes del plan con datos de Wikiando</p>
+        <p className="muted postales-intro">Infografías que explican los aspectos más importantes del plan con datos de <a href="https://wikiando.mx/" target="_blank" rel="noopener" className="wikiando-link" onClick={() => track('wikiando_link', { origen: 'laminas' })}><img src="/wikiando.png" alt="Wikiando" width="501" height="88" /></a></p>
         <PostalesCarousel
           base={LAMINAS_BASE}
           postales={LAMINAS}

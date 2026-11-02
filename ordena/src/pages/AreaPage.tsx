@@ -25,7 +25,7 @@ export function AreaPage() {
   const { data: area, error } = useFetch(() => api.area(slug), [slug]);
   const { data: areas } = useFetch(api.areas, []);
   useEffect(() => { window.scrollTo(0, 0); }, [slug]);
-  useSeo(`/area/${slug}`, area ? { title: `${area.titulo}: qué propone el POZMVM · Opine`, description: firstSentence(area.resumen) } : null);
+  useSeo(`/area/${slug}`, area ? { title: `${area.titulo}: qué propone el POZMVM · ¿Qué opinas?`, description: firstSentence(area.resumen) } : null);
   useEffect(() => {
     if (area && hash === '#contexto') document.getElementById('contexto')?.scrollIntoView({ behavior: 'smooth' });
   }, [area, hash]);

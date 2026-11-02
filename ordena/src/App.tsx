@@ -32,7 +32,7 @@ export default function App() {
     <>
       <header className={`top${open ? ' open' : ''}`}>
         <div className="wrap top-row">
-          <Link to="/" className="brand" onClick={nav('/', 'logo')}><LogoMark size={36} /><span className="brand-t"><span>¿Qué opinas?</span><small>Programa de Ordenación de la ZMVM</small></span></Link>
+          <Link to="/" className="brand" onClick={nav('/', 'logo')}><LogoMark size={36} /><span className="brand-t"><span>¿Qué opinas?</span><small>Programa de Ordenación de la Megalópolis</small></span></Link>
           <button type="button" className="burger" aria-expanded={open} aria-controls="nav" aria-label={open ? 'Cerrar menú' : 'Abrir menú'} onClick={() => { track('menu', { abierto: !open }); setOpen((o) => !o); }}>
             <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="square">
               {open ? <path d="M5 5l14 14M19 5L5 19" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
@@ -60,7 +60,7 @@ export default function App() {
       </main>
       <footer>
         <div className="wrap">
-          Sitio ciudadano independiente para entender el proyecto del Programa de Ordenación de la Zona Metropolitana del Valle de México que SEDATU puso a consulta pública. No es un sitio oficial. Fuente: {consulta ? <a href={consulta.documento} target="_blank" rel="noreferrer">documento en consulta (PDF, 203 págs.)</a> : 'documento en consulta'}.
+          Sitio ciudadano independiente para entender el proyecto del Programa de Ordenación de la Megalópolis que SEDATU puso a consulta pública. No es un sitio oficial. Fuente: {consulta ? <a href={consulta.documento} target="_blank" rel="noreferrer">documento en consulta (PDF, 203 págs.)</a> : 'documento en consulta'}.
         </div>
       </footer>
       <a className="credito" href="https://tallerdeapps.mx" target="_blank" rel="noopener">
