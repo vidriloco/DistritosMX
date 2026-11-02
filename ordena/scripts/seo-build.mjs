@@ -55,7 +55,7 @@ const routes = [
   })),
 ];
 
-const OG_DEFAULT = { src: `${SITE}/og.png`, width: 1200, height: 630, alt: 'Silueta de la Ciudad de México y el título Opine' };
+const OG_DEFAULT = { src: `${SITE}/og.png`, width: 1200, height: 630, alt: 'Íconos de los nueve temas del plan alrededor del título ¿Qué opinas?, con la fecha de cierre de la consulta y ordena.laciudad.mx' };
 
 for (const r of routes) {
   const img = r.image ?? OG_DEFAULT;
