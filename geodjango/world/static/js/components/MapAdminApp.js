@@ -365,6 +365,94 @@ const interpolateColor = (color1, color2, t) => {
     }).join('')}`;
 };
 
+// The Índice de habitabilidad of each AGEB or colonia the pointer has been
+// over (/api/area-score), so the hover tooltip can show the axis that matches
+// the selected layer. null once answered means the area has no index.
+const areaScoreResults = {};
+const areaScoreRequests = {};
+
+const areaScoreKey = (properties, geographicUnit) => {
+    if (geographicUnit === 'neighbourhood') {
+        return properties.neighbourhood_code ? `colonia|${properties.neighbourhood_code}` : null;
+    }
+    if (geographicUnit === 'ageb') {
+        return properties.cvegeo ? `ageb|${properties.cvegeo}` : null;
+    }
+    return null;
+};
+
+const loadAreaScore = (properties, geographicUnit) => {
+    const key = areaScoreKey(properties, geographicUnit);
+    if (!key) return Promise.resolve(null);
+    if (key in areaScoreResults) return Promise.resolve(areaScoreResults[key]);
+    if (!areaScoreRequests[key]) {
+        const [type, code] = key.split('|');
+        areaScoreRequests[key] = fetch(`/api/area-score?type=${type}&code=${encodeURIComponent(code)}`)
+            .then(response => response.ok ? response.json() : null)
+            .then(data => { areaScoreResults[key] = data; return data; })
+            .catch(() => null)
+            .finally(() => { delete areaScoreRequests[key]; });
+    }
+    return areaScoreRequests[key];
+};
+
+// The index axis that covers a map layer: Oportunidades, Inseguridad,
+// Vivienda (Airbnb) and Movilidad.
+const areaScoreAxisFor = (indicator) => {
+    if (!indicator) return null;
+    if (['population', 'companies', 'jobs', 'education', 'health', 'provision', 'leisure'].includes(indicator)) return 'oportunidades';
+    if (/^(thefts|sexual_assault|house_thefts|business_thefts)_/.test(indicator)) return 'seguridad';
+    if (indicator.startsWith('airbnb_listings')) return 'vivienda';
+    if (indicator.endsWith('_stations')) return 'transporte';
+    return null;
+};
+
+const areaScoreTone = (value) => {
+    if (value < 4) return { ink: '#DC2626', wash: '#FEF2F2' };
+    if (value < 5) return { ink: '#EA580C', wash: '#FFF7ED' };
+    if (value < 7) return { ink: '#CA8A04', wash: '#FEFCE8' };
+    return { ink: '#16A34A', wash: '#F0FDF4' };
+};
+
+const isPhoneScreen = () => window.matchMedia('only screen and (max-width: 767px)').matches;
+
+// The axis score of the hovered area and how to open its card.
+const generateAreaScoreNote = (agebInfo, selectedIndicator, geographicUnit) => {
+    const key = areaScoreKey(agebInfo, geographicUnit);
+    if (!key) return '';
+    const noun = geographicUnit === 'neighbourhood' ? 'la colonia' : 'el AGEB';
+    const hint = isPhoneScreen()
+        ? 'Toca aquí para ver más'
+        : `Haz clic en ${noun} para ver más`;
+    const areaScore = areaScoreResults[key];
+    const axis = areaScore && areaScore.axes.find(item => item.key === areaScoreAxisFor(selectedIndicator));
+    // Styled inline like the rest of the tooltip, so a cached stylesheet can't flatten it.
+    let score = '';
+    if (axis && axis.value !== null) {
+        const tone = areaScoreTone(axis.value);
+        score = `
+            <div class="popup-score-note" style="margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: ${tone.wash};">
+                <div style="font-size: 0.68em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-secondary, #6B7280); margin-bottom: 6px;">
+                    Calificación en ${axis.label}
+                </div>
+                <div style="display: flex; align-items: baseline; gap: 8px;">
+                    <span style="font-size: 1.7em; font-weight: 800; line-height: 1; color: ${tone.ink};">${axis.value.toFixed(1)}</span>
+                    <span style="font-size: 0.85em; color: #374151;">de 10</span>
+                </div>
+                ${areaScore.score !== null && areaScore.score !== undefined ? `
+                <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(17, 24, 39, 0.08); font-size: 0.78em; color: #374151;">
+                    Índice de habitabilidad general: <strong style="color: #111827;">${areaScore.score.toFixed(1)}</strong> de 10
+                </div>` : ''}
+            </div>
+        `;
+    }
+    return `${score}
+        <div class="popup-score-hint" style="display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 0.8em; font-weight: 600; color: #2563EB;">
+            <span>${hint}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>`;
+};
+
 // Helper function to generate popup content
 const generatePopupContent = (agebInfo, selectedIndicator, address = null, geographicUnit = 'ageb') => {
     // Get the appropriate message based on geographic unit type
@@ -462,6 +550,7 @@ const generatePopupContent = (agebInfo, selectedIndicator, address = null, geogr
                         ${geographicUnit === 'neighbourhood' ? 'COLONIA / BARRIO' : 'AGEB'}
                     </div>
                 ` : ''}
+                ${generateAreaScoreNote(agebInfo, selectedIndicator, geographicUnit)}
             </div>
         `;
     }
@@ -739,6 +828,39 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
         return () => window.removeEventListener('popstate', handlePopState);
     }, [indicatorsData]);
     
+    // The area card's ranking list opens another AGEB or colonia: the map's own
+    // feature when it has it loaded, otherwise the outline from the API.
+    React.useEffect(() => {
+        const handleOpenArea = async (event) => {
+            const { type, code } = event.detail || {};
+            if (type === 'ageb' && indicatorsData && indicatorsData.features) {
+                const feature = indicatorsData.features.find(f => f.properties.cvegeo === code);
+                if (feature) {
+                    handleGeozoneSelect({ ...feature, type: 'ageb' });
+                    return;
+                }
+            }
+            try {
+                const response = await fetch(`/api/area-score?type=${type}&code=${encodeURIComponent(code)}&geometry=1`);
+                if (!response.ok) return;
+                const area = await response.json();
+                handleGeozoneSelect({
+                    type: type === 'colonia' ? 'neighborhood' : 'ageb',
+                    id: area.code,
+                    geometry: area.geometry,
+                    properties: type === 'colonia'
+                        ? { neighbourhood_code: area.code, name: area.name, municipality_name: area.municipality }
+                        : { cvegeo: area.code, cve_ageb: area.code.slice(-4) }
+                });
+            } catch (error) {
+                console.error('Error opening area from the ranking:', error);
+            }
+        };
+
+        window.addEventListener('area-score:open', handleOpenArea);
+        return () => window.removeEventListener('area-score:open', handleOpenArea);
+    }, [indicatorsData]);
+
     // Initialize geozone from URL on component mount
     React.useEffect(() => {
         const geozoneId = getGeozoneFromURL();
@@ -2366,7 +2488,7 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
     // Two layers over one source: a faint ghost of the whole decade for
     // context, and a solid layer filtered to the year the player is on.
     React.useEffect(() => {
-        const isDespojosRoute = window.location.pathname === '/proyectos/mapas/despojos-viviendas';
+        const isDespojosRoute = window.routePath(window.location.pathname) === window.DESPOJOS_PATH;
         if (!isDespojosRoute) return;
 
         const GHOST_LAYER = 'despojos-ghost';
@@ -3791,13 +3913,15 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                         .setHTML(initialPopupContent)
                         .addTo(map.current);
                     
-                    getMapboxAddress(feature).then(address => {
+                    Promise.all([getMapboxAddress(feature), loadAreaScore(feature.properties, geographicUnit)]).then(([address]) => {
                         if (popupRef.current) {
                             const updatedPopupContent = generatePopupContent(feature.properties, selectedIndicatorRef.current, address, geographicUnit);
                             popupRef.current.setHTML(updatedPopupContent);
                         }
                     });
+                    return feature;
                 }
+                return null;
             };
 
             // Mouseleave event
@@ -3842,7 +3966,7 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                     if (popupRef.current) {
                         popupRef.current.setLngLat(e.lngLat);
                         
-                        getMapboxAddress(feature).then(address => {
+                        Promise.all([getMapboxAddress(feature), loadAreaScore(feature.properties, geographicUnit)]).then(([address]) => {
                             if (popupRef.current) {
                                 const updatedPopupContent = generatePopupContent(feature.properties, selectedIndicatorRef.current, address, geographicUnit);
                                 popupRef.current.setHTML(updatedPopupContent);
@@ -3863,11 +3987,31 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
             map.current.on('mousemove', 'agebs-hover-detection', mousemoveHandler);
             
             // Add click event listener for AGEB selection
+            const selectFeature = (feature) => {
+                // Convert Mapbox vector tile feature to GeoJSON feature,
+                // typed as AGEB (the card tells colonias apart by their code)
+                handleGeozoneSelect({
+                    type: 'ageb',
+                    geometry: feature.geometry,
+                    properties: feature.properties,
+                    id: feature.id
+                });
+            };
+
             const clickHandler = (e) => {
                 // A phone has no hover, so a tap shows the hover tooltip
-                // instead of opening the AGEB card in the bottom sheet.
-                if (window.matchMedia('only screen and (max-width: 767px)').matches) {
-                    mouseenterHandler(e);
+                // instead of opening the AGEB card in the bottom sheet;
+                // tapping the tooltip then opens the card.
+                if (isPhoneScreen()) {
+                    const feature = mouseenterHandler(e);
+                    if (feature && popupRef.current) {
+                        const element = popupRef.current.getElement();
+                        element.style.cursor = 'pointer';
+                        element.addEventListener('click', () => {
+                            removePopup();
+                            selectFeature(feature);
+                        });
+                    }
                     return;
                 }
 
@@ -3876,23 +4020,7 @@ function MapAdminApp({ onHelpClick, hideVerticalPanel = false, hideLoadingModal 
                 });
                                 
                 if (features.length > 0) {
-                    const feature = features[features.length - 1];
-                    
-                    // Convert Mapbox vector tile feature to GeoJSON feature
-                    const geojsonFeature = {
-                        type: 'Feature',
-                        geometry: feature.geometry,
-                        properties: feature.properties,
-                        id: feature.id
-                    };
-                    
-                    // Add type property to identify as AGEB
-                    const geozone = {
-                        ...geojsonFeature,
-                        type: 'ageb'
-                    };
-
-                    handleGeozoneSelect(geozone);
+                    selectFeature(features[features.length - 1]);
                 }
             };
             

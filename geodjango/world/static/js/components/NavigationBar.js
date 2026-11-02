@@ -112,11 +112,16 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
     const handleDespojosClick = () => {
         setAnalisisOpen(false);
         setPhoneMenuOpen(false);
-        if (window.navigate) {
-            window.navigate('/proyectos/mapas/despojos-viviendas');
-        } else {
-            window.location.href = '/proyectos/mapas/despojos-viviendas';
-        }
+        // The despojos map is its own site on the despojos subdomain (despojos.laciudad.mx)
+        const { protocol, hostname, port } = window.location;
+        window.location.href = protocol + '//despojos.' + hostname.replace(/^(www|despojos)\./, '') + (port ? ':' + port : '') + '/';
+    };
+
+    // Opine, the POZMVM consultation, is its own site on the ordena subdomain
+    // of whichever host this is (ordena.laciudad.mx, ordena.localhost locally).
+    const handleOrdenaClick = () => {
+        const { protocol, hostname, port } = window.location;
+        window.location.href = protocol + '//ordena.' + hostname.replace(/^(www|despojos)\./, '') + (port ? ':' + port : '') + '/';
     };
 
     const handleContactoClick = () => {
@@ -194,6 +199,13 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                             <div className="nav-dropdown-menu" role="menu">
                                 <button
                                     className="nav-dropdown-item"
+                                    onClick={handleOrdenaClick}
+                                    role="menuitem"
+                                >
+                                    Consulta POZMVM
+                                </button>
+                                <button
+                                    className="nav-dropdown-item"
                                     onClick={handleDespojosClick}
                                     role="menuitem"
                                 >
@@ -226,6 +238,7 @@ function NavigationBar({ backgroundColor = "rgba(255, 255, 255, 0.95)" }) {
                             <div className="nav-dropdown-menu" role="menu">
                                 <button className="nav-dropdown-item" onClick={handleExplorarClick} role="menuitem">Explorar</button>
                                 <button className="nav-dropdown-item" onClick={handleNegociosClick} role="menuitem">Negocios</button>
+                                <button className="nav-dropdown-item" onClick={handleOrdenaClick} role="menuitem">Consulta POZMVM</button>
                                 <button className="nav-dropdown-item" onClick={handleDespojosClick} role="menuitem">Despojos</button>
                                 <button className="nav-dropdown-item" onClick={handleContactoClick} role="menuitem">Contacto</button>
                             </div>

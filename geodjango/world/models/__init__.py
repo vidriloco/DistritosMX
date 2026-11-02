@@ -34,6 +34,7 @@ from .polygon_of_interest import PolygonOfInterest
 from .trips_matching import TripsMatching
 from .contact_lead import ContactLead
 from .despojo_report import DespojoCaseReport
+from .area_score import AreaScore, AreaScoreRun
 from .despojo_news import (
     DespojoNewsFeed, DespojoNewsItem, DespojoNewsKeyword, DespojoNewsRun,
     DespojoNewsSetting,
@@ -107,4 +108,6 @@ __all__ = [
     'DespojoNewsKeyword',
     'DespojoNewsRun',
     'DespojoNewsSetting',
+    'AreaScore',
+    'AreaScoreRun',
 ]

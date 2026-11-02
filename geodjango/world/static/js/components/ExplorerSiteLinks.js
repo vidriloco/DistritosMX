@@ -4,6 +4,19 @@
 // button sits after the group. On a phone the group gives way to a menu
 // button that lists the same links.
 
+// Opine, the POZMVM consultation, is its own site on the ordena subdomain of
+// whichever host this is (ordena.laciudad.mx, ordena.localhost:8110 locally).
+function ordenaUrl() {
+    const { protocol, hostname, port } = window.location;
+    return protocol + '//ordena.' + hostname.replace(/^(www|despojos)\./, '') + (port ? ':' + port : '') + '/';
+}
+
+// The despojos map is its own site on the despojos subdomain, built the same way as ordenaUrl().
+function despojosUrl() {
+    const { protocol, hostname, port } = window.location;
+    return protocol + '//despojos.' + hostname.replace(/^(www|despojos)\./, '') + (port ? ':' + port : '') + '/';
+}
+
 function ExplorerSiteLinks({ onHelpClick }) {
     const [analisisOpen, setAnalisisOpen] = React.useState(false);
     const [contactOpen, setContactOpen] = React.useState(false);
@@ -46,7 +59,7 @@ function ExplorerSiteLinks({ onHelpClick }) {
     const ContactModal = window.ContactForm || (() => null);
     const link = (to, label) => (
         <a href={to} className={isActive(to) ? 'is-active' : ''} aria-current={isActive(to) ? 'page' : undefined}
-           onClick={(e) => { e.preventDefault(); navigate(to); }}>{label}</a>
+           onClick={(e) => { e.preventDefault(); window.analyticsService && window.analyticsService.track('nav', { destino: to, origen: 'barra' }); navigate(to); }}>{label}</a>
     );
 
     return (
@@ -62,13 +75,14 @@ function ExplorerSiteLinks({ onHelpClick }) {
                     </button>
                     {analisisOpen && (
                         <div className="xb-links-dropdown" role="menu">
-                            <button type="button" role="menuitem" onClick={() => navigate('/proyectos/mapas/despojos-viviendas')}>Despojos</button>
+                            <button type="button" role="menuitem" onClick={() => { window.analyticsService && window.analyticsService.track('nav', { destino: 'ordena', origen: 'menu' }); window.location.href = ordenaUrl(); }}>Consulta POZMVM</button>
+                            <button type="button" role="menuitem" onClick={() => { window.analyticsService && window.analyticsService.track('nav', { destino: 'despojos', origen: 'menu' }); window.location.href = despojosUrl(); }}>Despojos</button>
                         </div>
                     )}
                 </div>
-                <button type="button" onClick={() => { setAnalisisOpen(false); setContactOpen(true); }}>Contacto</button>
+                <button type="button" onClick={() => { window.analyticsService && window.analyticsService.track('contacto_abierto', { origen: 'barra' }); setAnalisisOpen(false); setContactOpen(true); }}>Contacto</button>
             </div>
-            <button type="button" className="xb-icon-button" onClick={onHelpClick} aria-label="Ayuda" title="Ayuda">
+            <button type="button" className="xb-icon-button" onClick={() => { window.analyticsService && window.analyticsService.track('ayuda_abierta'); onHelpClick && onHelpClick(); }} aria-label="Ayuda" title="Ayuda">
                 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                     <circle cx="12" cy="12" r="9" />
                     <path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.5" />
@@ -84,10 +98,11 @@ function ExplorerSiteLinks({ onHelpClick }) {
                 </button>
                 {phoneMenuOpen && (
                     <div className="xb-links-dropdown" role="menu">
-                        <button type="button" role="menuitem" className={isActive('/explorar') ? 'is-active' : ''} onClick={() => navigate('/explorar')}>Explorar</button>
-                        <button type="button" role="menuitem" className={isActive('/negocios') ? 'is-active' : ''} onClick={() => navigate('/negocios')}>Negocios</button>
-                        <button type="button" role="menuitem" onClick={() => navigate('/proyectos/mapas/despojos-viviendas')}>Despojos</button>
-                        <button type="button" role="menuitem" onClick={() => { setPhoneMenuOpen(false); setContactOpen(true); }}>Contacto</button>
+                        <button type="button" role="menuitem" className={isActive('/explorar') ? 'is-active' : ''} onClick={() => { window.analyticsService && window.analyticsService.track('nav', { destino: '/explorar', origen: 'menu_telefono' }); navigate('/explorar'); }}>Explorar</button>
+                        <button type="button" role="menuitem" className={isActive('/negocios') ? 'is-active' : ''} onClick={() => { window.analyticsService && window.analyticsService.track('nav', { destino: '/negocios', origen: 'menu_telefono' }); navigate('/negocios'); }}>Negocios</button>
+                        <button type="button" role="menuitem" onClick={() => { window.analyticsService && window.analyticsService.track('nav', { destino: 'ordena', origen: 'menu' }); window.location.href = ordenaUrl(); }}>Consulta POZMVM</button>
+                        <button type="button" role="menuitem" onClick={() => { window.analyticsService && window.analyticsService.track('nav', { destino: 'despojos', origen: 'menu' }); window.location.href = despojosUrl(); }}>Despojos</button>
+                        <button type="button" role="menuitem" onClick={() => { window.analyticsService && window.analyticsService.track('contacto_abierto', { origen: 'menu_telefono' }); setPhoneMenuOpen(false); setContactOpen(true); }}>Contacto</button>
                     </div>
                 )}
             </div>

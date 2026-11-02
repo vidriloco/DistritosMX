@@ -1,0 +1,1176 @@
+{
+  "consulta": {
+    "nombre": "Consulta pública del Programa de Ordenación de la Zona Metropolitana del Valle de México (POZMVM)",
+    "inicio": "2026-09-24",
+    "cierre": "2026-11-22",
+    "correo": "participacion.dgomr@sedatu.gob.mx",
+    "sitio": "https://pozmvm.sedatu.gob.mx/",
+    "pagina_consulta": "https://pozmvm.sedatu.gob.mx/?page_id=1953",
+    "pagina_eventos": "https://pozmvm.sedatu.gob.mx/?page_id=1968",
+    "documento": "https://pozmvm.sedatu.gob.mx/wp-content/uploads/2026/09/Consulta-Pblica_POZMVM-1-1.pdf",
+    "alcance": "84 municipios y alcaldías de la Ciudad de México, Estado de México, Hidalgo y Morelos. Horizonte 2050.",
+    "estructura": [
+      {
+        "capitulo": "Introducción",
+        "pagina": 6
+      },
+      {
+        "capitulo": "Diagnóstico",
+        "pagina": 20
+      },
+      {
+        "capitulo": "Prospectiva",
+        "pagina": 63
+      },
+      {
+        "capitulo": "Modelo de Ordenamiento Territorial (14 políticas)",
+        "pagina": 70
+      },
+      {
+        "capitulo": "Estrategia",
+        "pagina": 101
+      },
+      {
+        "capitulo": "Agenda metropolitana (4 proyectos estratégicos, 10 prioritarios)",
+        "pagina": 112
+      },
+      {
+        "capitulo": "Instrumentación y financiamiento",
+        "pagina": 164
+      },
+      {
+        "capitulo": "Gobernanza",
+        "pagina": 181
+      },
+      {
+        "capitulo": "Monitoreo e indicadores",
+        "pagina": 189
+      }
+    ]
+  },
+  "areas": [
+    {
+      "slug": "agua",
+      "orden": 1,
+      "titulo": "Agua y ciudad esponja",
+      "icono": "💧",
+      "resumen": "La metrópoli extrae más agua de la que recarga, pierde una parte enorme en fugas y casi no trata sus aguas residuales. El plan propone una 'Metrópoli Esponja': recargar el acuífero, captar lluvia y recuperar lagos y humedales.",
+      "diagnostico": [
+        {
+          "texto": "Cerca de 196 mil viviendas (3.1 %) no tienen agua entubada, y solo alrededor del 30 % de la población tiene agua y saneamiento continuos.",
+          "pagina": 58,
+          "cita": "Para 2020, alrededor del 3.1% de las viviendas particulares habitadas (cerca de 196 mil viviendas) no contaban con acceso a agua potable."
+        },
+        {
+          "texto": "Más del 80 % de las aguas residuales urbanas tienen destino desconocido y menos del 1 % llega a una planta de tratamiento.",
+          "pagina": 33,
+          "cita": "En la ZMVM la situación es más crítica, pues de acuerdo con la información del Registro Público de Derechos de Agua (REPDA) más del 80% de las aguas residuales de uso público urbano se desconoce su destino y menos de 1% llega a un sistema de tratamiento (ver…"
+        },
+        {
+          "texto": "El estrés hídrico se estima en 128.7 hm³ al año; la meta es bajarlo a 119 hm³ en 2050.",
+          "pagina": 191,
+          "cita": "Estrés hídrico hm³/año 2023 128.7 129.1 129.5 130.0 125.4 122.2 119.0 CONAGUA y REPDA…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Proyecto estratégico Metrópoli Esponja: recarga del acuífero, cosecha de agua de lluvia, pozos de absorción y parques drenantes.",
+          "pagina": 115,
+          "clave": "Metrópoli Esponja",
+          "cita": "El proyecto Metrópoli Esponja plantea un cambio en la forma en que la ZMVM gestiona el agua dentro de su territorio."
+        },
+        {
+          "texto": "Rehabilitación del Sistema Cutzamala y del Sistema del Alto Lerma como proyectos prioritarios.",
+          "pagina": 115,
+          "clave": "Prioritario 10",
+          "cita": "Programa de mantenimiento y conservación del Sistema Cutzamala • Rehabilitación del Sistema del Alto Lerma (Estado de México-Ciudad de…"
+        },
+        {
+          "texto": "Rescate del Lago de Texcoco y recuperación de humedales como infraestructura verde-azul.",
+          "pagina": 116,
+          "clave": "Metrópoli Esponja",
+          "cita": "Restauración del Lago de Texcoco • Programa para el…"
+        },
+        {
+          "texto": "Reducir fugas de la red en al menos 40 % con obras por etapas anuales y macromedición telemétrica.",
+          "pagina": 141,
+          "clave": "Cuadro 13",
+          "cita": "Su ejecución se realizará por etapas anuales con mecanismos de supervisión, buscando disminuir las fugas en al menos 40% y fortalecer la operación de la red a largo plazo."
+        },
+        {
+          "texto": "Agencia Metropolitana de Agua Potable, Drenaje y Saneamiento para coordinar a las cuatro entidades.",
+          "pagina": 119,
+          "clave": "Metrópoli con Derechos",
+          "cita": "Creación de Agencias Metropolitanas: de Agua Potable, Drenaje y Saneamiento; Movilidad Integrada y Transporte; Gestión Integral de Riesgos, Protección Civil y Cambio…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "agua-prioridad",
+          "texto": "¿Qué debería atenderse primero en tu colonia o municipio?",
+          "opciones": [
+            {
+              "valor": "fugas",
+              "etiqueta": "Reparar fugas y renovar la red existente",
+              "opinion": "Considero que la prioridad debe ser la reparación de fugas y la renovación de la red antes de traer más agua de fuera; pido que la meta de reducir fugas al menos 40 % (p. 141) tenga calendario y presupuesto público por municipio."
+            },
+            {
+              "valor": "cobertura",
+              "etiqueta": "Llevar agua entubada a quienes no la tienen",
+              "opinion": "Pido que el programa priorice la cobertura de las cerca de 196 mil viviendas sin agua entubada (p. 58) con metas anuales por demarcación, antes que proyectos de gran escala."
+            },
+            {
+              "valor": "tratamiento",
+              "etiqueta": "Tratar y reutilizar las aguas residuales",
+              "opinion": "Propongo que el tratamiento y reúso de aguas residuales sea un proyecto prioritario con metas claras, dado que menos del 1 % llega hoy a tratamiento (p. 33)."
+            },
+            {
+              "valor": "recarga",
+              "etiqueta": "Captar lluvia y recargar el acuífero",
+              "opinion": "Apoyo la Metrópoli Esponja (p. 115) y pido que la cosecha de lluvia y los pozos de recarga se instalen primero en las zonas con subsidencia y mayor sobreexplotación."
+            }
+          ],
+          "corto": "Prioridad"
+        },
+        {
+          "slug": "agua-agencia",
+          "texto": "¿Estás de acuerdo con crear una Agencia Metropolitana del Agua que coordine a CDMX, Edomex, Hidalgo y Morelos?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, hace falta una sola autoridad",
+              "opinion": "Estoy de acuerdo con la creación de la Agencia Metropolitana de Agua Potable, Drenaje y Saneamiento (Cuadro 11, p. 119), siempre que tenga atribuciones reales y rinda cuentas públicamente."
+            },
+            {
+              "valor": "condicion",
+              "etiqueta": "Sí, pero con participación ciudadana vinculante",
+              "opinion": "Apoyo la Agencia Metropolitana del Agua (p. 119) a condición de que incluya representación ciudadana y de pueblos originarios con voz y voto, y que publique datos abiertos de consumo y fugas."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, prefiero fortalecer a los organismos locales",
+              "opinion": "No considero necesaria una nueva agencia metropolitana del agua; propongo fortalecer con presupuesto y transparencia a los organismos operadores locales y a la Comisión de Agua ya existente."
+            }
+          ],
+          "corto": "Agencia del Agua"
+        }
+      ]
+    },
+    {
+      "slug": "movilidad",
+      "orden": 2,
+      "titulo": "Movilidad y transporte",
+      "icono": "🚇",
+      "resumen": "Tres de cada cuatro viajes en transporte público se hacen en micros y combis, y quien vive en la periferia puede pasar cuatro horas al día viajando. El plan apuesta por un sistema integrado de transporte masivo y por acercar empleo y servicios a donde vive la gente.",
+      "diagnostico": [
+        {
+          "texto": "El modelo 'hombre-camión' de micros y vagonetas mueve a más de 6 millones de personas al día, el 74 % de los viajes en transporte público.",
+          "pagina": 50,
+          "cita": "Este sistema moviliza diariamente a más de 6 millones de personas, representando alrededor del 74% de los viajes en transporte público de la metrópoli, pero opera con menor regularidad, condiciones desiguales y limitada integración con el resto de la red."
+        },
+        {
+          "texto": "Hogares de la periferia destinan hasta 40 % de su ingreso al transporte y hasta 4 horas diarias en traslados.",
+          "pagina": 52,
+          "cita": "la población puede invertir cuatro o más horas al día en movilidad."
+        },
+        {
+          "texto": "Cada día se hacen más de 5.8 millones de viajes del Estado de México a la Ciudad de México.",
+          "pagina": 43,
+          "cita": "Cada día se realizan más de 5.8 millones de viajes desde el Estado de México hacia la Ciudad de México, evidenciando la dependencia de la población periférica respecto al núcleo central para acceder a empleo y servicios."
+        },
+        {
+          "texto": "Las mujeres dedican 25 horas a la semana a mover a dependientes, los hombres 6; el 58 % de esos viajes son a pie.",
+          "pagina": 45,
+          "cita": "Mientras que las mujeres dedican en promedio 25 horas semanales al transporte de dependientes (niños y adultos mayores), los hombres destinan solo 6 horas a estas tareas (PUEC, 2025); el 58% de estos desplazamientos se realizan exclusivamente a pie (Encuesta…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Sistema Integrado de Transporte Metropolitano Masivo de alta y mediana capacidad (proyecto prioritario 4).",
+          "pagina": 120,
+          "clave": "Prioritario 4",
+          "cita": "ida 4 Sistema Integrado de Transporte Metropolitano Masivo, de Alta y Mediana Capacidad…"
+        },
+        {
+          "texto": "Política de Desarrollo Cercano al Transporte: vivienda y servicios junto a estaciones y corredores.",
+          "pagina": 75,
+          "clave": "MOT",
+          "cita": "Política de Desarrollo Cercano al Transporte La política de Desarrollo Cercano al Transporte se propone para entornos ubicados dentro de un radio de 500 metros de estaciones de transporte masiv o, áreas con prevalencia de vivienda unifamiliar y baja…"
+        },
+        {
+          "texto": "Reordenación de los CETRAM y una Encuesta Origen-Destino metropolitana actualizada.",
+          "pagina": 117,
+          "clave": "Metrópoli de Proximidad",
+          "cita": "cas • Encuesta Origen-Destino Metropolitana • Reordenación urbana de las zonas aledañas a estaciones ferroviarias, CETRAMs y estaciones de transporte masivo y…"
+        },
+        {
+          "texto": "Esquema metropolitano de monitoreo operativo del transporte público y homologación de la gestión vehicular entre entidades.",
+          "pagina": 119,
+          "clave": "Metrópoli con Derechos",
+          "cita": "Esquema Metropolitano de Monitoreo Operativo del Sistema de Transporte Público • Homologación normativa entre entidades federativas, alcaldías y municipios para la operación de servicios y procesos…"
+        },
+        {
+          "texto": "Meta: bajar el tiempo de traslado de 180 a 90 minutos y subir el acceso a transporte estructurado del 25 % al 65 % en 2050.",
+          "pagina": 191,
+          "clave": "Indicadores",
+          "cita": "Tiempo de traslado metropolitano (ida+vuelta) Minutos 2023 180 200 220 240 150…"
+        },
+        {
+          "texto": "Ampliación y modernización de vialidades y carreteras estratégicas (proyecto prioritario 9).",
+          "pagina": 120,
+          "clave": "Prioritario 9",
+          "cita": "uic 9 Ampliación y Modernización Metropolitana de Vialidades y Carreteras Estratégicas…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "movilidad-inversion",
+          "texto": "¿Dónde debería ir primero la inversión en movilidad?",
+          "opciones": [
+            {
+              "valor": "masivo",
+              "etiqueta": "Metro, tren y Metrobús hacia la periferia",
+              "opinion": "Apoyo el Sistema Integrado de Transporte Metropolitano Masivo (proyecto prioritario 4, p. 120) y pido que sus primeras líneas conecten al oriente y norte del Estado de México, donde se concentran los viajes de 5.8 millones de personas (p. 43)."
+            },
+            {
+              "valor": "micros",
+              "etiqueta": "Ordenar y mejorar micros y combis",
+              "opinion": "Dado que el 74 % de los viajes en transporte público se hacen en micros y combis (p. 50), pido que el programa incluya un plan concreto para ordenar, integrar tarifariamente y mejorar ese servicio, no solo construir sistemas nuevos."
+            },
+            {
+              "valor": "peaton",
+              "etiqueta": "Banquetas, ciclovías y caminos seguros",
+              "opinion": "Pido que la movilidad peatonal y ciclista tenga metas propias en el programa: el 58 % de los viajes de cuidado se hacen a pie (p. 45) y la infraestructura peatonal fuera del centro es deficiente."
+            },
+            {
+              "valor": "vialidades",
+              "etiqueta": "Carreteras y vialidades",
+              "opinion": "Considero que la ampliación de vialidades y carreteras estratégicas (proyecto prioritario 9, p. 120) debe condicionarse a que no induzca más expansión urbana y a que incluya carriles para transporte público."
+            }
+          ],
+          "corto": "Inversión"
+        },
+        {
+          "slug": "movilidad-tarifa",
+          "texto": "¿Debería existir una tarifa única metropolitana con transbordos gratuitos entre sistemas y entidades?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, una sola tarjeta y una sola tarifa",
+              "opinion": "Propongo que el programa incluya explícitamente la integración tarifaria metropolitana (una sola tarjeta y transbordos sin costo entre sistemas de CDMX y Edomex), que hoy no aparece como proyecto concreto."
+            },
+            {
+              "valor": "subsidio",
+              "etiqueta": "Sí, con subsidio para hogares de bajos ingresos",
+              "opinion": "Pido una tarifa integrada metropolitana con subsidio focalizado, ya que hay hogares que gastan hasta 40 % de su ingreso en transporte (p. 56)."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No es prioritario",
+              "opinion": "No considero prioritaria la tarifa única; prefiero que los recursos se destinen a la calidad y frecuencia del servicio."
+            }
+          ],
+          "corto": "Tarifa única"
+        },
+        {
+          "slug": "movilidad-cuidado",
+          "texto": "¿El plan debería tener medidas específicas para la movilidad del cuidado y de las mujeres?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, con metas y presupuesto",
+              "opinion": "Pido que la movilidad del cuidado tenga metas, presupuesto e indicadores propios en el monitoreo (Cuadro 14, p. 191), considerando la brecha de 25 contra 6 horas semanales entre mujeres y hombres (p. 45)."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "Está cubierto con la mejora general",
+              "opinion": "Considero que la mejora general del transporte atiende la movilidad del cuidado sin necesidad de medidas separadas."
+            }
+          ],
+          "corto": "Movilidad del cuidado"
+        }
+      ]
+    },
+    {
+      "slug": "vivienda",
+      "orden": 3,
+      "titulo": "Vivienda, suelo y crecimiento urbano",
+      "icono": "🏘️",
+      "resumen": "La vivienda formal es inalcanzable en la mayoría de la ciudad mientras miles de casas en la periferia están abandonadas. El plan quiere frenar la expansión, densificar cerca del transporte y regular el suelo.",
+      "diagnostico": [
+        {
+          "texto": "Una vivienda de $608,760 es inviable para la mayoría en 22 demarcaciones de la zona metropolitana.",
+          "pagina": 40,
+          "cita": "la vivienda económica resulta inviable en al menos 22 demarcaciones de la ZMVM, correspondientes a 13 alcaldías de la Ciudad de México y 9 municipios del Estado de México."
+        },
+        {
+          "texto": "El suelo cuesta hasta $80,000 por m² en Polanco frente a $1,500 a 2,500 en la periferia.",
+          "pagina": 37,
+          "cita": "elevando el precio del suelo a más de $80,000 por metro cuadrado, mientras que en zonas periféricas como Zumpango o Tecámac los precios oscilan entre $1,500 y $2,500 por metro cuadrado8."
+        },
+        {
+          "texto": "Zumpango, Tecámac y Huehuetoca concentran el 77.2 % de la vivienda abandonada de la metrópoli.",
+          "pagina": 57,
+          "cita": "abitacional: municipios como Zumpango, Tecámac y Huehuetoca concentran el 77.2% de la vivienda abandonada en la ZMVM, reflejando que…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Catorce políticas territoriales que dicen dónde sí y dónde no crecer: consolidación, mejoramiento, refuncionalización, gestión y crecimiento de asentamientos.",
+          "pagina": 72,
+          "clave": "MOT",
+          "cita": "se definieron 14 políticas de ordenamiento territorial, aplicables según las características específicas de cada unidad, para guiar la planeación metropolitana bajo criterios de sostenibilidad y…"
+        },
+        {
+          "texto": "Desarrollo cercano al transporte: densificar junto a estaciones en vez de extender la mancha urbana.",
+          "pagina": 75,
+          "clave": "MOT",
+          "cita": "La política de Desarrollo Cercano al Transporte se propone para entornos ubicados dentro de un radio de 500 metros de estaciones de transporte masiv o, áreas con prevalencia de vivienda unifamiliar y baja densidad,…"
+        },
+        {
+          "texto": "Programas de atención a viviendas en zonas de riesgo y recuperación de vivienda abandonada.",
+          "pagina": 157,
+          "clave": "Metrópoli Resiliente",
+          "cita": "Programas de atención a viviendas en zonas de riesgo Programa, Obra Ciudad de México, Estado de México, Hidalgo y Morelos; viviendas ubicadas en zonas de riesgo Establecimiento de un programa que interviene viviendas unifamiliares y multifamiliares en zonas…"
+        },
+        {
+          "texto": "Predial a valor de mercado y cobro de al menos 1 % a terrenos baldíos para desalentar la especulación.",
+          "pagina": 169,
+          "clave": "Instrumentación",
+          "cita": "Gravamen al desperdicio urbano Este instrumento de carácter fiscal y territorial tiene como objetivo principal desincentivar la subutilización o no construcción de inmuebles localizados en áreas consolidadas de la Zona Metropolitana, promoviendo un…"
+        },
+        {
+          "texto": "Meta: que el crecimiento urbano sea planificado y que 12 millones de personas vivan a 300 m de un espacio público (hoy 7.5 millones).",
+          "pagina": 191,
+          "clave": "Indicadores",
+          "cita": "Población a 300 metros de un espacio público (excluyendo elementos residuales o de pequeña escala) Población…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "vivienda-donde",
+          "texto": "¿Dónde debería construirse la vivienda nueva?",
+          "opciones": [
+            {
+              "valor": "centro",
+              "etiqueta": "En zonas centrales ya urbanizadas, cerca del transporte",
+              "opinion": "Apoyo la política de Desarrollo Cercano al Transporte (p. 75) y pido que la vivienda nueva se concentre en zonas ya urbanizadas con servicios, con cuotas obligatorias de vivienda asequible en cada desarrollo."
+            },
+            {
+              "valor": "abandonada",
+              "etiqueta": "Recuperar primero la vivienda abandonada",
+              "opinion": "Pido que antes de autorizar nuevos conjuntos se recupere la vivienda abandonada en Zumpango, Tecámac y Huehuetoca (77.2 % del total, p. 57) dotándola de transporte y servicios."
+            },
+            {
+              "valor": "periferia",
+              "etiqueta": "En la periferia, pero con servicios desde el inicio",
+              "opinion": "Acepto crecimiento en la periferia solo si cada desarrollo llega con transporte, agua, escuelas y empleo desde el inicio, como condición vinculante en la política de Crecimiento de Asentamientos (p. 74)."
+            }
+          ],
+          "corto": "Dónde construir"
+        },
+        {
+          "slug": "vivienda-baldios",
+          "texto": "¿Estás de acuerdo con cobrar predial a valor de mercado y al menos 1 % anual a terrenos baldíos?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, el suelo ocioso debe pagar",
+              "opinion": "Estoy de acuerdo con el predial a valor de mercado y la contribución de al menos 1 % sobre baldíos (pp. 170 y 174), y pido que lo recaudado se etiquete para vivienda asequible y espacio público."
+            },
+            {
+              "valor": "progresivo",
+              "etiqueta": "Sí, pero progresivo y con protección a hogares de bajos ingresos",
+              "opinion": "Apoyo el predial a valor de mercado (p. 174) siempre que sea progresivo, con exenciones para vivienda única de bajos ingresos y adultos mayores."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, subiría el costo de vivir",
+              "opinion": "Me opongo al predial a valor de mercado propuesto en la Instrumentación (p. 174) porque elevaría el costo de vivir en zonas centrales y expulsaría a residentes de largo plazo."
+            }
+          ],
+          "corto": "Predial a baldíos"
+        }
+      ]
+    },
+    {
+      "slug": "medio-ambiente",
+      "orden": 4,
+      "titulo": "Bosques, aire y residuos",
+      "icono": "🌳",
+      "resumen": "Solo 3 de cada 100 habitantes viven con la cobertura vegetal adecuada y cada día se generan 25 mil toneladas de basura que terminan en municipios periféricos. El plan quiere proteger el Bosque de Agua, ampliar los parques y crear un sistema metropolitano de residuos.",
+      "diagnostico": [
+        {
+          "texto": "Solo el 37 % de la población ve árboles desde su casa, 35 % tiene un área verde a menos de 300 m y 2.9 % vive con cobertura vegetal suficiente.",
+          "pagina": 44,
+          "cita": "visibles desde la vivienda, una cobertura vegetal mínima del 30% y acceso a un espacio verde a menos de 300 metros, en la ZMVM solo el 37% de la población cumple con la visibilidad de árboles, el 35% tiene acceso cercano a espacios verdes y apenas el 2.9%…"
+        },
+        {
+          "texto": "Se generan 25,134 toneladas de residuos al día (1.13 kg por persona) y la disposición final recae en municipios periféricos.",
+          "pagina": 29,
+          "cita": "Actualmente, la metrópoli genera alrededor de 25,134 toneladas diarias de residuos, con una tasa per cápita de 1.13 kg por habitante al día, lo que representa una presión constante sobre el suelo, la infraestructura y los ecosistemas del territorio…"
+        },
+        {
+          "texto": "Meta: cobertura forestal de 798 mil a 908 mil hectáreas en 2050.",
+          "pagina": 191,
+          "cita": "Cobertura forestal Hectáreas 2025 798,000 782,667 767,333 752,000 805,333 842,000…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Conservación del Bosque de Agua como Área Natural Protegida (proyecto prioritario 3).",
+          "pagina": 120,
+          "clave": "Prioritario 3",
+          "cita": "AM) 3 Conservación del Bosque de Agua como Área Natural Protegida 4…"
+        },
+        {
+          "texto": "Rehabilitación y construcción de parques urbanos metropolitanos (proyecto prioritario 6).",
+          "pagina": 120,
+          "clave": "Prioritario 6",
+          "cita": "cas 6 Rehabilitación y construcción de parques urbanos…"
+        },
+        {
+          "texto": "Sistema Metropolitano de Gestión Integral de Residuos (SIGIRES-ZMVM) y red de parques de economía circular (prioritario 7).",
+          "pagina": 120,
+          "clave": "Prioritario 7",
+          "cita": "nos 7 Sistema Metropolitano para la Gestión Integral de Residuos Sólidos (SIGIRES-ZMVM) y de la red de parques de economía…"
+        },
+        {
+          "texto": "Proyecto integral Xochimilco-Tláhuac-Xico-Chalco y plan Tlateles Mixquic para recuperar los humedales del sur-oriente (prioritario 8).",
+          "pagina": 120,
+          "clave": "Prioritario 8",
+          "cita": "lar 8 Proyecto Integral Xochimilco-Tláhuac-Xico-Chalco; Plan Integral Tlateles…"
+        },
+        {
+          "texto": "Ampliación del monitoreo ambiental y actualización del inventario de emisiones.",
+          "pagina": 118,
+          "clave": "Metrópoli Resiliente",
+          "cita": "politana • Actualización del Inventario de emisiones de la…"
+        },
+        {
+          "texto": "Políticas de Preservación, Conservación y Restauración Ecológica en el Modelo de Ordenamiento.",
+          "pagina": 74,
+          "clave": "MOT",
+          "cita": "Política de Restauración Ecológica La política de Restauración Ecológica identifica zonas que, aunque muestran un alto grado de transformación por intervención humana o pérdida de cobertura vegetal, conservan las condiciones ecológicas y…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "ambiente-prioridad",
+          "texto": "¿Cuál de estos proyectos consideras más urgente?",
+          "opciones": [
+            {
+              "valor": "bosque",
+              "etiqueta": "Proteger el Bosque de Agua y los suelos de conservación",
+              "opinion": "Pido que la declaratoria del Bosque de Agua como Área Natural Protegida (proyecto prioritario 3, p. 120) se concrete en este sexenio, con vigilancia contra la urbanización irregular en suelo de conservación."
+            },
+            {
+              "valor": "parques",
+              "etiqueta": "Más parques y árboles en las colonias",
+              "opinion": "Apoyo los parques urbanos metropolitanos (prioritario 6, p. 120) y pido que se ubiquen primero en las colonias donde menos del 35 % de la gente tiene un área verde cerca (p. 44)."
+            },
+            {
+              "valor": "residuos",
+              "etiqueta": "Resolver la basura y los tiraderos",
+              "opinion": "Pido que el SIGIRES-ZMVM (prioritario 7, p. 120) incluya separación obligatoria, plantas de valorización y compensación a los municipios que hoy reciben los residuos de toda la metrópoli (p. 29)."
+            },
+            {
+              "valor": "aire",
+              "etiqueta": "Calidad del aire",
+              "opinion": "Pido metas de calidad del aire con plazos en el Cuadro de indicadores (p. 191), vinculadas al inventario de emisiones y al cambio de flota del transporte público."
+            }
+          ],
+          "corto": "Proyecto urgente"
+        },
+        {
+          "slug": "ambiente-residuos",
+          "texto": "¿Estarías dispuesto a separar residuos en casa si hubiera recolección diferenciada y un centro de reciclaje cercano?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí",
+              "opinion": "Me comprometo a separar residuos si el programa garantiza recolección diferenciada; pido que el SIGIRES (p. 120) establezca esa obligación para los municipios."
+            },
+            {
+              "valor": "incentivo",
+              "etiqueta": "Sí, si hay un incentivo o descuento",
+              "opinion": "Propongo que la red de parques de economía circular (p. 120) incluya incentivos económicos a los hogares que separan residuos."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, la responsabilidad debe ser de la industria",
+              "opinion": "Propongo que el sistema de residuos (p. 120) ponga la responsabilidad extendida en los productores y envasadores, no en los hogares."
+            }
+          ],
+          "corto": "Separar residuos"
+        }
+      ]
+    },
+    {
+      "slug": "riesgos",
+      "orden": 5,
+      "titulo": "Riesgos y resiliencia",
+      "icono": "⚠️",
+      "resumen": "Inundaciones, hundimientos, laderas urbanizadas y olas de calor afectan sobre todo a la periferia. El plan propone un sistema de alerta temprana, un atlas de riesgos metropolitano y refugios compartidos.",
+      "diagnostico": [
+        {
+          "texto": "La sobreexplotación del acuífero causa hundimientos que dañan viviendas, calles y redes; hay asentamientos en laderas y zonas inundables.",
+          "pagina": 23,
+          "cita": "Esto ha contribuido a la sobreexplotación de acuíferos, descensos de los niveles piezométricos y procesos de subsidencia y hundimientos diferenciales, particularmente en las zonas asentadas sobre antiguos suelos lacustres, como el oriente y centro del Valle…"
+        },
+        {
+          "texto": "La variabilidad climática intensifica lluvias extremas, sequías y olas de calor.",
+          "pagina": 117,
+          "cita": "La creciente variabilidad climática intensifica eventos como lluvias extremas, sequías prolongadas y olas de calor, mientras que procesos como la sobreexplotación de acuíferos han generado subsidencias que afectan viviendas, vialidades y redes de…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Sistema de Alerta Temprana Metropolitana para la Prevención de Desastres (proyecto prioritario 1).",
+          "pagina": 120,
+          "clave": "Prioritario 1",
+          "cita": "cto 1 Sistema de Alerta Temprana Metropolitana para la Prevención de Desastres…"
+        },
+        {
+          "texto": "Atlas de Riesgos Metropolitano único para las cuatro entidades.",
+          "pagina": 131,
+          "clave": "Metrópoli Resiliente",
+          "cita": "RA5-1.2 Atlas de Riesgos Metropolitano Programa, Instrumento Ciudad de México, Estado de México, estado de Hidalgo y estado de Morelos Instrumento que integre la información geoespacial sobre peligros geológicos,…"
+        },
+        {
+          "texto": "Programas de atención a viviendas en zonas de riesgo y red metropolitana de refugios y albergues.",
+          "pagina": 132,
+          "clave": "Metrópoli Resiliente",
+          "cita": "RA5-1.3 Red metropolitana de refugios y albergues para contingencias naturales Programa Ciudad de México, Estado de México, Hidalgo y Morelos;"
+        },
+        {
+          "texto": "Protocolo metropolitano de movilidad en contingencias climáticas y de emergencia.",
+          "pagina": 153,
+          "clave": "Metrópoli Resiliente",
+          "cita": "MP4- 3.1 Protocolo Metropolitano de Movilidad en Contingencias Climáticas y de Emergencia Programa Zona Metropolitana del Valle de México con prioridad en:…"
+        },
+        {
+          "texto": "Agencia Metropolitana de Gestión Integral de Riesgos, Protección Civil y Cambio Climático.",
+          "pagina": 159,
+          "clave": "Metrópoli con Derechos",
+          "cita": "Constituir agencias metropolitanas con facultades de planeación, regulación y supervisión sobre infraestructura hídrica, transporte masivo y estructurante, y sistemas de prevención y atención de riesgos."
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "riesgos-vivienda",
+          "texto": "¿Qué debería hacerse con las viviendas ya construidas en zonas de alto riesgo?",
+          "opciones": [
+            {
+              "valor": "mitigar",
+              "etiqueta": "Obras de mitigación para que la gente se quede",
+              "opinion": "Pido que los programas de atención a viviendas en zonas de riesgo (p. 118) prioricen obras de mitigación y mejoramiento in situ, con participación de las familias."
+            },
+            {
+              "valor": "reubicar",
+              "etiqueta": "Reubicación con vivienda digna cerca",
+              "opinion": "Propongo que la reubicación de viviendas en zonas de riesgo (p. 118) sea voluntaria y ofrezca vivienda digna en la misma zona, nunca en periferias lejanas."
+            },
+            {
+              "valor": "atlas",
+              "etiqueta": "Primero un atlas público para saber quién está en riesgo",
+              "opinion": "Pido que el Atlas de Riesgos Metropolitano (p. 131) sea público, en datos abiertos y consultable por colonia antes de definir cualquier programa de reubicación."
+            }
+          ],
+          "corto": "Casas en riesgo"
+        },
+        {
+          "slug": "riesgos-alerta",
+          "texto": "¿Qué te parece el sistema de alerta temprana metropolitano como proyecto prioritario número uno?",
+          "opciones": [
+            {
+              "valor": "acuerdo",
+              "etiqueta": "De acuerdo, es lo más urgente",
+              "opinion": "Apoyo que el Sistema de Alerta Temprana Metropolitana sea el proyecto prioritario 1 (p. 120) y pido que cubra inundaciones y calor extremo, no solo sismos."
+            },
+            {
+              "valor": "prevencion",
+              "etiqueta": "Mejor prevenir: drenaje, barrancas y laderas",
+              "opinion": "Considero que la alerta temprana (p. 120) debe ir acompañada de inversión en prevención: drenaje pluvial, restauración de barrancas y control de la urbanización en laderas."
+            },
+            {
+              "valor": "otro",
+              "etiqueta": "No es lo más urgente",
+              "opinion": "No considero que la alerta temprana deba ser el proyecto prioritario 1; propongo que ese lugar lo ocupe el agua o el transporte."
+            }
+          ],
+          "corto": "Alerta temprana"
+        }
+      ]
+    },
+    {
+      "slug": "proximidad",
+      "orden": 6,
+      "titulo": "Empleo, salud y servicios cerca de casa",
+      "icono": "🏥",
+      "resumen": "El empleo formal se concentra en el centro mientras la informalidad en la periferia llega al 90 %. El plan quiere una 'Metrópoli de Proximidad': centralidades nuevas, hospitales y universidades en las periferias.",
+      "diagnostico": [
+        {
+          "texto": "La informalidad ronda 30 % en Benito Juárez y Miguel Hidalgo, pero entre 78 y 90 % en Villa del Carbón, Otumba o Atlautla, y más de 65 % en el oriente.",
+          "pagina": 43,
+          "cita": "Esta desigualdad territorial se expresa también en las condiciones laborales: mientras en alcaldías centrales como Benito Juárez y Miguel Hidalgo las tasas de informalidad se mantienen cercanas al 30%, en municipios periféricos como Villa del Carbón, Otumba…"
+        },
+        {
+          "texto": "Menos del 50 % de los hogares tienen internet regular a nivel metropolitano.",
+          "pagina": 44,
+          "cita": "Estas localidades también enfrentan rezagos en materia de agua potable, energía eléctrica y telecomunicaciones, registrando menos del 50% de los hogares con acceso regular a internet a nivel metropolitano, según el Censo de Población y Vivienda 2020 del…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Centros Urbanos Integrales de Atención Metropolitana (CUIDAM) con servicios públicos y de cuidado en un solo lugar (prioritario 2).",
+          "pagina": 120,
+          "clave": "Prioritario 2",
+          "cita": "res 2 Centros Urbanos Integrales de Atención Metropolitana (CUIDAM)…"
+        },
+        {
+          "texto": "Cuatro nodos de salud de alta especialidad en zonas periféricas (prioritario 5).",
+          "pagina": 120,
+          "clave": "Prioritario 5",
+          "cita": "dad 5 Creación de cuatro nodos de salud de alta especialidad en zonas…"
+        },
+        {
+          "texto": "Nuevas centralidades y universidades en la periferia para acercar empleo y educación.",
+          "pagina": 117,
+          "clave": "Metrópoli de Proximidad",
+          "cita": "cidad • Red de universidades públicas metropolitanas a través de la construcción de nuevos campus y reconversión de los existentes • Programa Metropolitano de…"
+        },
+        {
+          "texto": "Política de Desarrollo Económico en el Modelo de Ordenamiento para diversificar la economía fuera del centro.",
+          "pagina": 76,
+          "clave": "MOT",
+          "cita": "La política de Desarrollo Económico agrupa territorios con dinamismo económico actual o potencial, como centralidades consolidadas o propuestas, zonas con alta concentración de comercio y servicios, áreas industriales y contextos con baja…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "proximidad-servicio",
+          "texto": "¿Qué servicio te obliga más a viajar lejos y debería llegar a tu zona?",
+          "opciones": [
+            {
+              "valor": "salud",
+              "etiqueta": "Hospital de especialidades",
+              "opinion": "Apoyo los cuatro nodos de salud de alta especialidad en periferias (prioritario 5, p. 120) y pido que se publique dónde estarán y con qué criterio se eligió cada sitio."
+            },
+            {
+              "valor": "empleo",
+              "etiqueta": "Empleo formal",
+              "opinion": "Pido que las nuevas centralidades (p. 116) tengan metas de empleo formal verificables, dado que la informalidad supera el 65 % en el oriente metropolitano (p. 43)."
+            },
+            {
+              "valor": "educacion",
+              "etiqueta": "Universidad o escuela técnica",
+              "opinion": "Pido que las universidades previstas en la Metrópoli de Proximidad (p. 117) se ubiquen en los municipios con menor acceso a educación superior, con fechas de apertura."
+            },
+            {
+              "valor": "tramites",
+              "etiqueta": "Trámites y cuidado (CUIDAM)",
+              "opinion": "Apoyo los CUIDAM (prioritario 2, p. 120) y pido que incluyan guarderías, atención a adultos mayores e internet gratuito, ya que menos de la mitad de los hogares lo tienen (p. 44)."
+            }
+          ],
+          "corto": "Servicio lejano"
+        }
+      ]
+    },
+    {
+      "slug": "campo",
+      "orden": 7,
+      "titulo": "Campo, pueblos y patrimonio",
+      "icono": "🌽",
+      "resumen": "Chinampas, ejidos y pueblos originarios sostienen alimento, agua y cultura, pero la ciudad crece sobre ellos. El plan define políticas de producción rural y conservación biocultural.",
+      "diagnostico": [
+        {
+          "texto": "El riego con aguas residuales sin tratar mantiene cultivos pero pone en riesgo la salud, los suelos y los ecosistemas.",
+          "pagina": 33,
+          "cita": "Desde el punto de vista de la salud pública, el uso de aguas residuales sin tratar para riego representa un riesgo elevado para las personas que trabajan en el campo y para las comunidades cercanas."
+        },
+        {
+          "texto": "El Bosque de Agua es el corredor forestal estratégico que abastece a la metrópoli y está bajo presión urbana.",
+          "pagina": 24,
+          "cita": "Bosque de Agua, corredor forestal estratégico del Eje Neovolcánico, entre las serranías del Chichinautzin, Ajusco y las Cruces, con conectividad hacia la Sierra Nevada y el Nevado de Toluca."
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Políticas de Producción Rural y de Conservación Biocultural en el Modelo de Ordenamiento Territorial.",
+          "pagina": 74,
+          "clave": "MOT",
+          "cita": "La política de Producción Rural integra territorios con vocación para actividades agropecuarias y forestales, donde las dinámicas productivas coexisten con un grado intermedio de transformación del entorno, pero conservan condiciones…"
+        },
+        {
+          "texto": "Eje estratégico 'Fortalecimiento agroecológico y biocultural', uno de los seis ejes del programa.",
+          "pagina": 101,
+          "clave": "Estrategia",
+          "cita": "1) Regeneración ambiental; 2) Fortalecimiento agroecológico y biocultural;"
+        },
+        {
+          "texto": "Recuperación de humedales y zona chinampera en Xochimilco, Tláhuac, Xico y Chalco (prioritario 8).",
+          "pagina": 125,
+          "clave": "Prioritario 8",
+          "cita": "RA2-1.8 Proyecto Integral Xochimilco-Tláhuac-Xico- Chalco-Plan Integral Tlalteles Mixquic Obra Corredor hidroecológico en el oriente de la Cuenca de México, incluyendo sitios específicos en: 1."
+        },
+        {
+          "texto": "El programa pone en el centro los territorios bioculturales y reconoce los derechos de los pueblos originarios y los núcleos agrarios.",
+          "pagina": 104,
+          "clave": "Estrategia",
+          "cita": "el POZMVM busca poner en el centro los territorios bioculturales de la ZMVM, incorporando criterios de justicia territorial y reconociendo los derechos de los pueblos originarios y los núcleos agrarios, así como valorando sus experiencias en la gestión…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "campo-apoyo",
+          "texto": "¿Cómo debería apoyar el plan al campo metropolitano?",
+          "opciones": [
+            {
+              "valor": "pago",
+              "etiqueta": "Pagar a quien conserva bosque y produce alimentos",
+              "opinion": "Propongo que la política de Producción Rural (p. 74) incluya pago por servicios ambientales a ejidos y comunidades que conservan bosque y recarga de agua."
+            },
+            {
+              "valor": "agua",
+              "etiqueta": "Agua tratada para riego",
+              "opinion": "Pido que el tratamiento de aguas residuales (p. 33) tenga como primer destino el riego agrícola seguro en la zona chinampera y el oriente."
+            },
+            {
+              "valor": "consulta",
+              "etiqueta": "Consulta previa y vinculante a pueblos originarios",
+              "opinion": "Pido que toda obra del programa en territorio de pueblos y comunidades originarias pase por consulta previa, libre e informada, y que así se establezca en la Gobernanza (p. 104)."
+            }
+          ],
+          "corto": "Apoyo al campo"
+        }
+      ]
+    },
+    {
+      "slug": "gobernanza",
+      "orden": 8,
+      "titulo": "Quién decide y quién paga",
+      "icono": "🏛️",
+      "resumen": "Cuatro estados y 84 gobiernos locales deciden por separado. El plan propone una Ley de Desarrollo Metropolitano, agencias metropolitanas, un fideicomiso para financiar obras y un órgano consultivo ciudadano.",
+      "diagnostico": [
+        {
+          "texto": "La fragmentación institucional hace que suelo, infraestructura y ambiente se decidan sin visión metropolitana compartida.",
+          "pagina": 118,
+          "cita": "Esta configuración ha generado importantes desafíos para la coordinación intergubernamental, provocando que muchas decisiones relacionadas con el uso del suelo, la infraestructura o la gestión ambiental se tomen de manera desarticulada y sin una visión…"
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Ley de Desarrollo Metropolitano del Valle de México y reformas constitucionales (arts. 73, 115, 116 y 122).",
+          "pagina": 161,
+          "clave": "Metrópoli con Derechos",
+          "cita": "Promoción de reformas constitucionales en materia metropolitana (Artículos 73, 115, 116 y 122) Instrumento Impacto nacional Acción dirigida a promover reformas constitucionales a los artículos 73,…"
+        },
+        {
+          "texto": "Consejo de Desarrollo Metropolitano y Órgano Consultivo con participación social.",
+          "pagina": 185,
+          "clave": "Gobernanza",
+          "cita": "Órgano Consultivo Metropolitano Adicionalmente, se plantea la incorporación de un órgano auxiliar del CDMVM de participación y consulta técnica."
+        },
+        {
+          "texto": "Fideicomiso Metropolitano del Valle de México para financiar los proyectos.",
+          "pagina": 175,
+          "clave": "Instrumentación",
+          "cita": "El presente instrumento propone la constitución de un fideicomiso público denominado “ Fideicomiso Metropolitano del Valle de México” en el que participen como fideicomitentes el gobierno federal y los gobiernos de las cuatro entidades…"
+        },
+        {
+          "texto": "Contribución de mejoras: quien se beneficia de una obra pública aporta a su costo.",
+          "pagina": 176,
+          "clave": "Instrumentación",
+          "cita": "Las contribuciones de mejoras (CM), con distintos niveles de regulación, ya están incorporadas en la legislación vigente de las cuatro entidades federativas y en algunos casos son empleadas de forma activa para el financiamiento de obras…"
+        },
+        {
+          "texto": "Agencia o Instituto Metropolitano de Planeación y Gestión de Proyectos.",
+          "pagina": 186,
+          "clave": "Metrópoli con Derechos",
+          "cita": "Agencia/Instituto Metropolitano de Planeación y Gestión de Proyectos Se propone la creación de la Agencia o Instituto Metropolitano de Planeación y Gestión de Proyectos concebido como un agente técnico y financiero especializado en la planeación, desarrollo…"
+        },
+        {
+          "texto": "Sistema de monitoreo con indicadores a 2030, 2040 y 2050.",
+          "pagina": 68,
+          "clave": "Monitoreo",
+          "cita": "En el ámbito técnico, se adopta la planeación por escenarios que permite traducir procesos territoriales complejos en indicadores observables y metas verificables a 2030, 2040 y 2050."
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "gobernanza-participacion",
+          "texto": "¿Cómo debería participar la ciudadanía en las decisiones metropolitanas?",
+          "opciones": [
+            {
+              "valor": "voto",
+              "etiqueta": "Con voz y voto en el Consejo Metropolitano",
+              "opinion": "Pido que el Órgano Consultivo (p. 185) tenga representación ciudadana electa con voto en el Consejo de Desarrollo Metropolitano, no solo voz."
+            },
+            {
+              "valor": "presupuesto",
+              "etiqueta": "Decidiendo parte del fideicomiso",
+              "opinion": "Propongo que un porcentaje del Fideicomiso Metropolitano (p. 176) se asigne por presupuesto participativo metropolitano."
+            },
+            {
+              "valor": "datos",
+              "etiqueta": "Con datos abiertos y avances públicos",
+              "opinion": "Pido que los indicadores del Cuadro 14 (p. 191) se publiquen anualmente en un portal abierto, con responsable por proyecto y presupuesto ejercido."
+            }
+          ],
+          "corto": "Participación"
+        },
+        {
+          "slug": "gobernanza-pago",
+          "texto": "¿Quién debería pagar las obras metropolitanas?",
+          "opciones": [
+            {
+              "valor": "federal",
+              "etiqueta": "Principalmente el gobierno federal",
+              "opinion": "Considero que el Fideicomiso Metropolitano (p. 175) debe nutrirse principalmente de recursos federales etiquetados, dada la escala nacional de la metrópoli."
+            },
+            {
+              "valor": "mejoras",
+              "etiqueta": "Quienes se benefician directamente (contribución de mejoras)",
+              "opinion": "Apoyo la contribución de mejoras (p. 176) para que los propietarios cuyo suelo se valoriza con obra pública aporten a financiarla."
+            },
+            {
+              "valor": "mixto",
+              "etiqueta": "Mezcla de todos con reglas claras",
+              "opinion": "Pido reglas claras y públicas sobre cómo se combinan recursos federales, estatales, contribución de mejoras y predial en el Fideicomiso Metropolitano (p. 176)."
+            }
+          ],
+          "corto": "Quién paga"
+        }
+      ]
+    },
+    {
+      "slug": "quien-paga",
+      "orden": 9,
+      "titulo": "¿Quién paga todo esto?",
+      "icono": "💰",
+      "resumen": "El plan enumera 10 proyectos prioritarios y decenas de obras, pero no trae ninguna cifra de costo. Lo que sí dice es de dónde saldría el dinero: siete instrumentos y un fondo común, el Fideicomiso Metropolitano.",
+      "diagnostico": [
+        {
+          "texto": "Ninguna de las 203 páginas incluye un costo total ni un presupuesto por proyecto.",
+          "pagina": 120
+        },
+        {
+          "texto": "Siete instrumentos para recaudar, cinco de ellos nuevos y que requieren reformar leyes fiscales estatales.",
+          "pagina": 174,
+          "cita": "Instrumentos económicos y financieros Impulso a la…"
+        },
+        {
+          "texto": "Un fondo común, el Fideicomiso Metropolitano, con montos y periodicidad por definir en su contrato.",
+          "pagina": 176,
+          "cita": "El monto y la periodicidad de las aportaciones deberán establecerse en el contrato constitutivo, los convenios y las reglas de operación del fideicomiso."
+        }
+      ],
+      "propuestas": [
+        {
+          "texto": "Cobrar el predial tal como ya prevé la ley, con una proporción transferida al Fideicomiso Metropolitano.",
+          "pagina": 174,
+          "clave": "Instrumentación",
+          "cita": "una primera fase de esta propuesta es que los municipios cobren este impuesto tal y como está previsto en su legislación fiscal y hacendaria, lo que tiene la ventaja de no requerir adecuaciones en los marcos jurídicos vigentes de las entidades federativas."
+        },
+        {
+          "texto": "Impuesto al desperdicio urbano: al menos 1 % anual sobre baldíos y predios subutilizados en zonas con servicios.",
+          "pagina": 169,
+          "clave": "Instrumentación",
+          "cita": "Gravamen al desperdicio urbano Este instrumento de carácter fiscal y territorial tiene como objetivo principal desincentivar la subutilización o no construcción de inmuebles localizados en áreas consolidadas de la Zona Metropolitana, promoviendo un…"
+        },
+        {
+          "texto": "Captura de plusvalías por más edificabilidad, suelo periférico o cambio de uso; se paga en suelo, obra o dinero.",
+          "pagina": 173,
+          "clave": "Instrumentación",
+          "cita": "aso, podrán aplicar mecanismos de recuperación de plusvalías derivados del incremento en el valor del suelo generado por el desarrollo autorizado."
+        },
+        {
+          "texto": "Contribución de mejoras reformada para financiar transporte masivo, con acuerdo previo de los beneficiarios.",
+          "pagina": 176,
+          "clave": "Instrumentación",
+          "cita": "Se sugiere incorporar en la legislación estatal, la posibilidad de financiar obras relacionadas con los sistemas de transporte masivo y semimasivo, así como con los nodos o estaciones con potencial de convertirse en polos de desarrollo desde el enfoque de…"
+        },
+        {
+          "texto": "Fideicomiso Metropolitano del Valle de México con el gobierno federal y los cuatro estados como fideicomitentes.",
+          "pagina": 175,
+          "clave": "Instrumentación",
+          "cita": "en el que participen como fideicomitentes el gobierno federal y los gobiernos de las cuatro entidades federativas, a través de las secretarías competentes para celebrar contratos de esta…"
+        }
+      ],
+      "preguntas": [
+        {
+          "slug": "quien-paga-situacion",
+          "corto": "Tu situación",
+          "texto": "¿Cuál es tu situación? Te decimos qué instrumentos del plan te afectarían.",
+          "opciones": [
+            {
+              "valor": "dueno",
+              "etiqueta": "Soy dueño de mi casa",
+              "opinion": "Soy propietario de mi vivienda. Pido que el predial a valor de mercado (p. 174) traiga topes anuales de aumento y exenciones para vivienda única, y que se publique un calendario de actualización catastral por municipio."
+            },
+            {
+              "valor": "renta",
+              "etiqueta": "Rento",
+              "opinion": "Rento mi vivienda. Pido que el plan incluya salvaguardas para inquilinos: que el predial a valor de mercado y la contribución de mejoras (pp. 174 y 176) no se trasladen a la renta sin límites."
+            },
+            {
+              "valor": "baldio",
+              "etiqueta": "Tengo un terreno sin construir",
+              "opinion": "Tengo un terreno sin construir. Pido que el impuesto al desperdicio urbano (p. 169) distinga entre predios de especulación y terrenos familiares, con plazos razonables para construir antes de cobrar."
+            },
+            {
+              "valor": "obra",
+              "etiqueta": "Vivo cerca de una obra prevista",
+              "opinion": "Vivo cerca de una obra prevista. Pido que la contribución de mejoras (p. 176) se cobre solo con beneficio comprobado y que las obras incluyan consulta vecinal antes de definir montos."
+            },
+            {
+              "valor": "ejido",
+              "etiqueta": "Soy ejidatario o vivo en zona rural",
+              "opinion": "Soy ejidatario o vivo en zona rural. Pido que la cuota por incorporación de suelo periférico (p. 174) y el fondo de conservación (p. 167) protejan a los núcleos agrarios y no sean la puerta para urbanizar lo que hoy es campo."
+            }
+          ]
+        },
+        {
+          "slug": "quien-paga-prioridad",
+          "texto": "Sobre el dinero del plan, lo más importante es que…",
+          "opciones": [
+            {
+              "valor": "costo",
+              "etiqueta": "El plan diga cuánto cuesta cada proyecto prioritario",
+              "opinion": "Pido que la versión final del POZMVM incluya una estimación de costo y una fuente de financiamiento para cada uno de los 10 proyectos prioritarios (p. 120), ya que el documento en consulta no contiene ninguna cifra de costo."
+            },
+            {
+              "valor": "quien",
+              "etiqueta": "Quede claro quién paga y quién queda exento",
+              "opinion": "Pido que los instrumentos de la Instrumentación (pp. 169 a 178) definan sujetos, tasas, topes y exenciones para vivienda única de bajos ingresos y adultos mayores antes de aprobarse, no después en cada congreso local."
+            },
+            {
+              "valor": "fideicomiso",
+              "etiqueta": "El Fideicomiso Metropolitano rinda cuentas en público",
+              "opinion": "Apoyo el Fideicomiso Metropolitano (pp. 175 y 176) a condición de que publique en datos abiertos sus aportaciones por gobierno, los proyectos financiados y el avance de cada uno, con participación ciudadana en su Comité Técnico."
+            },
+            {
+              "valor": "inquilinos",
+              "etiqueta": "No se traslade el costo a inquilinos y periferia",
+              "opinion": "Pido que el predial a valor de mercado y la contribución de mejoras (pp. 174 y 176) incluyan salvaguardas para que el costo no se traslade a inquilinos ni recaiga en los municipios periféricos que ya cargan con los residuos y los traslados de la metrópoli."
+            }
+          ],
+          "corto": "Prioridad del dinero"
+        }
+      ]
+    }
+  ],
+  "financiamiento": {
+    "fuentes": [
+      {
+        "nombre": "Presupuestos",
+        "detalle": "federal, de los 4 estados y municipios",
+        "pagina": 175,
+        "tipo": "existente"
+      },
+      {
+        "nombre": "Predial",
+        "detalle": "cobrado completo y actualizado a valor de mercado",
+        "pagina": 174,
+        "tipo": "existente",
+        "slug": "predial-fideicomiso"
+      },
+      {
+        "nombre": "Impuesto al desperdicio urbano",
+        "detalle": "baldíos y predios subutilizados en zonas con servicios",
+        "pagina": 169,
+        "tipo": "nuevo",
+        "slug": "baldios"
+      },
+      {
+        "nombre": "Captura de plusvalías",
+        "detalle": "quien gana edificabilidad o cambio de uso, aporta",
+        "pagina": 174,
+        "tipo": "nuevo",
+        "slug": "plusvalias"
+      },
+      {
+        "nombre": "Contribución de mejoras",
+        "detalle": "quien se beneficia de una obra paga parte",
+        "pagina": 176,
+        "tipo": "reforma",
+        "slug": "mejoras"
+      },
+      {
+        "nombre": "Incorporación de suelo periférico",
+        "detalle": "cuota por urbanizar lo que era campo",
+        "pagina": 174,
+        "tipo": "nuevo",
+        "slug": "plusvalias"
+      },
+      {
+        "nombre": "Fondo de conservación",
+        "detalle": "turismo, donativos y captura de valor para bosques y agua",
+        "pagina": 167,
+        "tipo": "nuevo"
+      }
+    ],
+    "destinos": [
+      {
+        "nombre": "10 proyectos prioritarios",
+        "pagina": 120,
+        "cita": "Cuadro 12. Proyectos prioritarios para la ZMVM"
+      },
+      {
+        "nombre": "Agencias metropolitanas de agua, movilidad y riesgos",
+        "pagina": 119,
+        "cita": "Creación de Agencias Metropolitanas: de Agua Potable, Drenaje y Saneamiento; Movilidad Integrada y Transporte; Gestión Integral de Riesgos, Protección Civil y Cambio Climático"
+      },
+      {
+        "nombre": "Obras y servicios intermunicipales",
+        "pagina": 176,
+        "cita": "Los recursos del Fideicomiso metropolitano se destinarán exclusivamente al financiamiento de acciones, proyectos y obras de interés metropolitano."
+      }
+    ],
+    "perfiles": [
+      {
+        "id": "dueno",
+        "label": "Soy dueño de mi casa",
+        "corto": "Dueño"
+      },
+      {
+        "id": "renta",
+        "label": "Rento",
+        "corto": "Rento"
+      },
+      {
+        "id": "baldio",
+        "label": "Tengo un terreno sin construir",
+        "corto": "Terreno baldío"
+      },
+      {
+        "id": "obra",
+        "label": "Vivo cerca de una obra prevista",
+        "corto": "Cerca de obra"
+      },
+      {
+        "id": "ejido",
+        "label": "Soy ejidatario o vivo en zona rural",
+        "corto": "Ejido o rural"
+      }
+    ],
+    "efectos": {
+      "dueno": [
+        {
+          "kicker": "Te afecta",
+          "titulo": "Predial a valor de mercado",
+          "texto": "Si tu catastro está desactualizado, tu predial subiría al acercarse al valor real de la casa. El plan no fija tasas ni topes.",
+          "pagina": "p. 174",
+          "tono": "alto"
+        },
+        {
+          "kicker": "Puede afectarte",
+          "titulo": "Contribución de mejoras",
+          "texto": "Si una obra metropolitana valoriza tu colonia, podrían cobrarte una parte del costo. El plan deja el cómo a cada estado.",
+          "pagina": "p. 176",
+          "tono": "medio"
+        },
+        {
+          "kicker": "No te afecta",
+          "titulo": "Impuesto al desperdicio urbano",
+          "texto": "Solo aplica a baldíos y predios con muy poca construcción en zonas con servicios.",
+          "pagina": "p. 169",
+          "tono": "bajo"
+        }
+      ],
+      "renta": [
+        {
+          "kicker": "Indirecto",
+          "titulo": "Predial a valor de mercado",
+          "texto": "No lo pagas tú, pero el propietario puede trasladarlo a la renta. El plan no habla de proteger a inquilinos.",
+          "pagina": "p. 174",
+          "tono": "medio"
+        },
+        {
+          "kicker": "A tu favor",
+          "titulo": "Impuesto al desperdicio urbano",
+          "texto": "Busca que los baldíos del centro se construyan, lo que debería aumentar la oferta de vivienda cerca del empleo.",
+          "pagina": "p. 169",
+          "tono": "bajo"
+        },
+        {
+          "kicker": "Puede afectarte",
+          "titulo": "Contribución de mejoras",
+          "texto": "Si la cobran al propietario de donde vives, puede acabar en tu renta.",
+          "pagina": "p. 176",
+          "tono": "medio"
+        }
+      ],
+      "baldio": [
+        {
+          "kicker": "Te afecta directo",
+          "titulo": "Impuesto al desperdicio urbano",
+          "texto": "Una contribución nueva, distinta del predial, sobre baldíos y predios con coeficiente de uso menor a 0.25 en zonas consolidadas. Plazos de 2 a 4 años para edificar.",
+          "pagina": "pp. 169 y 171",
+          "tono": "alto"
+        },
+        {
+          "kicker": "Te afecta",
+          "titulo": "Captura de plusvalías",
+          "texto": "Si te dan más edificabilidad o cambio de uso, parte del aumento de valor se recupera para la ciudad.",
+          "pagina": "pp. 174 y 175",
+          "tono": "alto"
+        },
+        {
+          "kicker": "Te afecta",
+          "titulo": "Predial a valor de mercado",
+          "texto": "El terreno se valuaría a mercado, no al valor catastral viejo.",
+          "pagina": "p. 174",
+          "tono": "medio"
+        }
+      ],
+      "obra": [
+        {
+          "kicker": "Te afecta",
+          "titulo": "Contribución de mejoras",
+          "texto": "Es el instrumento pensado para ti: quien se beneficia de una obra pública aporta a su costo. El plan no define porcentajes ni exenciones.",
+          "pagina": "p. 176",
+          "tono": "alto"
+        },
+        {
+          "kicker": "A tu favor",
+          "titulo": "Fideicomiso Metropolitano",
+          "texto": "Es de donde saldría el dinero de la obra. Puedes pedir que su Comité Técnico publique qué proyectos financia y con qué criterio.",
+          "pagina": "pp. 175 y 176",
+          "tono": "bajo"
+        },
+        {
+          "kicker": "Puede afectarte",
+          "titulo": "Predial a valor de mercado",
+          "texto": "La obra sube el valor de tu casa y, con él, el predial.",
+          "pagina": "p. 174",
+          "tono": "medio"
+        }
+      ],
+      "ejido": [
+        {
+          "kicker": "Te afecta",
+          "titulo": "Incorporación de suelo periférico",
+          "texto": "Si tu tierra pasa de rural a urbana, habría una cuota por urbanizar. El plan quiere frenar la expansión, no financiarla.",
+          "pagina": "p. 175",
+          "tono": "alto"
+        },
+        {
+          "kicker": "A tu favor",
+          "titulo": "Fondo de conservación",
+          "texto": "Ventanilla única y fideicomisos comunitarios para pagar a quien conserva bosque y recarga de agua.",
+          "pagina": "p. 167",
+          "tono": "bajo"
+        },
+        {
+          "kicker": "Pendiente",
+          "titulo": "Pago por servicios ambientales",
+          "texto": "El plan lo menciona como fin, no como instrumento con reglas. Es un hueco que puedes señalar.",
+          "pagina": "p. 167",
+          "tono": "medio"
+        }
+      ]
+    }
+  }
+}

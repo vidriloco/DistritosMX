@@ -76,10 +76,10 @@ PAGES = {
     'negocios': {
         'path': '/negocios',
         'title': 'Analiza una zona antes de abrir tu negocio — Ciudad MX',
+        # Descriptions stay under ~160 characters, where Google cuts the snippet.
         'description': (
-            'Estudia una zona antes de abrir: cuántos negocios como el tuyo hay alrededor '
-            '(DENUE), cuánta gente vive ahí (Censo) y cómo es el entorno (FGJ), en un radio '
-            'de 100, 350 u 800 metros.'
+            'Antes de abrir tu negocio, mira cuántos negocios como el tuyo hay cerca (DENUE), '
+            'cuánta gente vive ahí (Censo) y cómo es el entorno, en un radio de 100 a 800 m.'
         ),
         'og_title': 'Analiza una zona antes de abrir tu negocio',
         'heading': 'Estudia una zona antes de abrir tu negocio',
@@ -107,7 +107,7 @@ PAGES = {
     },
     'vivienda': {
         'path': '/vivienda',
-        'title': 'Comprar o rentar: indicadores de vivienda por colonia — Ciudad MX',
+        'title': 'Comprar o rentar: vivienda por colonia en CDMX — Ciudad MX',
         'description': (
             'Indicadores de calidad de vida por colonia para decidir dónde comprar o rentar '
             'vivienda en la Ciudad de México: precios, servicios, seguridad y gentrificación.'
@@ -135,11 +135,12 @@ PAGES = {
     },
     'despojos': {
         'path': '/proyectos/mapas/despojos-viviendas',
-        'title': 'Despojo de vivienda en la CDMX: el mapa de los casos denunciados — Ciudad MX',
+        # Titles stay under ~60 characters and descriptions under ~160, where Google cuts
+        # them; the longer social-card wording is in og_title and og_description below.
+        'title': 'Mapa del despojo de vivienda en la CDMX — Ciudad MX',
         'description': (
-            'Mapa interactivo del despojo de vivienda en la Ciudad de México a partir de las '
-            'carpetas de investigación de la Fiscalía General de Justicia desde 2016: dónde se '
-            'concentra, cómo cambia año con año y qué alcaldías acumulan más casos.'
+            'Mapa del despojo de vivienda en la CDMX con las carpetas de la Fiscalía (FGJ) '
+            'desde 2016: dónde se concentra, cómo cambia cada año y qué alcaldías suman más.'
         ),
         'og_title': 'Despojo de vivienda en la CDMX: el mapa de los casos denunciados',
         'og_description': (

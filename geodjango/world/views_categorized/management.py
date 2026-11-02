@@ -73,7 +73,7 @@ def turistas_cdmx_2024_2025_page(request):
 
 def despojos_viviendas_page(request):
     """View for despojos de viviendas project - shows only map and navigation"""
-    return render(request, 'map-admin/index.html', seo_context('despojos'))
+    return render(request, 'map-admin/index.html', {**seo_context('despojos'), 'is_despojos': True})
 
 def neighbourhoods_map_page(request):
     """View for displaying all neighbourhoods on a map"""

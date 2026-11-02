@@ -30,6 +30,14 @@ const EXPLORER_SECTIONS = [
     }
 ];
 
+// The livability-index axis each tab belongs to, highlighted in the area card.
+const EXPLORER_SECTION_AXES = {
+    oportunidades: 'oportunidades',
+    inseguridad: 'seguridad',
+    rentas_temporales: 'vivienda',
+    movilidad: 'transporte'
+};
+
 const EXPLORER_OPPORTUNITY_INDICATORS = [
     { name: 'Población', property: 'population', unit: 'habitantes' },
     { name: 'Empresas', property: 'companies', unit: 'oficinas' },
@@ -232,6 +240,7 @@ function ExplorerInspector({
 
     const handleTabClick = (section) => {
         if (section === activeSection) return;
+        window.analyticsService && window.analyticsService.track('explorar_seccion', { seccion: section });
         if (indicatorsLoading) return;
         if (indicatorsError) {
             alert('Error al cargar los indicadores: ' + indicatorsError);
@@ -248,6 +257,7 @@ function ExplorerInspector({
     };
 
     const handleClearSection = () => {
+        window.analyticsService && window.analyticsService.track('explorar_limpiar', { seccion: activeSection });
         if (setIsClearingDueToSectionClose) setIsClearingDueToSectionClose(true);
         setSelectedIndicator(null);
         if (map && removeAgebDataLayers) removeAgebDataLayers();
@@ -278,7 +288,7 @@ function ExplorerInspector({
                     type="radio"
                     name="xb-indicator"
                     checked={selected}
-                    onChange={() => onIndicatorSelect(indicator)}
+                    onChange={() => { window.analyticsService && window.analyticsService.track('explorar_indicador', { indicador: indicator.property }); onIndicatorSelect(indicator); }}
                 />
                 {explorerIndicatorIcon(indicator.property)}
                 <span className="xb-indicator-name">{indicator.name}</span>
@@ -343,9 +353,6 @@ function ExplorerInspector({
                         </div>
                     )}
                 </div>
-                {!isRadiusScope && (
-                    <p className="xb-muted">Elige «Isocronas» arriba para acotar los totales a un radio alrededor del pin.</p>
-                )}
             </section>
         );
     };
@@ -398,6 +405,7 @@ function ExplorerInspector({
                         ref={geozoneDetailsPanelRef}
                         selectedGeozone={selectedGeozone}
                         onClose={onCloseGeozoneDetails}
+                        highlightedAxis={EXPLORER_SECTION_AXES[activeSection] || null}
                     />
                 )}
                 {selectedLine && (
@@ -466,7 +474,7 @@ function ExplorerInspector({
                                         id="xb-year"
                                         className="xb-select"
                                         value={selectedYearCrime}
-                                        onChange={(e) => onCrimeYearChange(Number(e.target.value))}
+                                        onChange={(e) => { window.analyticsService && window.analyticsService.track('explorar_anio_delitos', { anio: Number(e.target.value) }); onCrimeYearChange(Number(e.target.value)); }}
                                     >
                                         {EXPLORER_CRIME_YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
                                     </select>
@@ -481,7 +489,7 @@ function ExplorerInspector({
                                             key={r}
                                             type="button"
                                             className={selectedRadius === r ? 'is-active' : ''}
-                                            onClick={() => onRadiusChange(r)}
+                                            onClick={() => { window.analyticsService && window.analyticsService.track('explorar_radio', { radio: r }); onRadiusChange(r); }}
                                             aria-pressed={selectedRadius === r}
                                         >
                                             {explorerFormatRadius(r)}

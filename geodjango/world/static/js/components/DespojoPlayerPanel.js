@@ -309,6 +309,7 @@ function DespojoPlayerPanel() {
     );
 
     const openNear = () => {
+        window.analyticsService && window.analyticsService.track('despojo_cerca_abierto');
         setPlaying(false);
         setView('points');
         setSelected(null);
@@ -320,6 +321,7 @@ function DespojoPlayerPanel() {
     };
 
     const closeNear = () => {
+        window.analyticsService && window.analyticsService.track('despojo_cerca_cerrado');
         askSheet('half');
         setNear(false);
         setNearPoint(null);
@@ -331,6 +333,7 @@ function DespojoPlayerPanel() {
     };
 
     const pickSuggestion = (item) => {
+        window.analyticsService && window.analyticsService.track('despojo_direccion_elegida');
         skipLookup.current = true;
         setNearPoint({ lng: item.lng, lat: item.lat });
         setNearLabel(item.label);
@@ -349,6 +352,7 @@ function DespojoPlayerPanel() {
     };
 
     const locateMe = () => {
+        window.analyticsService && window.analyticsService.track('despojo_ubicarme');
         if (!navigator.geolocation) {
             setNearNote('Tu navegador no permite compartir la ubicación. Busca una dirección o toca el mapa.');
             return;
@@ -374,6 +378,7 @@ function DespojoPlayerPanel() {
     };
 
     const toggleNearYear = (y) => {
+        window.analyticsService && window.analyticsService.track('despojo_cerca_anio', { anio: y });
         setNearYears(prev => {
             if (prev.indexOf(y) === -1) return prev.concat([y]).sort();
             // Never leave the reader with an empty set: that is the one state
@@ -452,7 +457,7 @@ function DespojoPlayerPanel() {
         <button
             type="button"
             className="despojo-report"
-            onClick={() => window.dispatchEvent(new Event('despojoOpenForm'))}
+            onClick={() => { window.analyticsService && window.analyticsService.track('despojo_formulario_abierto'); window.dispatchEvent(new Event('despojoOpenForm')); }}
         >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9"
                  strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -516,7 +521,7 @@ function DespojoPlayerPanel() {
                         autoComplete="off"
                     />
                     {suggestions.length > 0 && (
-                        <div className="despojo-suggest">
+                        <div className="despojo-suggest ph-no-capture">
                             {suggestions.map(item => (
                                 <button key={item.id} type="button" onClick={() => pickSuggestion(item)}>
                                     {item.label}
@@ -558,7 +563,7 @@ function DespojoPlayerPanel() {
                                 key={r}
                                 type="button"
                                 aria-pressed={r === nearRadius}
-                                onClick={() => setNearRadius(r)}
+                                onClick={() => { window.analyticsService && window.analyticsService.track('despojo_cerca_radio', { radio: r }); setNearRadius(r); }}
                             >
                                 {fmtRadius(r)}
                             </button>
@@ -687,7 +692,7 @@ function DespojoPlayerPanel() {
                         <button
                             type="button"
                             aria-pressed={view === 'points'}
-                            onClick={() => setView('points')}
+                            onClick={() => { window.analyticsService && window.analyticsService.track('despojo_vista', { vista: 'puntos' }); setView('points'); }}
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                                 <circle cx="7" cy="8" r="1.6" /><circle cx="15" cy="6" r="1.6" />
@@ -699,7 +704,7 @@ function DespojoPlayerPanel() {
                         <button
                             type="button"
                             aria-pressed={view === 'boroughs'}
-                            onClick={() => setView('boroughs')}
+                            onClick={() => { window.analyticsService && window.analyticsService.track('despojo_vista', { vista: 'alcaldias' }); setView('boroughs'); }}
                         >
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                                 <rect x="3" y="3" width="8" height="8" rx="1.5" />
@@ -754,7 +759,7 @@ function DespojoPlayerPanel() {
                         className={'despojo-delta-chip ' + chip.tone}
                         aria-expanded={deltaOpen}
                         aria-controls="despojo-delta-note"
-                        onClick={() => setDeltaOpen(o => !o)}
+                        onClick={() => { window.analyticsService && window.analyticsService.track('despojo_cambio', { abierto: !deltaOpen }); setDeltaOpen(o => !o); }}
                     >
                         {chip.label}
                     </button>
@@ -787,7 +792,7 @@ function DespojoPlayerPanel() {
             <div className="despojo-controls">
                 <button
                     className="despojo-play"
-                    onClick={() => setPlaying(p => !p)}
+                    onClick={() => { window.analyticsService && window.analyticsService.track('despojo_reproducir', { reproduciendo: !playing }); setPlaying(p => !p); }}
                     aria-label={playing ? 'Pausar' : 'Reproducir la década'}
                 >
                     <span aria-hidden="true">{playing ? '❚❚' : '▶'}</span>
@@ -800,7 +805,7 @@ function DespojoPlayerPanel() {
                     max={Math.max(0, decade.length - 1)}
                     step="1"
                     value={Math.max(0, decade.indexOf(year))}
-                    onChange={e => { setPlaying(false); setYear(decade[+e.target.value]); }}
+                    onChange={e => { setPlaying(false); setYear(decade[+e.target.value]); window.analyticsService && window.analyticsService.track('despojo_anio', { anio: decade[+e.target.value], via: 'barra' }); }}
                     aria-label="Año del hecho"
                 />
             </div>
@@ -817,14 +822,14 @@ function DespojoPlayerPanel() {
                         <button
                             type="button"
                             aria-pressed={measure === 'absolute'}
-                            onClick={() => setMeasure('absolute')}
+                            onClick={() => { window.analyticsService && window.analyticsService.track('despojo_medida', { medida: 'absoluta' }); setMeasure('absolute'); }}
                         >
                             Carpetas
                         </button>
                         <button
                             type="button"
                             aria-pressed={measure === 'rate'}
-                            onClick={() => setMeasure('rate')}
+                            onClick={() => { window.analyticsService && window.analyticsService.track('despojo_medida', { medida: 'tasa' }); setMeasure('rate'); }}
                             title="Carpetas por cada 100 mil habitantes (Censo 2020)"
                         >
                             Por 100 mil hab.
@@ -855,7 +860,7 @@ function DespojoPlayerPanel() {
                                 type="button"
                                 className={'despojo-rank' + (selected === row.code ? ' is-on' : '')}
                                 aria-pressed={selected === row.code}
-                                onClick={() => setSelected(selected === row.code ? null : row.code)}
+                                onClick={() => { window.analyticsService && window.analyticsService.track('despojo_alcaldia', { alcaldia: row.code, abierta: selected !== row.code }); setSelected(selected === row.code ? null : row.code); }}
                             >
                                 <i style={{ background: colorFor(year, row.code) }}></i>
                                 <span className="despojo-rank-name">{row.name}</span>
@@ -872,7 +877,7 @@ function DespojoPlayerPanel() {
                         <button
                             type="button"
                             className="despojo-rank-more"
-                            onClick={() => setRankingOpen(o => !o)}
+                            onClick={() => { window.analyticsService && window.analyticsService.track('despojo_ranking', { abierto: !rankingOpen }); setRankingOpen(o => !o); }}
                         >
                             {rankingOpen ? 'Ver solo las seis primeras' : `Ver las ${ranking.length} alcaldías`}
                         </button>
@@ -906,7 +911,7 @@ function DespojoPlayerPanel() {
                                 className={'despojo-bar' + (partial[y] ? ' is-partial' : '') + (clipped ? ' is-clipped' : '')}
                                 aria-pressed={y === year}
                                 aria-label={`${y}: ${fmt(n)} carpetas${partial[y] ? ' (faltan datos del año)' : ''}${clipped ? ' (por debajo del inicio del eje)' : ''}`}
-                                onClick={() => { setPlaying(false); setYear(y); }}
+                                onClick={() => { setPlaying(false); setYear(y); window.analyticsService && window.analyticsService.track('despojo_anio', { anio: y, via: 'marca' }); }}
                             >
                                 <span className="despojo-stem" style={{ height: stemHeight(n) + '%' }}>
                                     {/* Own tooltip rather than `title`: the native one waits a
@@ -1002,7 +1007,7 @@ function DespojoPlayerPanel() {
                         aria-expanded={noteOpen}
                         aria-controls="despojo-note-body"
                         title={noteOpen ? 'Ocultar la definición de despojo' : '¿Qué es el despojo?'}
-                        onClick={() => setNoteOpen(o => !o)}
+                        onClick={() => { window.analyticsService && window.analyticsService.track('despojo_nota', { abierta: !noteOpen }); setNoteOpen(o => !o); }}
                     >
                         <span aria-hidden="true">i</span>
                         <span className="despojo-sr">¿Qué es el despojo?</span>

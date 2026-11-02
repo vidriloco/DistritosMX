@@ -6,26 +6,11 @@
  */
 
 window.ANALYTICS_CONFIG = {
-    // Mixpanel Configuration
-    MIXPANEL: {
-        // Replace with your actual Mixpanel project token
-        PROJECT_TOKEN: '6d19199a925b706938c50559f716b886',
-        
-        // Environment-specific settings
-        DEBUG: false, // Set to true for development
-        TRACK_PAGEVIEW: false,
-        PERSISTENCE: 'localStorage',
-        
-        // Additional options
-        OPTIONS: {
-            // Enable/disable specific tracking features
-            TRACK_LINKS: true,
-            TRACK_FORMS: true,
-            TRACK_WITH_GROUPS: false,
-            
-            // Custom settings
-            CUSTOM_LIB_URL: null, // Set custom Mixpanel library URL if needed
-        }
+    // PostHog (project "laciudad.mx", shared with ordena.laciudad.mx; the `site` property tells them apart).
+    // The project token is public by design: it can only send events, not read them.
+    POSTHOG: {
+        PROJECT_TOKEN: 'phc_sjhMLdeBsxDXXCxjmJ72DbPewD7iYoFrfkuaBV63yRVg',
+        API_HOST: 'https://eu.i.posthog.com'
     },
     
     // Feature flags for analytics
@@ -54,7 +39,7 @@ window.ANALYTICS_CONFIG = {
 
 /**
  * Get analytics configuration for a specific service
- * @param {string} service - The service name (e.g., 'MIXPANEL')
+ * @param {string} service - The service name (e.g., 'POSTHOG')
  * @returns {Object} Configuration object for the service
  */
 window.getAnalyticsConfig = function(service) {

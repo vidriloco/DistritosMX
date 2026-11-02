@@ -144,17 +144,20 @@
     cursor: grab;
 }
 .nb-pin:active { cursor: grabbing; }
+/* The page template styles every map popup with !important (no padding,
+   another font), so this card has to insist. It sits above its feature with
+   the tip on its bottom edge pointing at it. */
 .nb-popup .mapboxgl-popup-content {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-family: 'Ruda', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif !important;
     font-size: 13px;
     line-height: 1.4;
     color: #111111;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid #E6E6E3;
-    box-shadow: 0 1px 3px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    border: 0 !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.10) !important;
 }
-.nb-popup .mapboxgl-popup-tip { display: none; }
+.nb-popup .mapboxgl-popup-tip { border-width: 7px; border-top-color: #FFFFFF !important; }
 .nb-popup-name { font-weight: 500; display: block; }
 .nb-popup-sub { display: block; color: #6B6B68; font-size: 12px; }
 
@@ -232,6 +235,45 @@
 .nb-section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 2px; }
 .nb-section-head h3 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
 .nb-section-note { font-size: 12px; color: var(--xb-muted); }
+.nb-section-head:has(.nb-map-toggle) { align-items: center; }
+/* "Ver en el mapa" on a section: a small pill that stays on while active. */
+.nb-map-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 30px; padding: 0 12px;
+    border: 1px solid var(--xb-line); border-radius: 999px;
+    background: #FFFFFF; color: var(--xb-ink);
+    font: inherit; font-size: 13px; cursor: pointer;
+}
+.nb-map-toggle:hover { border-color: var(--xb-faint); }
+.nb-map-toggle.is-active { background: var(--xb-ink); border-color: var(--xb-ink); color: #FFFFFF; }
+.nb-map-toggle:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: 2px; }
+
+/* The legend of the hazards on the map, top left of the map. */
+.nb-map-legend {
+    position: absolute;
+    top: calc(var(--xb-topbar) + 12px);
+    left: 12px;
+    z-index: 10000;   /* over the map, like the giro chips */
+    display: flex; flex-direction: column; gap: 6px;
+    min-width: 190px;
+    padding: 10px 12px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: var(--xb-shadow);
+    font-size: 13px;
+}
+.nb-map-legend-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-weight: 600; }
+.nb-map-legend-close {
+    width: 24px; height: 24px; margin-right: -6px;
+    display: flex; align-items: center; justify-content: center;
+    border: 0; border-radius: 6px; background: transparent; color: var(--xb-muted); cursor: pointer;
+}
+.nb-map-legend-close:hover { background: var(--xb-wash); color: var(--xb-ink); }
+.nb-map-legend-row { display: grid; grid-template-columns: 18px 1fr auto; align-items: center; gap: 8px; }
+.nb-map-legend-mark { width: 10px; height: 10px; justify-self: center; border: 2.5px solid; border-radius: 50%; background: #FFFFFF; }
+.nb-map-legend-mark.is-line { width: 18px; height: 0; border-width: 0; border-top: 2px dashed; border-radius: 0; }
+.nb-map-legend-count { color: var(--xb-muted); font-variant-numeric: tabular-nums; }
+.nb-map-legend-empty { color: var(--xb-muted); }
 
 /* Competition by giro: one card, rows split by hairlines, numbers in
    aligned columns, and a bar in the giro's colour for its share. */
@@ -291,6 +333,71 @@
 
 .xb-segmented.is-compact { padding: 3px; }
 .xb-segmented.is-compact button { height: 28px; padding: 0 10px; font-size: 12px; }
+/* The empty inspector: the reports opened before in this browser, or a
+   drawing and the steps when there are none. */
+.nb-recent { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.nb-recent-head { display: flex; justify-content: space-between; align-items: center; }
+.nb-recent-forget { font-size: 12px; color: var(--xb-muted); }
+.nb-recent-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--xb-line); border-radius: 12px; overflow: hidden; }
+.nb-recent-list li + li { border-top: 1px solid var(--xb-line-soft); }
+.nb-recent-item {
+    width: 100%;
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border: 0; background: #FFFFFF; color: var(--xb-ink);
+    font: inherit; text-align: left; cursor: pointer;
+}
+.nb-recent-item:hover { background: var(--xb-wash-soft); }
+.nb-recent-item:focus-visible { outline: 2px solid var(--xb-accent); outline-offset: -2px; }
+.nb-recent-icon {
+    flex: 0 0 auto;
+    width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    background: var(--xb-wash); color: var(--xb-accent);
+}
+.nb-recent-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.nb-recent-place, .nb-recent-meta { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nb-recent-place { font-size: 14px; font-weight: 500; }
+.nb-recent-meta { font-size: 12px; color: var(--xb-muted); }
+.nb-recent-side { flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.nb-recent-total { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.nb-recent-total::after { content: ' negocios'; font-size: 11px; font-weight: 400; color: var(--xb-muted); }
+.nb-recent-ago { font-size: 11px; color: var(--xb-faint); }
+
+.nb-no-recent {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    margin-top: 12px;
+    padding: 24px 20px 20px;
+    border: 1px dashed var(--xb-line);
+    border-radius: 16px;
+    text-align: center;
+}
+.nb-no-recent-art { margin-bottom: 6px; }
+.nb-no-recent-title { margin: 0; font-size: 15px; font-weight: 600; }
+.nb-no-recent .xb-muted { margin: 0; font-size: 13px; }
+.nb-no-recent-steps { align-self: stretch; margin-top: 12px; padding: 14px 14px 14px 32px; background: var(--xb-wash-soft); border-radius: 10px; text-align: left; }
+
+/* Terreno y clima: one card per group, a fact per hairline row. */
+.nb-facts { border: 1px solid var(--xb-line); border-radius: 12px; overflow: hidden; }
+.nb-fact {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    padding: 11px 14px;
+    font-size: 14px;
+}
+.nb-fact + .nb-fact { border-top: 1px solid var(--xb-line-soft); }
+.nb-fact-name { flex: 0 0 auto; white-space: nowrap; color: var(--xb-muted); }
+.nb-fact-value { min-width: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; font-weight: 500; }
+.nb-fact-value small { max-width: 220px; font-size: 12px; font-weight: 400; line-height: 1.35; color: var(--xb-muted); }
+/* A hazard level: five steps, filled up to the level; high ones in orange. */
+.nb-level { display: inline-flex; align-items: center; gap: 8px; }
+.nb-level-meter { display: inline-flex; gap: 2px; }
+.nb-level-meter span { width: 10px; height: 6px; border-radius: 1px; background: var(--xb-wash); }
+.nb-level .is-on { background: var(--xb-faint); }
+.nb-level.is-2 .is-on { background: #B7791F; }
+.nb-level.is-3 .is-on, .nb-level.is-4 .is-on { background: #C2410C; }
+.nb-level.is-3, .nb-level.is-4 { color: #9A3412; font-weight: 600; }
+
 .nb-callout {
     display: flex; flex-direction: column; gap: 6px;
     padding: 14px 16px;
@@ -389,6 +496,9 @@
     .nb-page:has(.xb-inspector.is-empty) .map-container { bottom: 0; }
     .nb-page .xb-inspector.is-empty { height: auto; max-height: var(--xb-sheet); }
     .nb-btn { height: 44px; font-size: 14px; }
+    .nb-no-recent { padding: 16px 14px 14px; }
+    .nb-no-recent-art { width: 104px; height: 79px; }
+    .nb-map-legend { top: calc(var(--xb-topbar) + 8px); left: 8px; min-width: 0; padding: 8px 10px; gap: 4px; font-size: 12px; }
     .nb-suggest { top: 44px; }
 }
 
@@ -408,6 +518,7 @@
 .nb-print-map { margin: 0; }
 .nb-print-map img { display: block; width: auto; max-width: 100%; max-height: 100mm; margin: 0 auto; border: 1px solid var(--xb-line); border-radius: 8px; }
 .nb-print-map figcaption { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--xb-muted); }
+.nb-print-map figcaption span:last-child { flex: 0 0 auto; white-space: nowrap; }
 .nb-print-hours { display: flex; flex-direction: column; gap: 6px; }
 .nb-print-hours + .nb-print-hours { margin-top: 14px; }
 .nb-print-link { font-size: 11px; color: var(--xb-muted); }
@@ -418,7 +529,7 @@
     .nb-page { height: auto; overflow: visible; }
     .nb-page .map-admin-container, .nb-page .xb-topbar, .nb-page .nb-chips,
     .nb-page .explore-help-panel, .nb-page .nb-foot, .nb-page .nb-row-remove,
-    .nb-page .nb-sheet-chips, .nb-page .nb-sheet-radius, .nb-page .nb-giros-add,
+    .nb-page .nb-sheet-chips, .nb-page .nb-sheet-radius, .nb-page .nb-giros-add, .nb-page .nb-map-legend,
     .nb-page .nb-screen-only { display: none !important; }
     .nb-page .nb-print-only { display: block; }
     .nb-page .nb-print-head { display: flex; }
@@ -436,7 +547,7 @@
     .nb-page .nb-giros-text { display: block; -webkit-line-clamp: unset; overflow: visible; }
     /* Never split a block, a row or a chart across pages. */
     .nb-page .nb-verdict, .nb-page .nb-print-map, .nb-page .nb-sub, .nb-page .nb-callout,
-    .nb-page .nb-giros-row, .nb-page .nb-row, .nb-page .nb-bar-row, .nb-page .nb-print-hours,
+    .nb-page .nb-giros-row, .nb-page .nb-row, .nb-page .nb-bar-row, .nb-page .nb-print-hours, .nb-page .nb-fact,
     .nb-page .nb-sources { break-inside: avoid; }
     .nb-page .nb-section-head { break-after: avoid; }
 }

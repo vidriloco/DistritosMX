@@ -23,6 +23,32 @@ function DespojoPage() {
     const [formOpen, setFormOpen] = React.useState(false);
     // Opens at mid height: peek looks better but does not say what the page is.
     const [snap, setSnap] = React.useState('half');
+    const [navOpen, setNavOpen] = React.useState(false);
+    const navRef = React.useRef(null);
+
+    // The rest of Ciudad MX, as real links: this page also lives on despojos.laciudad.mx,
+    // so they point at the main site (and ordena's subdomain), not at routes on this host.
+    const mainUrl = (path) => (window.mainSiteUrl ? window.mainSiteUrl(path) : path);
+    const ordenaUrl = () => {
+        const { protocol, hostname, port } = window.location;
+        return protocol + '//ordena.' + hostname.replace(/^(www|despojos)\./, '') + (port ? ':' + port : '') + '/';
+    };
+    const sections = [
+        { key: 'explorar', label: 'Explorar', href: mainUrl('/explorar') },
+        { key: 'negocios', label: 'Negocios', href: mainUrl('/negocios') },
+        { key: 'ordena', label: 'Consulta POZMVM', href: ordenaUrl() },
+    ];
+    const trackNav = (destino) => window.analyticsService && window.analyticsService.track('nav', { destino, origen: 'despojos' });
+
+    // The phone dropdown closes on a tap outside it or on Escape
+    React.useEffect(() => {
+        if (!navOpen) return;
+        const onDown = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setNavOpen(false); };
+        const onKey = (e) => { if (e.key === 'Escape') setNavOpen(false); };
+        document.addEventListener('pointerdown', onDown);
+        document.addEventListener('keydown', onKey);
+        return () => { document.removeEventListener('pointerdown', onDown); document.removeEventListener('keydown', onKey); };
+    }, [navOpen]);
     const sheetRef = React.useRef(null);
     const dragRef = React.useRef(null);
 
@@ -170,9 +196,33 @@ function DespojoPage() {
             </div>
 
             <div className="despojo-panel-slot">
-                <a className="despojo-brand" href="/" aria-label="Ciudad MX — ir al inicio">
-                    <img src="/static/images/distritos-mx-logo-black.png" alt="Ciudad MX" />
-                </a>
+                <nav className="despojo-brand" ref={navRef} aria-label="Secciones de Ciudad MX">
+                    <a className="despojo-brand-logo" href={mainUrl('/')} aria-label="Ciudad MX — ir al inicio" onClick={() => trackNav('/')}>
+                        <img src="/static/images/ciudad-mx-icon.png" alt="Ciudad MX" />
+                    </a>
+                    <ul className="despojo-nav-links">
+                        {sections.map((s) => (
+                            <li key={s.key}><a href={s.href} onClick={() => trackNav(s.key)}>{s.label}</a></li>
+                        ))}
+                    </ul>
+                    <button
+                        type="button"
+                        className="despojo-nav-toggle"
+                        aria-expanded={navOpen}
+                        aria-controls="despojo-nav-menu"
+                        onClick={() => setNavOpen((o) => !o)}
+                    >
+                        Secciones
+                        <svg aria-hidden="true" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d={navOpen ? 'M2 6.5l3-3 3 3' : 'M2 3.5l3 3 3-3'} /></svg>
+                    </button>
+                    {navOpen && (
+                        <ul className="despojo-nav-menu" id="despojo-nav-menu">
+                            {sections.map((s) => (
+                                <li key={s.key}><a href={s.href} onClick={() => trackNav(s.key)}>{s.label}</a></li>
+                            ))}
+                        </ul>
+                    )}
+                </nav>
 
                 {/* `display: contents` above the breakpoint, so on a desktop the
                     brand and the panel stay direct children of the slot and this

@@ -146,7 +146,7 @@ function BusinessTopBar({
                 </label>
 
                 {showList && (
-                    <div className="nb-suggest" role="listbox" aria-label="Sugerencias">
+                    <div className="nb-suggest ph-no-capture" role="listbox" aria-label="Sugerencias">
                         {query.trim().length < 3 && (
                             <button type="button" onMouseDown={(e) => { e.preventDefault(); setOpen(false); setEditing(false); onUseMyLocation(); }}>
                                 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /><circle cx="12" cy="12" r="8" /></svg>

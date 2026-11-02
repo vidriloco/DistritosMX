@@ -88,6 +88,10 @@ urlpatterns = [
 
 
     path('api/business/location/stats', get_business_location_stats, name='get_business_location_stats'),
+    path('api/business/location/hazards', get_business_location_hazards, name='get_business_location_hazards'),
+    path('api/area-score', get_area_score, name='get_area_score'),
+    path('api/area-score/ranking', get_area_score_ranking, name='get_area_score_ranking'),
+    path('api/area-score/distribution', get_area_score_distribution, name='get_area_score_distribution'),
     path('api/business/indicators', get_business_indicators, name='get_business_indicators'),
     
     # API for Business

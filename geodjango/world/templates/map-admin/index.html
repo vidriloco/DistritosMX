@@ -135,6 +135,20 @@
         ]
     }
     </script>
+    <script>
+        // The despojos map also lives on its own subdomain (despojos.laciudad.mx), where it is the root.
+        // The router knows pages by path, so routePath() maps that root to the despojos route, and
+        // mainSiteUrl() points any other page back at the main site.
+        window.DESPOJOS_PATH = '/proyectos/mapas/despojos-viviendas';
+        window.isDespojosHost = /^despojos\./.test(window.location.hostname);
+        window.routePath = function (p) {
+            return window.isDespojosHost && (p === '/' || p === '') ? window.DESPOJOS_PATH : p;
+        };
+        window.mainSiteUrl = function (path) {
+            var l = window.location;
+            return l.protocol + '//' + l.hostname.replace(/^despojos\./, '') + (l.port ? ':' + l.port : '') + path;
+        };
+    </script>
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     <script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
@@ -143,12 +157,8 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     
-    <!-- Mixpanel Analytics -->
-    <script type="text/javascript">
-        (function(f,b){if(!b.__SV){var e,g,i,h;window.mixpanel=b;b._i=[];b.init=function(e,f,c){function g(a,d){var b=d.split(".");2==b.length&&(a=a[b[0]],d=b[1]);a[d]=function(){a.push([d].concat(Array.prototype.slice.call(arguments,0)))}}var a=b;"undefined"!==typeof c?a=b[c]=[]:c="mixpanel";a.people=a.people||[];a.toString=function(a){var d="mixpanel";"mixpanel"!==c&&(d+="."+c);a||(d+=" (stub)");return d};a.people.toString=function(){return a.toString(1)+".people (stub)"};i="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
-        for(h=0;h<i.length;h++)g(a,i[h]);var j="set set_once union unset remove delete".split(" ");a.get_group=function(){function b(c){d[c]=function(){call2_args=arguments;call2=[c].concat(Array.prototype.slice.call(call2_args,0));a.push([e,call2])}}var d={},e=["get_group"].concat(Array.prototype.slice.call(arguments,0));for(var c=0;c<j.length;c++)b(j[c]);return d};b._i.push([e,f,c])};b.__SV=1.2;e=f.createElement("script");e.type="text/javascript";e.async=!0;e.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?
-        MIXPANEL_CUSTOM_LIB_URL:"file:"===f.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";g=f.getElementsByTagName("script")[0];g.parentNode.insertBefore(e,g)}})(document,window.mixpanel||[]);
-    </script>
+    <!-- PostHog Analytics (anonymous, cookieless; set up in the Analytics Service below) -->
+    <script defer crossorigin="anonymous" src="https://eu-assets.i.posthog.com/static/array.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
     <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -3570,9 +3580,44 @@
             opacity: .92;
             transition: opacity .15s ease;
         }
-        .despojo-brand:hover { opacity: 1; }
-        .despojo-brand:focus-visible { outline: 2px solid var(--dsp-seal, #98122b); outline-offset: 3px; }
+        .despojo-brand:hover, .despojo-brand:focus-within { opacity: 1; }
         .despojo-brand img { height: 25px; width: auto; display: block; }
+
+        /* The chip doubles as a mini-menu to the rest of Ciudad MX: links in a row on a
+           desktop, a "Secciones" dropdown on a phone. */
+        /* As wide as the panel card below it on a desktop; on a phone it floats as a compact chip */
+        .despojo-brand { position: relative; align-self: stretch; box-sizing: border-box; align-items: center; gap: 2px; padding: 7px 8px 7px 12px; }
+        /* Icon only: the wordmark is cropped off (ciudad-mx-icon.png), so it is square */
+        .despojo-brand .despojo-brand-logo img { height: 26px; width: 26px; }
+        .despojo-brand-logo { display: flex; align-items: center; padding-right: 12px; margin-right: 4px; border-right: 1px solid var(--dsp-line, #dce0da); }
+        .despojo-brand a:focus-visible, .despojo-nav-toggle:focus-visible { outline: 2px solid var(--dsp-seal, #98122b); outline-offset: 2px; border-radius: 4px; }
+        .despojo-nav-links { display: flex; gap: 0; margin: 0; padding: 0; list-style: none; }
+        /* Same voice as the panel's controls: Ruda, small caps-style labels, the seal red on hover */
+        .despojo-nav-links a, .despojo-nav-toggle, .despojo-nav-menu a {
+            font-family: 'Ruda', sans-serif; font-size: 11.5px; font-weight: 700;
+            letter-spacing: .06em; text-transform: uppercase;
+            color: var(--dsp-dim, #4d5a5c); text-decoration: none; white-space: nowrap;
+        }
+        .despojo-nav-links a {
+            display: block; padding: 8px 10px;
+            text-decoration-line: underline; text-decoration-color: transparent;
+            text-decoration-thickness: 2px; text-underline-offset: 6px;
+            transition: color .14s ease, text-decoration-color .14s ease;
+        }
+        .despojo-nav-links a:hover { color: var(--dsp-seal, #98122b); text-decoration-color: var(--dsp-seal, #98122b); }
+        .despojo-nav-toggle {
+            display: none; align-items: center; gap: 6px; margin-left: 2px; padding: 6px 8px;
+            border: 0; background: none; cursor: pointer;
+        }
+        .despojo-nav-toggle[aria-expanded="true"] { color: var(--dsp-seal, #98122b); }
+        .despojo-nav-menu {
+            position: absolute; top: calc(100% + 6px); left: 0; z-index: 1002; min-width: 210px;
+            margin: 0; padding: 6px; list-style: none; background: #fff; border-radius: 8px;
+            box-shadow: 0 4px 24px rgba(26,32,39,.18);
+        }
+        .despojo-nav-menu li + li { border-top: 1px solid var(--dsp-inset, #eef0ed); }
+        .despojo-nav-menu a { display: block; padding: 13px 12px; font-size: 12px; }
+        .despojo-nav-menu a:hover { color: var(--dsp-seal, #98122b); }
 
         /* The page renders no navigation bar, so the panel owns the full height
            left over by the wordmark above it.
@@ -3797,6 +3842,11 @@
                 padding: 5px 10px;
             }
             .despojo-brand img { height: 19px; }
+            .despojo-brand .despojo-brand-logo img { height: 22px; width: 22px; }
+            .despojo-brand { padding: 5px 4px 5px 10px; }
+            .despojo-brand-logo { padding-right: 8px; margin-right: 2px; }
+            .despojo-nav-links { display: none; }
+            .despojo-nav-toggle { display: inline-flex; min-height: 36px; }
 
             /* Targets a finger can actually land on. */
             .despojo-play { min-height: 44px; padding: 0 16px; }
@@ -5924,7 +5974,7 @@
     </style>
 </head>
 <body>
-    {% if "/proyectos/mapas/despojos-viviendas" not in request.path %}
+    {% if not is_despojos %}
     <div class="loading-view">
         <div class="loading-content">
             <img
@@ -5951,6 +6001,7 @@
                     <li><a href="/explorar">Explorador de datos por colonia y AGEB</a></li>
                     <li><a href="/negocios">Analiza una zona antes de abrir tu negocio</a></li>
                     <li><a href="/proyectos/mapas/despojos-viviendas">Despojo de vivienda en la CDMX</a></li>
+                    <li><a href="https://ordena.laciudad.mx/">Consulta pública del plan del Valle de México (POZMVM)</a></li>
                     <li><a href="/proyectos/mapas/turistas-cdmx-2024-2025">Turistas en la CDMX 2024–2025</a></li>
                     <li><a href="/transporte">Transporte público de la CDMX</a></li>
                     <li><a href="/vivienda">Indicadores de vivienda</a></li>
@@ -6017,7 +6068,7 @@
         // Functional Analytics Service (Babel-compatible)
         (function() {
             // Global state for analytics
-            let mixpanelInstance = null;
+            let client = null;
             let isInitialized = false;
             let projectToken = null;
             let sessionId = null;
@@ -6052,15 +6103,9 @@
             function setDefaultProperties() {
                 if (!isInitialized) return;
 
-                const defaultProps = {
-                    [window.ANALYTICS_PROPERTIES.PAGE_URL]: window.location.href,
-                    [window.ANALYTICS_PROPERTIES.PAGE_TITLE]: document.title,
-                    [window.ANALYTICS_PROPERTIES.REFERRER]: document.referrer,
-                    [window.ANALYTICS_PROPERTIES.SESSION_ID]: sessionId,
-                    [window.ANALYTICS_PROPERTIES.TIMESTAMP]: new Date().toISOString()
-                };
-
-                mixpanelInstance.register(defaultProps);
+                // PostHog already adds the URL, title, referrer and session to every event.
+                const local = /(^|\.)localhost$|^127\.|^192\.168\./.test(window.location.hostname);
+                client.register({ site: 'laciudad', environment: local ? 'development' : 'production' });
             }
 
             // Main analytics functions
@@ -6072,20 +6117,26 @@
 
                 projectToken = token;
                 
-                if (typeof mixpanel === 'undefined') {
-                    console.error('Mixpanel is not loaded. Make sure to include the Mixpanel script.');
+                if (typeof posthog === 'undefined') {
+                    // Blocked by the browser or offline: the site works the same, it just isn't counted.
                     return;
                 }
 
                 try {
-                    mixpanel.init(token, {
-                        debug: options.debug || false,
-                        track_pageview: options.track_pageview || false,
-                        persistence: options.persistence || 'localStorage',
-                        ...options
+                    // Cookieless: nothing is stored in the browser and visitors are never identified.
+                    posthog.init(token, {
+                        api_host: options.api_host || 'https://eu.i.posthog.com',
+                        ui_host: 'https://eu.posthog.com',
+                        cookieless_mode: 'always',
+                        person_profiles: 'never',
+                        capture_pageview: 'history_change',
+                        capture_pageleave: true,
+                        autocapture: true,
+                        disable_session_recording: true,
+                        disable_surveys: true
                     });
 
-                    mixpanelInstance = mixpanel;
+                    client = posthog;
                     isInitialized = true;
                     sessionId = generateSessionId();
 
@@ -6097,17 +6148,13 @@
             };
 
             window.trackEvent = function(eventKey, properties = {}) {
-                if (!isInitialized) {
-                    console.warn('Analytics not initialized. Event not tracked:', eventKey);
-                    return;
-                }
+                if (!isInitialized) return;
 
                 const eventName = getEventName(eventKey);
                 const validatedProperties = validateEventProperties(properties);
 
                 try {
-                    mixpanelInstance.track(eventName, validatedProperties);
-                    console.log('Event tracked:', eventName, validatedProperties);
+                    client.capture(eventName, validatedProperties);
                 } catch (error) {
                     console.error('Failed to track event:', eventName, error);
                 }
@@ -6168,7 +6215,7 @@
                 if (!isInitialized) return;
 
                 try {
-                    mixpanelInstance.reset();
+                    client.reset();
                 } catch (error) {
                     console.error('Failed to reset analytics:', error);
                 }
@@ -6196,17 +6243,10 @@
 
         // Initialize analytics immediately if config is available
         if (window.ANALYTICS_CONFIG && window.isAnalyticsEnabled && window.isAnalyticsEnabled()) {
-            const config = window.getAnalyticsConfig('MIXPANEL');
+            const config = window.getAnalyticsConfig('POSTHOG');
             
             if (window.initAnalytics) {
-                window.initAnalytics(config.PROJECT_TOKEN, {
-                    debug: config.DEBUG || false,
-                    track_pageview: config.TRACK_PAGEVIEW || false,
-                    persistence: config.PERSISTENCE || 'localStorage',
-                    ...config.OPTIONS
-                });
-                
-                console.log('Analytics initialized immediately');
+                window.initAnalytics(config.PROJECT_TOKEN, { api_host: config.API_HOST });
             }
         }
     </script>

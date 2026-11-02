@@ -62,6 +62,23 @@ const transportSystems = {
     }
 };
 
+// Hover tooltip helpers. Lines served come as "[1]", "['1', 'A']" or empty, depending on the system's data.
+function txLinesOf(p) {
+    const lines = String(p.lines_serving || '').replace(/[\[\]'"\s]/g, '').split(',').filter(Boolean);
+    return lines.length ? lines : [String(p.line_number)];
+}
+function txEsc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+// Dark text on light line colours (yellow, light green), white on the rest
+function txInkOn(hex) {
+    const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || ''));
+    if (!m) return '#fff';
+    const n = parseInt(m[1], 16);
+    const lum = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255;
+    return lum > 0.6 ? '#111' : '#fff';
+}
+
 function TransportSystemsPanel({ 
     onClose,
     map,
@@ -326,19 +343,90 @@ function TransportSystemsPanel({
             }
         });
 
-        // Add hover effects
-        mapInstance.on('mouseenter', layerName, () => {
-            mapInstance.getCanvas().style.cursor = 'pointer';
+        // Hover tooltips: which line or station this is, with the station's icon and the system's logo
+        const sys = transportSystems[system] || {};
+        const lineColor = {};
+        const stationCount = {};
+        data.features.forEach((f) => {
+            const p = f.properties;
+            if (p.type === 'line') lineColor[String(p.line_number)] = p.color;
+            if (p.type === 'station') txLinesOf(p).forEach((n) => { stationCount[n] = (stationCount[n] || 0) + 1; });
         });
-        mapInstance.on('mouseleave', layerName, () => {
-            mapInstance.getCanvas().style.cursor = '';
-        });
-        mapInstance.on('mouseenter', stationsLayerName, () => {
-            mapInstance.getCanvas().style.cursor = 'pointer';
-        });
-        mapInstance.on('mouseleave', stationsLayerName, () => {
-            mapInstance.getCanvas().style.cursor = '';
-        });
+        const logo = (cls) => sys.icon ? `<img class="${cls}" src="${txEsc(sys.icon)}" alt="" onerror="this.remove()">` : '';
+        const badge = (n, fallback) => {
+            const bg = lineColor[n] || fallback || '#555';
+            return `<span class="tx-badge" style="background:${txEsc(bg)};color:${txInkOn(bg)}">${txEsc(n)}</span>`;
+        };
+        const systemName = (p) => txEsc(sys.name || p.humanized_system || system);
+
+        const lineHtml = (p) => {
+            const n = String(p.line_number);
+            const count = stationCount[n];
+            return `<div class="tx-tip">
+                <div class="tx-sys">${logo('tx-logo')}<span>${systemName(p)}</span></div>
+                <div class="tx-title">${badge(n, p.color)}<strong>Línea ${txEsc(n)}</strong></div>
+                ${p.route ? `<div class="tx-route">${txEsc(p.route)}</div>` : ''}
+                <div class="tx-meta">${count ? `${count} ${count === 1 ? 'estación' : 'estaciones'} · ` : ''}Clic para ver la línea</div>
+            </div>`;
+        };
+        const stationHtml = (p) => {
+            const lines = txLinesOf(p);
+            const hasImage = p.image && p.image !== 'None';
+            // A station without its own icon (or whose icon fails to load) shows the system's logo
+            const icon = hasImage
+                ? `<img class="tx-icon" src="${txEsc(p.image)}" alt="" onerror="this.onerror=null;${sys.icon ? `this.src='${txEsc(sys.icon)}'` : 'this.remove()'}">`
+                : logo('tx-icon');
+            return `<div class="tx-tip tx-station">
+                ${icon}
+                <div class="tx-body">
+                    <strong class="tx-name">${txEsc(p.name)}</strong>
+                    <div class="tx-sys">${logo('tx-logo')}<span>${systemName(p)}</span></div>
+                    <div class="tx-lines">${lines.map((n) => badge(n, p.color)).join('')}</div>
+                    ${lines.length === 1 && p.route ? `<div class="tx-route">${txEsc(p.route)}</div>` : ''}
+                    <div class="tx-meta">Clic para ver detalles</div>
+                </div>
+            </div>`;
+        };
+
+        // One tooltip for the whole map, shared by every system; a station wins over the line under it
+        if (!mapInstance.__txHover) {
+            mapInstance.__txHover = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, offset: 12, maxWidth: '300px', className: 'tx-hover' });
+        }
+        const popup = mapInstance.__txHover;
+        const canvas = mapInstance.getCanvas();
+        const onLineMove = (e) => {
+            if (mapInstance.__txOverStation || !e.features.length) return;
+            canvas.style.cursor = 'pointer';
+            popup.setLngLat(e.lngLat).setHTML(lineHtml(e.features[0].properties)).addTo(mapInstance);
+        };
+        const onLineLeave = () => {
+            if (mapInstance.__txOverStation) return;
+            canvas.style.cursor = '';
+            popup.remove();
+        };
+        const onStationMove = (e) => {
+            if (!e.features.length) return;
+            const f = e.features[0];
+            mapInstance.__txOverStation = true;
+            canvas.style.cursor = 'pointer';
+            popup.setLngLat(f.geometry.coordinates).setHTML(stationHtml(f.properties)).addTo(mapInstance);
+        };
+        const onStationLeave = () => {
+            mapInstance.__txOverStation = false;
+            canvas.style.cursor = '';
+            popup.remove();
+        };
+
+        // Re-adding a system replaces its handlers instead of stacking a second set
+        const handlers = mapInstance.__txHandlers || (mapInstance.__txHandlers = {});
+        (handlers[system] || []).forEach((h) => mapInstance.off(h[0], h[1], h[2]));
+        handlers[system] = [
+            ['mousemove', layerName, onLineMove],
+            ['mouseleave', layerName, onLineLeave],
+            ['mousemove', stationsLayerName, onStationMove],
+            ['mouseleave', stationsLayerName, onStationLeave]
+        ];
+        handlers[system].forEach((h) => mapInstance.on(h[0], h[1], h[2]));
 
         // Update visible systems state to reflect the new layer
         setVisibleSystems(prev => ({
@@ -362,6 +450,10 @@ function TransportSystemsPanel({
         }
         if (mapInstance.getLayer(stationsLayerName)) {
             mapInstance.removeLayer(stationsLayerName);
+        }
+        if (mapInstance.__txHover) {
+            mapInstance.__txHover.remove();
+            mapInstance.__txOverStation = false;
         }
         // Remove source
         if (mapInstance.getSource(sourceName)) {

@@ -7655,3 +7655,554 @@
 .neighbourhoods-loading-spinner {
     animation: spin 1s linear infinite;
 }
+/* Índice de habitabilidad card (GeozoneDetailsPanel) */
+.hab-status {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #6B7280;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-summary {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-score {
+    flex: 0 0 auto;
+    width: 84px;
+    height: 84px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.hab-score-number {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.5px;
+}
+
+.hab-score-scale {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    opacity: 0.8;
+}
+
+.hab-summary-text {
+    min-width: 0;
+}
+
+.hab-summary-text p {
+    margin: 0;
+}
+
+.hab-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #6B7280;
+}
+
+.hab-rank {
+    font-size: 15px;
+    color: #374151;
+    margin: 2px 0 4px !important;
+}
+
+.hab-rank strong {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111827;
+}
+
+.hab-caption {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #6B7280;
+}
+
+.hab-radar {
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin: 0 auto;
+}
+
+.hab-radar-axis {
+    cursor: pointer;
+}
+
+.hab-radar-label {
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-radar-label.is-active {
+    font-weight: 700;
+}
+
+.hab-radar-value {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-radar-value.is-peak {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.hab-radar-peak {
+    pointer-events: none;
+}
+
+.hab-axes {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    border-top: 1px solid #F3F4F6;
+}
+
+.hab-axis {
+    border-bottom: 1px solid #F3F4F6;
+}
+
+/* The axis of the tab the user is on. */
+.hab-axis.is-highlighted .hab-axis-head {
+    padding-left: 10px;
+    margin-left: -8px;
+    width: calc(100% + 8px);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--axis-color) 10%, transparent);
+    box-shadow: inset 3px 0 0 var(--axis-color);
+    color: #111827;
+}
+
+.hab-axis.is-highlighted .hab-axis-name,
+.hab-axis.is-highlighted .hab-axis-value {
+    font-weight: 800;
+}
+
+.hab-axis-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Ruda', sans-serif;
+    color: #374151;
+}
+
+.hab-axis-head:hover .hab-axis-name {
+    color: #111827;
+}
+
+.hab-axis-dot {
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--axis-color);
+}
+
+.hab-axis-name {
+    flex: 0 0 104px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.hab-bar {
+    flex: 1 1 auto;
+    display: block;
+    height: 6px;
+    border-radius: 3px;
+    background: #F3F4F6;
+    overflow: hidden;
+}
+
+.hab-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--axis-color);
+}
+
+.hab-axis-value {
+    flex: 0 0 auto;
+    min-width: 30px;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.hab-axis-value.is-missing {
+    font-size: 12px;
+    font-weight: 500;
+    color: #9CA3AF;
+}
+
+.hab-axis-chevron {
+    flex: 0 0 auto;
+    color: #9CA3AF;
+    transition: transform 0.2s ease;
+}
+
+.hab-axis.is-open .hab-axis-chevron {
+    transform: rotate(180deg);
+}
+
+.hab-indicators {
+    list-style: none;
+    margin: 0 0 12px 18px;
+    padding: 4px 0 0 12px;
+    border-left: 2px solid var(--axis-color);
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-indicator {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    column-gap: 12px;
+    row-gap: 5px;
+    align-items: baseline;
+    padding: 6px 0;
+}
+
+.hab-indicator-label {
+    font-size: 12px;
+    line-height: 1.35;
+    color: #4B5563;
+}
+
+.hab-indicator-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    white-space: nowrap;
+}
+
+.hab-bar-thin {
+    grid-column: 1 / -1;
+    height: 4px;
+    opacity: 0.85;
+}
+
+.hab-indicators-note {
+    padding: 6px 0 2px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #9CA3AF;
+}
+
+.hab-method-toggle {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2563EB;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-method-toggle:hover {
+    text-decoration: underline;
+}
+
+.hab-method {
+    margin-top: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #F9FAFB;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #4B5563;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-method p {
+    margin: 0 0 6px;
+}
+
+.hab-method p:last-child {
+    margin: 0;
+}
+
+.hab-ranking .hab-eyebrow {
+    margin: 0;
+}
+
+.hab-ranking {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: 'Ruda', sans-serif;
+}
+
+.hab-ranking-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 32px;
+}
+
+.hab-ranking-home {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid #BFDBFE;
+    border-radius: 999px;
+    background: #EFF6FF;
+    color: #1D4ED8;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.hab-ranking-focus {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #F9FAFB;
+}
+
+.hab-ranking-badge {
+    flex: 0 0 auto;
+    min-width: 56px;
+    padding: 10px 6px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.hab-ranking-focus-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hab-ranking-focus-text .hab-caption {
+    margin: 0;
+}
+
+.hab-ranking-focus-rank {
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    color: #111827;
+}
+
+.hab-ranking-focus-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hab-ranking-open {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 10px;
+    background: #111827;
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.hab-ranking-strip {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 60px;
+    margin-top: 4px;
+}
+
+.hab-ranking-bucket {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0;
+    border: none;
+    border-radius: 2px 2px 0 0;
+    background: var(--bucket-color);
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.hab-ranking-bucket:hover {
+    opacity: 0.8;
+}
+
+.hab-ranking-bucket.is-home {
+    opacity: 0.9;
+}
+
+.hab-ranking-bucket.is-current {
+    background: #1D4ED8;
+    opacity: 1;
+}
+
+.hab-ranking-slider {
+    width: 100%;
+    height: 28px;
+    margin: 0;
+    accent-color: #1D4ED8;
+}
+
+.hab-ranking-ends {
+    display: flex;
+    justify-content: space-between;
+    margin-top: -6px;
+    font-size: 11px;
+    color: #6B7280;
+}
+
+.hab-ranking-steps {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.hab-ranking-steps button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: 40px;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    background: #FFFFFF;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+    cursor: pointer;
+}
+
+.hab-ranking-steps svg {
+    flex: 0 0 auto;
+}
+
+.hab-ranking-steps button:disabled {
+    color: #D1D5DB;
+    cursor: default;
+}
+
+.hab-ranking-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.hab-ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 46px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: #374151;
+}
+
+.hab-ranking-row:hover {
+    background: #F9FAFB;
+}
+
+.hab-ranking-row.is-home {
+    background: #EFF6FF;
+}
+
+.hab-ranking-row.is-current {
+    box-shadow: inset 3px 0 0 #1D4ED8;
+}
+
+.hab-ranking-rank {
+    flex: 0 0 52px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6B7280;
+    font-variant-numeric: tabular-nums;
+}
+
+.is-current .hab-ranking-rank {
+    color: #1D4ED8;
+}
+
+.hab-ranking-name {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.hab-ranking-name > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hab-ranking-place {
+    font-size: 11px;
+    font-weight: 500;
+    color: #6B7280;
+}
+
+.hab-ranking-score {
+    flex: 0 0 auto;
+    font-size: 14px;
+    font-weight: 800;
+    color: #111827;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Transport hover tooltip (TransportSystemsPanel): line or station, with its icon and the system's logo */
+.mapboxgl-popup.tx-hover { pointer-events: none; }
+/* the page sets padding: 0 !important on every popup, so the padding lives on .tx-tip */
+.tx-hover .mapboxgl-popup-content { border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.10); font-family: inherit; color: #111; }
+.tx-tip { display: flex; flex-direction: column; gap: 6px; min-width: 200px; padding: 14px 16px; font-size: 13px; line-height: 1.3; }
+.tx-tip.tx-station { flex-direction: row; align-items: flex-start; gap: 12px; }
+.tx-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.tx-icon { width: 40px; height: 40px; object-fit: contain; flex: none; border-radius: 6px; background: #F3F3F0; }
+.tx-sys { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: .02em; color: #6B6B68; }
+.tx-logo { width: 18px; height: 18px; object-fit: contain; flex: none; }
+.tx-title { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+.tx-name { font-size: 15px; line-height: 1.2; }
+.tx-route { color: #444; }
+.tx-lines { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+.tx-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px; font-size: 12px; font-weight: 700; box-sizing: border-box; }
+.tx-meta { font-size: 11px; color: #9A9A96; margin-top: 2px; padding-top: 8px; border-top: 1px solid #EFEFEC; }

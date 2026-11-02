@@ -149,6 +149,11 @@ $COMPOSE up -d app
 echo "==> Running migrations..."
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py migrate --noinput"
 
+# Opine's questions and options (ordena.laciudad.mx) live in
+# geodjango/consulta/content/pozmvm.json; this refreshes the tables from it.
+echo "==> Loading the POZMVM consultation content..."
+$COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py load_content"
+
 if [ "$SEED" = true ]; then
     # Every command below reads from geodjango/data/, which is not in git. On a
     # fresh server it is empty, and `set -e` would otherwise kill the deploy on

@@ -1,6 +1,6 @@
 // Simple custom router implementation
 function SimpleRouter() {
-    const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+    const [currentPath, setCurrentPath] = React.useState(window.routePath(window.location.pathname));
     // Show modal by default if on mundial-2025 path, will be updated after auth check
     const [showPasswordModal, setShowPasswordModal] = React.useState(
         window.location.pathname === '/proyectos/mundial-2025'
@@ -103,7 +103,7 @@ function SimpleRouter() {
     // Listen for browser back/forward buttons
     React.useEffect(() => {
         const handlePopState = () => {
-            const newPath = window.location.pathname;
+            const newPath = window.routePath(window.location.pathname);
             setCurrentPath(newPath);
             
             // Update SEO tags for the new route
@@ -147,6 +147,11 @@ function SimpleRouter() {
     
     // Function to navigate programmatically
     const navigate = (path) => {
+        // On the despojos subdomain only the despojos map lives here; every other page is on the main site
+        if (window.isDespojosHost && window.routePath(path) !== window.DESPOJOS_PATH) {
+            window.location.href = window.mainSiteUrl(path);
+            return;
+        }
         window.history.pushState({}, '', path);
         setCurrentPath(path);
         

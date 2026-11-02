@@ -16,7 +16,7 @@
     --xb-shadow: 0 1px 3px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
     --xb-topbar: 60px;
     --xb-inspector: 400px;
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-family: 'Ruda', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     color: var(--xb-ink);
     background: #EFF0EC;
     font-size: 14px;
@@ -545,6 +545,10 @@ img.xb-indicator-icon { border-radius: 4px; }
     overflow: hidden;
 }
 .xb-inspector .floating-actions-header { background: #FFFFFF; border-bottom: 1px solid var(--xb-line-soft); }
+/* The inspector already scrolls: the card keeps its full height instead of
+   shrinking to fit (its overflow is hidden), and has no scroller of its own. */
+.xb-inspector .floating-actions-container { flex-shrink: 0; }
+.xb-inspector .scrollable-content-area { max-height: none; overflow: visible; }
 .xb-inspector .floating-actions-title { font-family: inherit; text-transform: none; letter-spacing: 0; font-size: 14px; }
 
 /* Mapbox chrome */

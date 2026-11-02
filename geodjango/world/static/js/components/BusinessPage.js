@@ -17,6 +17,22 @@ const NB_SOURCE_POINTS = 'nb-points';
 const NB_LAYER_FILL = 'nb-radius-fill';
 const NB_LAYER_LINE = 'nb-radius-line';
 const NB_LAYER_POINTS = 'nb-points';
+const NB_SOURCE_HAZARDS = 'nb-hazards';
+const NB_LAYER_HAZARD_LINES = 'nb-hazard-lines';
+const NB_LAYER_HAZARD_POINTS = 'nb-hazard-points';
+
+// The Terreno y clima features the map can draw: points as coloured rings, so
+// they never pass for businesses (filled dots), and lines dashed.
+const NB_HAZARDS = {
+    waterlogging: { label: 'Encharcamientos', one: 'Encharcamiento reportado', color: '#0E7490', line: false },
+    sinkholes: { label: 'Socavones', one: 'Socavón', color: '#7C2D12', line: false },
+    mines: { label: 'Minas antiguas', one: 'Mina antigua', color: '#6D28D9', line: false },
+    fractures: { label: 'Fracturas', one: 'Fractura en el terreno', color: '#B45309', line: true },
+    faults: { label: 'Fallas geológicas', one: 'Falla geológica', color: '#991B1B', line: true }
+};
+const nbHazardColor = ['match', ['get', 'kind']]
+    .concat(Object.entries(NB_HAZARDS).flatMap(([kind, h]) => [kind, h.color]))
+    .concat(['#6B6B68']);
 
 const nbParseUrl = () => {
     const params = new URLSearchParams(window.location.search);
@@ -41,12 +57,34 @@ const nbBuildUrl = (point, radius, codes) => {
         '&r=' + radius + '&i=' + codes.join(',');
 };
 
+// The zone reports opened in this browser, newest first, so the empty
+// inspector can offer them again. Browser storage only: a convenience that
+// may be missing (private windows) and is never sent anywhere.
+const NB_RECENT_KEY = 'negocios.recent';
+const NB_RECENT_MAX = 8;
+const nbReadRecent = () => {
+    try {
+        const list = JSON.parse(window.localStorage.getItem(NB_RECENT_KEY) || '[]');
+        return Array.isArray(list) ? list : [];
+    } catch (error) {
+        return [];
+    }
+};
+const nbWriteRecent = (list) => {
+    try { window.localStorage.setItem(NB_RECENT_KEY, JSON.stringify(list)); } catch (error) { /* storage off */ }
+};
+// One entry per place and giros; trying another radius updates it.
+const nbRecentKey = (entry) => [entry.lat.toFixed(5), entry.lng.toFixed(5),
+    entry.giros.map((g) => g.codigo_act).sort().join(',')].join('|');
+
 // Runs `fn` with the map once its style is in; false when there is no map yet.
+// isStyleLoaded() is also false while tiles stream in, long after 'load' has
+// fired, so the wait is for the next 'idle', which always comes.
 const nbWithMap = (fn) => {
     const map = window.map;
     if (!map) return false;
     if (map.isStyleLoaded()) fn(map);
-    else map.once('load', () => fn(map));
+    else map.once('idle', () => fn(map));
     return true;
 };
 
@@ -153,6 +191,9 @@ function BusinessPage() {
     const [indicatorsLoading, setIndicatorsLoading] = React.useState(false);
     const [pickerOpen, setPickerOpen] = React.useState(false);
     const [showHelp, setShowHelp] = React.useState(false);
+    const [hazardsOn, setHazardsOn] = React.useState(false);
+    const [hazards, setHazards] = React.useState(null);
+    const [recent, setRecent] = React.useState(nbReadRecent);
     const isMobile = useNbMedia(NB_MOBILE);
     const markerRef = React.useRef(null);
     const popupRef = React.useRef(null);
@@ -231,6 +272,43 @@ function BusinessPage() {
     const changeRadius = (value) => {
         setRadius(value);
         if (window.analyticsService) window.analyticsService.track('USER_SELECTED_RADIUS', { radius: value });
+    };
+
+    // ---- recent reports ----------------------------------------------------
+    // A report joins the list once its numbers are in; the address, which
+    // arrives on its own, fills in when it comes.
+    React.useEffect(() => {
+        if (!point || giros.length === 0 || !stats || !stats.summary) return;
+        // Numbers still from the previous point or radius: wait for the new ones.
+        const at = stats.summary.coordinates || {};
+        if (Math.abs(at.lat - point.lat) > 1e-6 || Math.abs(at.lng - point.lng) > 1e-6 || stats.summary.radius_meters !== radius) return;
+        setRecent((current) => {
+            const entry = {
+                lat: point.lat,
+                lng: point.lng,
+                radius: radius,
+                giros: giros.map((g) => ({ codigo_act: g.codigo_act, nombre_act: g.nombre_act })),
+                total: stats.summary.total_businesses,
+                at: Date.now()
+            };
+            const key = nbRecentKey(entry);
+            const previous = current.find((e) => nbRecentKey(e) === key);
+            entry.address = address || (previous && previous.address) || '';
+            const next = [entry].concat(current.filter((e) => nbRecentKey(e) !== key)).slice(0, NB_RECENT_MAX);
+            nbWriteRecent(next);
+            return next;
+        });
+    }, [stats, address]);
+
+    const openRecent = (entry) => {
+        choosePoint({ lat: entry.lat, lng: entry.lng }, entry.address || null);
+        setRadius(entry.radius);
+        setGiros(entry.giros.slice(0, NB_MAX_GIROS).map((g, index) => ({ ...g, color: NB_COLORS[index], visible: true })));
+        setPickerOpen(false);
+    };
+    const forgetRecent = () => {
+        nbWriteRecent([]);
+        setRecent([]);
     };
 
     // ---- URL ---------------------------------------------------------------
@@ -373,7 +451,7 @@ function BusinessPage() {
                         '<span class="nb-popup-sub">' + nbEscape(p.categoryName) + (p.staff ? ' · ' + nbEscape(p.staff) : '') + '</span>' +
                         (p.address ? '<span class="nb-popup-sub">' + nbEscape(p.address) + '</span>' : '');
                     if (popupRef.current) popupRef.current.remove();
-                    popupRef.current = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, className: 'nb-popup', offset: 10 })
+                    popupRef.current = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, className: 'nb-popup', anchor: 'bottom', offset: 8 })
                         .setLngLat(f.geometry.coordinates.slice())
                         .setHTML(html)
                         .addTo(map);
@@ -387,11 +465,93 @@ function BusinessPage() {
         });
     }, [stats, codesKey, visibleKey]);
 
+    // ---- map: Terreno y clima ------------------------------------------------
+    // Fetched only while the layer is on, for the current point and radius.
+    React.useEffect(() => {
+        if (!hazardsOn || !point) { setHazards(null); return undefined; }
+        let current = true;
+        fetch('/api/business/location/hazards?lng=' + point.lng + '&lat=' + point.lat + '&radius=' + radius)
+            .then((response) => (response.ok ? response.json() : null))
+            .then((data) => { if (current) setHazards(data); })
+            .catch(() => { if (current) setHazards(null); });
+        return () => { current = false; };
+    }, [hazardsOn, point && point.lat, point && point.lng, radius]);
+
+    React.useEffect(() => {
+        nbWithMap((map) => {
+            const data = hazards || { type: 'FeatureCollection', features: [] };
+            if (map.getSource(NB_SOURCE_HAZARDS)) {
+                map.getSource(NB_SOURCE_HAZARDS).setData(data);
+                return;
+            }
+            if (!hazards) return;
+            map.addSource(NB_SOURCE_HAZARDS, { type: 'geojson', data: data });
+            // Under the establishments, which stay the subject of the map.
+            const before = map.getLayer(NB_LAYER_POINTS) ? NB_LAYER_POINTS : undefined;
+            map.addLayer({
+                id: NB_LAYER_HAZARD_LINES,
+                type: 'line',
+                source: NB_SOURCE_HAZARDS,
+                filter: ['in', ['get', 'kind'], ['literal', ['fractures', 'faults']]],
+                paint: {
+                    'line-color': nbHazardColor,
+                    'line-width': ['match', ['get', 'kind'], 'faults', 3, 1.5],
+                    'line-dasharray': [2, 1.5],
+                    'line-opacity': 0.9
+                }
+            }, before);
+            map.addLayer({
+                id: NB_LAYER_HAZARD_POINTS,
+                type: 'circle',
+                source: NB_SOURCE_HAZARDS,
+                filter: ['==', ['geometry-type'], 'Point'],
+                paint: {
+                    'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 3, 15, 5, 18, 8],
+                    'circle-color': '#FFFFFF',
+                    'circle-opacity': 0.85,
+                    'circle-stroke-color': nbHazardColor,
+                    'circle-stroke-width': 2.5
+                }
+            }, before);
+            const show = (e) => {
+                const f = e.features && e.features[0];
+                if (!f) return;
+                const p = f.properties;
+                const h = NB_HAZARDS[p.kind] || {};
+                const html = '<span class="nb-popup-name">' + nbEscape(h.one || p.kind) + '</span>' +
+                    ((p.year || p.name) ? '<span class="nb-popup-sub">' + nbEscape(p.year ? 'Reportado en ' + p.year : p.name) + '</span>' : '');
+                if (popupRef.current) popupRef.current.remove();
+                popupRef.current = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, className: 'nb-popup', anchor: 'bottom', offset: 8 })
+                    .setLngLat(f.geometry.type === 'Point' ? f.geometry.coordinates.slice() : e.lngLat)
+                    .setHTML(html)
+                    .addTo(map);
+            };
+            const hide = () => {
+                map.getCanvas().style.cursor = '';
+                if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
+            };
+            [NB_LAYER_HAZARD_POINTS, NB_LAYER_HAZARD_LINES].forEach((id) => {
+                map.on('mouseenter', id, (e) => { map.getCanvas().style.cursor = 'pointer'; show(e); });
+                map.on('mouseleave', id, hide);
+                map.on('click', id, show);   // phones have no hover
+            });
+        });
+    }, [hazards]);
+
+    // What the legend lists: the kinds found, with how many.
+    const hazardCounts = React.useMemo(() => {
+        const counts = {};
+        ((hazards && hazards.features) || []).forEach((f) => { counts[f.properties.kind] = (counts[f.properties.kind] || 0) + 1; });
+        return counts;
+    }, [hazards]);
+
     // ---- map: a click on the map places the pin -----------------------------
     React.useEffect(() => {
         let map = null;
         const onClick = (e) => {
-            if (map.getLayer(NB_LAYER_POINTS) && map.queryRenderedFeatures(e.point, { layers: [NB_LAYER_POINTS] }).length > 0) return;
+            // A click on an establishment or a hazard opens its card instead.
+            const layers = [NB_LAYER_POINTS, NB_LAYER_HAZARD_POINTS, NB_LAYER_HAZARD_LINES].filter((id) => map.getLayer(id));
+            if (layers.length && map.queryRenderedFeatures(e.point, { layers: layers }).length > 0) return;
             choosePointRef.current({ lat: e.lngLat.lat, lng: e.lngLat.lng }, null);
         };
         nbWithMap((m) => { map = m; map.on('click', onClick); });
@@ -399,8 +559,8 @@ function BusinessPage() {
             if (!map) return;
             map.off('click', onClick);
             try {
-                [NB_LAYER_POINTS, NB_LAYER_FILL, NB_LAYER_LINE].forEach((id) => { if (map.getLayer(id)) map.removeLayer(id); });
-                [NB_SOURCE_POINTS, NB_SOURCE_RADIUS].forEach((id) => { if (map.getSource(id)) map.removeSource(id); });
+                [NB_LAYER_POINTS, NB_LAYER_HAZARD_POINTS, NB_LAYER_HAZARD_LINES, NB_LAYER_FILL, NB_LAYER_LINE].forEach((id) => { if (map.getLayer(id)) map.removeLayer(id); });
+                [NB_SOURCE_POINTS, NB_SOURCE_HAZARDS, NB_SOURCE_RADIUS].forEach((id) => { if (map.getSource(id)) map.removeSource(id); });
             } catch (error) { /* the map may already be gone */ }
             if (popupRef.current) { popupRef.current.remove(); popupRef.current = null; }
             if (markerRef.current) { markerRef.current.remove(); markerRef.current = null; }
@@ -444,6 +604,26 @@ function BusinessPage() {
 
             {point && !isMobile && chips('nb-chips')}
 
+            {point && hazards && (
+                <div className="nb-map-legend" aria-label="Terreno y clima en el mapa">
+                    <div className="nb-map-legend-head">
+                        <span>Terreno y clima</span>
+                        <button type="button" className="nb-map-legend-close" onClick={() => setHazardsOn(false)} aria-label="Quitar del mapa">
+                            <svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                        </button>
+                    </div>
+                    {Object.keys(hazardCounts).length === 0 ? (
+                        <span className="nb-map-legend-empty">Nada registrado en el radio.</span>
+                    ) : Object.entries(NB_HAZARDS).filter(([kind]) => hazardCounts[kind]).map(([kind, h]) => (
+                        <div key={kind} className="nb-map-legend-row">
+                            <span className={'nb-map-legend-mark' + (h.line ? ' is-line' : '')} style={{ borderColor: h.color }}></span>
+                            <span>{h.label}</span>
+                            <span className="nb-map-legend-count">{h.line ? '' : hazardCounts[kind]}</span>
+                        </div>
+                    ))}
+                </div>
+            )}
+
             <BusinessInspector
                 point={point}
                 address={address}
@@ -466,6 +646,11 @@ function BusinessPage() {
                 onRemoveGiro={removeGiro}
                 onReset={reset}
                 isMobile={isMobile}
+                recent={recent}
+                onOpenRecent={openRecent}
+                onForgetRecent={forgetRecent}
+                hazardsOn={hazardsOn}
+                onHazardsToggle={() => setHazardsOn((on) => !on)}
                 chipsSlot={point && isMobile ? chips('nb-sheet-chips') : null}
             />
 

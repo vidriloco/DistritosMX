@@ -12,6 +12,12 @@
 #                                      investigacion dataset (felonies, despojos, etc.)
 #   ./deploy-production.sh --seed-denue also download + ingest the INEGI DENUE
 #                                      business registry (powers /negocios)
+#   ./deploy-production.sh --seed-hazards re-download the Atlas de Riesgos layers
+#                                      behind "Terreno y clima" (otherwise only
+#                                      fetched when the hazards volume is empty)
+#   ./deploy-production.sh --seed-scores recompute the Índice de habitabilidad per
+#                                      AGEB and colonia (otherwise only when the
+#                                      table is empty; the admin can also rerun it)
 #
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -42,12 +48,16 @@ PULL=false
 SEED=false
 SEED_FGJ=false
 SEED_DENUE=false
+SEED_HAZARDS=false
+SEED_SCORES=false
 for arg in "$@"; do
     case "$arg" in
         --pull) PULL=true ;;
         --seed) SEED=true ;;
         --seed-fgj) SEED_FGJ=true ;;
         --seed-denue) SEED_DENUE=true ;;
+        --seed-hazards) SEED_HAZARDS=true ;;
+        --seed-scores) SEED_SCORES=true ;;
         *) echo "Unknown option: $arg" >&2; exit 1 ;;
     esac
 done
@@ -184,6 +194,11 @@ esac
 echo "==> Running migrations..."
 $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py migrate --noinput"
 
+# Opine's questions and options (ordena.laciudad.mx) live in
+# geodjango/consulta/content/pozmvm.json; this refreshes the tables from it.
+echo "==> Loading the POZMVM consultation content..."
+$COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py load_content"
+
 echo "==> Preparing static assets..."
 # The container command already runs this on start; repeating it here makes a
 # failure visible in the deploy output instead of only in a restart loop, and
@@ -259,6 +274,30 @@ if [ "$SEED_FGJ" = true ]; then
     $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py despojos_warm_cache"
     echo "NOTE: run 'geo_area_update_from_felonies' manually if you also want"
     echo "AGEB/neighbourhood/municipality aggregates updated from this data."
+fi
+
+# "Terreno y clima" in the /negocios report reads GeoParquet files built from
+# the Atlas de Riesgos CDMX, kept in the `hazards` volume rather than in
+# PostGIS. Without them the report just leaves the block out, silently, so the
+# first deploy onto a new volume fetches them. Refresh with --seed-hazards
+# when the Atlas publishes a new year (and its layer ids are in hazards.py).
+# A network hiccup on the Atlas side must not fail an otherwise good deploy.
+if [ "$SEED_HAZARDS" = true ] || ! $COMPOSE exec -T app test -f geodjango/data/hazards/ageb_hazards.parquet; then
+    echo "==> Downloading the Atlas de Riesgos layers (Terreno y clima, ~3MB, a minute or two)..."
+    $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py build_hazards" || \
+        echo "WARNING: could not build the hazard layers; Terreno y clima stays as it was. Retry with --seed-hazards." >&2
+fi
+
+# The Índice de habitabilidad (AreaScore) is computed from what the seeds above
+# load plus the Atlas files, so it runs after them: on request, after any seed,
+# or when the table is still empty. It downloads the Censo 2020 AGEB table from
+# INEGI itself (~45MB) and takes a few minutes. Like the hazards, a failure
+# here leaves the previous scores in place rather than failing the deploy.
+SCORES_EMPTY="$($COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py shell -c 'from world.models import AreaScore; print(AreaScore.objects.exists())'" 2>/dev/null | tail -1 | tr -d '\r')"
+if [ "$SEED_SCORES" = true ] || [ "$SEED" = true ] || [ "$SEED_DENUE" = true ] || [ "$SEED_FGJ" = true ] || [ "$SCORES_EMPTY" = "False" ]; then
+    echo "==> Computing the Índice de habitabilidad per AGEB and colonia (a few minutes)..."
+    $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py build_area_scores" || \
+        echo "WARNING: could not compute the index; the previous scores stay. See Admin > Cálculos del índice." >&2
 fi
 
 # The despojos map caches full-table scans for 12 hours in a file cache that

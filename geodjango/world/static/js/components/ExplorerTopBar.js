@@ -2,24 +2,25 @@
 // Logo, search, the spatial unit as chips and the section links.
 
 // On a phone the unit chips move into the inspector sheet, which reads them
-// from here.
+// from here. A hidden unit still works, it just has no chip.
 const EXPLORER_UNITS = [
     { id: 'hexbin', label: 'Hexbin', disabled: true },
     { id: 'agebs', label: 'AGEB' },
     { id: 'neighborhood', label: 'Colonia' },
-    { id: 'isochrones', label: 'Isocronas' }
+    { id: 'isochrones', label: 'Isocronas', hidden: true }
 ];
 
 function ExplorerUnitChips({ selectedAnalysis, onAnalysisSelect, className }) {
     const handleUnitClick = (unit) => {
         if (unit.disabled) return;
+        window.analyticsService && window.analyticsService.track('explorar_unidad', { unidad: unit.id });
         // Clicking the active chip again clears the spatial unit.
         onAnalysisSelect(selectedAnalysis === unit.id ? null : unit.id);
     };
 
     return (
         <div className={className} role="group" aria-label="Unidad espacial">
-            {EXPLORER_UNITS.map((unit) => (
+            {EXPLORER_UNITS.filter((unit) => !unit.hidden).map((unit) => (
                 <button
                     key={unit.id}
                     type="button"
@@ -35,6 +36,9 @@ function ExplorerUnitChips({ selectedAnalysis, onAnalysisSelect, className }) {
         </div>
     );
 }
+
+// The line and station search is hidden for now; set to true to bring it back.
+const EXPLORER_SHOW_SEARCH = false;
 
 function ExplorerTopBar({
     selectedAnalysis,
@@ -61,13 +65,15 @@ function ExplorerTopBar({
                 <img src="/static/images/distritos-mx-logo-black.png" alt="Ciudad MX" />
             </a>
 
-            <button type="button" className="xb-search" onClick={onSearchClick}>
-                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="m20 20-3.5-3.5" />
-                </svg>
-                <span className="xb-search-placeholder">Buscar línea o estación</span>
-            </button>
+            {EXPLORER_SHOW_SEARCH && (
+                <button type="button" className="xb-search" onClick={() => { window.analyticsService && window.analyticsService.track('explorar_busqueda_abierta'); onSearchClick(); }}>
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="m20 20-3.5-3.5" />
+                    </svg>
+                    <span className="xb-search-placeholder">Buscar línea o estación</span>
+                </button>
+            )}
 
             <ExplorerUnitChips
                 className="xb-units"

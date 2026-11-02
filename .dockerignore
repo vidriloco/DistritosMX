@@ -9,3 +9,5 @@ __pycache__
 designs
 documentos
 *.sql
+ordena/node_modules
+ordena/dist

@@ -72,9 +72,11 @@ function DespojoCaseForm({ open, onClose }) {
             .then(({ ok, body }) => {
                 if (!ok) throw new Error(body.error || 'No pudimos guardar tu caso.');
                 setStatus('sent');
+                window.analyticsService && window.analyticsService.track('despojo_caso_enviado', { ok: true });
             })
             .catch(err => {
                 setStatus('error');
+                window.analyticsService && window.analyticsService.track('despojo_caso_enviado', { ok: false });
                 setErrorMsg(err.message);
             });
     };
@@ -82,7 +84,7 @@ function DespojoCaseForm({ open, onClose }) {
     return (
         <div className="despojo-modal-backdrop" onClick={onClose}>
             <div
-                className="despojo-modal"
+                className="despojo-modal ph-no-capture"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="despojo-form-title"

@@ -1066,3 +1066,284 @@ class DespojoNewsRunAdmin(admin.ModelAdmin):
         return redirect('admin:world_despojonewsrun_change', run.pk)
 
 admin.site.register(DespojoNewsRun, DespojoNewsRunAdmin)
+
+
+# --------------------------------------------------------------- Índice de habitabilidad
+
+from datetime import timedelta
+
+from django.http import JsonResponse
+from django.utils import timezone
+from django.template.response import TemplateResponse
+from django.utils.safestring import mark_safe
+
+from .models import AreaScore, AreaScoreRun
+from .models.area_score import AXES
+
+
+def _score_color(score):
+    """The card's colours: red under 4, orange to 5, yellow to 7, green above."""
+    if score is None:
+        return '#9CA3AF'
+    if score < 4:
+        return '#ef4444'
+    if score < 5:
+        return '#f97316'
+    if score < 7:
+        return '#eab308'
+    return '#22c55e'
+
+
+def _radar_svg(values, size=260):
+    """The six axes as an inline SVG radar, like the public card."""
+    import math
+
+    centre, radius = size / 2, size / 2 - 46
+    n = len(AXES)
+
+    def at(i, r):
+        angle = -math.pi / 2 + 2 * math.pi * i / n
+        return centre + r * math.cos(angle), centre + r * math.sin(angle)
+
+    parts = []
+    for level in (0.25, 0.5, 0.75, 1):
+        ring = ' '.join('%.1f,%.1f' % at(i, radius * level) for i in range(n))
+        parts.append(f'<polygon points="{ring}" fill="none" stroke="#E5E7EB"/>')
+    for i, (_key, label) in enumerate(AXES):
+        x, y = at(i, radius)
+        parts.append(f'<line x1="{centre}" y1="{centre}" x2="{x:.1f}" y2="{y:.1f}" stroke="#E5E7EB"/>')
+        lx, ly = at(i, radius + 24)
+        parts.append(f'<text x="{lx:.1f}" y="{ly:.1f}" font-size="12" fill="#6B7280" '
+                     f'text-anchor="middle" dominant-baseline="middle">{label}</text>')
+    shape = ' '.join('%.1f,%.1f' % at(i, radius * (values.get(key) or 0) / 10) for i, (key, _l) in enumerate(AXES))
+    parts.append(f'<polygon points="{shape}" fill="rgba(59,130,246,.18)" stroke="#3B82F6" stroke-width="2"/>')
+    for i, (key, _label) in enumerate(AXES):
+        if values.get(key) is not None:
+            x, y = at(i, radius * values[key] / 10)
+            parts.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4" fill="#3B82F6" stroke="#fff" stroke-width="1.5"/>')
+    return f'<svg width="{size}" height="{size}" viewBox="0 0 {size} {size}">{"".join(parts)}</svg>'
+
+
+class AreaScoreAdminForm(forms.ModelForm):
+    class Meta:
+        model = AreaScore
+        fields = '__all__'
+
+    def clean(self):
+        cleaned = super().clean()
+        for key, label in AXES:
+            value = cleaned.get(key)
+            if value is not None and not 0 <= value <= 10:
+                self.add_error(key, f'{label} va de 0 a 10.')
+        return cleaned
+
+
+class AreaScoreAdmin(LeafletGeoAdmin):
+    """
+    The Índice de habitabilidad, one row per AGEB or colonia, written by
+    `manage.py build_area_scores` or by the "Recalcular" button here.
+
+    The six axes can be corrected by hand: the row is then marked as edited and
+    a recalculation keeps those axes (the overall score and the ranks still
+    move). "Quitar la edición manual" hands the row back to the calculation.
+    """
+    form = AreaScoreAdminForm
+    change_list_template = 'admin/world/areascore/change_list.html'
+    modifiable = False   # the map shows the area; its outline is not edited here
+    list_display = ['label', 'area_type', 'municipality', 'score_badge', 'rank_display', 'axes_bars',
+                    'population', 'edited']
+    list_filter = ['area_type', 'edited', 'rankable', 'municipality']
+    search_fields = ['name', 'code', 'municipality']
+    ordering = ['area_type', 'rank']
+    list_per_page = 50
+    actions = ['clear_edits']
+    readonly_fields = ['area_type', 'code', 'name', 'municipality', 'population', 'score_badge', 'rank_display',
+                       'radar', 'indicators_table', 'computed_at', 'updated_at', 'public_link']
+    fieldsets = (
+        (None, {'fields': ('area_type', 'code', 'name', 'municipality', 'population', 'public_link')}),
+        ('Índice', {'fields': ('score_badge', 'rank_display', 'radar', 'rankable')}),
+        ('Ejes (0 a 10; al cambiarlos el área queda como editada)', {
+            'fields': tuple(key for key, _label in AXES) + ('edited', 'note')}),
+        ('Indicadores medidos', {'fields': ('indicators_table',)}),
+        ('Mapa', {'fields': ('geometry',), 'classes': ('collapse',)}),
+        ('Cálculo', {'fields': ('computed_at', 'updated_at')}),
+    )
+
+    def has_add_permission(self, request):
+        # Areas come from the calculation, which also removes those that no longer exist.
+        return False
+
+    def label(self, obj):
+        return obj.name or obj.code
+    label.short_description = 'Área'
+    label.admin_order_field = 'name'
+
+    def score_badge(self, obj):
+        if obj.score is None:
+            return '—'
+        return format_html('<span style="display:inline-block;min-width:2.6em;text-align:center;padding:2px 8px;'
+                           'border-radius:999px;background:{};color:#fff;font-weight:600">{}</span>',
+                           _score_color(obj.score), f'{obj.score:.1f}')
+    score_badge.short_description = 'Índice'
+    score_badge.admin_order_field = 'score'
+
+    def rank_display(self, obj):
+        if obj.rank is None:
+            return 'Sin lugar (pocos habitantes)' if not obj.rankable else '—'
+        return f'#{obj.rank} de {obj.rank_of:,}'
+    rank_display.short_description = 'Lugar'
+    rank_display.admin_order_field = 'rank'
+
+    def axes_bars(self, obj):
+        cells = []
+        for key, label in AXES:
+            value = getattr(obj, key)
+            height = 0 if value is None else max(2, round(value * 2.2))
+            title = f'{label}: {"—" if value is None else f"{value:.1f}"}'
+            cells.append(f'<span title="{title}" style="display:inline-block;width:9px;height:22px;margin-right:2px;'
+                         f'background:#F3F4F6;position:relative;vertical-align:bottom">'
+                         f'<span style="position:absolute;left:0;right:0;bottom:0;height:{height}px;'
+                         f'background:{_score_color(value)}"></span></span>')
+        return mark_safe(''.join(cells))
+    axes_bars.short_description = 'Viv · Tra · Seg · Opo · Agu · Rie'
+
+    def radar(self, obj):
+        return mark_safe(_radar_svg(obj.axis_values()))
+    radar.short_description = 'Gráfica'
+
+    def indicators_table(self, obj):
+        rows = []
+        for key, label in AXES:
+            items = (obj.indicators or {}).get(key) or []
+            rows.append(format_html('<tr><th colspan="3" style="background:#F9FAFB">{} · {}</th></tr>', label,
+                                    '—' if getattr(obj, key) is None else f'{getattr(obj, key):.1f}'))
+            for item in items:
+                if item['value'] is None:
+                    value = '—'
+                else:
+                    number = f"{item['value']:,.0f}" if float(item['value']).is_integer() else f"{item['value']:,.1f}"
+                    value = number + ('%' if item['unit'] == '%' else f" {item['unit']}" if item['unit'] else '')
+                pct = '—' if item['percentile'] is None else f"{item['percentile']}"
+                rows.append(format_html('<tr><td>{}</td><td style="text-align:right">{}</td>'
+                                        '<td style="text-align:right">{}</td></tr>', item['label'], value, pct))
+        if not rows:
+            return '—'
+        return format_html('<table><thead><tr><th>Indicador</th><th>Valor</th>'
+                           '<th title="Mejor que este % de las áreas del mismo tipo">Percentil</th></tr></thead>'
+                           '<tbody>{}</tbody></table>', mark_safe(''.join(rows)))
+    indicators_table.short_description = 'Indicadores'
+
+    def public_link(self, obj):
+        if obj.area_type != AreaScore.AreaType.AGEB:
+            return '—'
+        return format_html('<a href="/explorar?geozone={}" target="_blank" rel="noopener">Ver en el mapa público ↗</a>',
+                           obj.code)
+    public_link.short_description = 'En el sitio'
+
+    def save_model(self, request, obj, form, change):
+        if change and any(key in form.changed_data for key, _label in AXES):
+            obj.edited = True
+        obj.compute_score()
+        super().save_model(request, obj, form, change)
+        AreaScore.rerank(obj.area_type)
+
+    def clear_edits(self, request, queryset):
+        updated = queryset.update(edited=False)
+        self.message_user(request, f'{updated} área(s) vuelven a tomar sus ejes del cálculo en la próxima '
+                                   'ejecución.')
+    clear_edits.short_description = 'Quitar la edición manual'
+
+    def changelist_view(self, request, extra_context=None):
+        extra_context = extra_context or {}
+        extra_context['last_run'] = AreaScoreRun.objects.first()
+        return super().changelist_view(request, extra_context)
+
+    def get_urls(self):
+        return [
+            path('recalcular/', self.admin_site.admin_view(self.run_now_view), name='world_areascore_run_now'),
+            path('mapa/', self.admin_site.admin_view(self.map_view), name='world_areascore_map'),
+            path('mapa.geojson', self.admin_site.admin_view(self.map_data_view), name='world_areascore_map_data'),
+        ] + super().get_urls()
+
+    def run_now_view(self, request):
+        """Start a recalculation; POST only, since it rewrites the whole table."""
+        from .area_scores import build_in_background
+
+        if request.method != 'POST':
+            return redirect('admin:world_areascore_changelist')
+        if not request.user.has_perm('world.change_areascore'):
+            raise PermissionDenied
+        running = AreaScoreRun.objects.filter(status=AreaScoreRun.Status.RUNNING,
+                                              started_at__gte=timezone.now() - timedelta(hours=1)).first()
+        if running:
+            self.message_user(request, f'Ya hay un cálculo en curso (#{running.pk}).', level=messages.WARNING)
+            return redirect('admin:world_areascorerun_change', running.pk)
+        kind = request.POST.get('type', 'all')
+        area_types = ('ageb', 'colonia') if kind not in ('ageb', 'colonia') else (kind,)
+        run = build_in_background(area_types, actor=request.user.get_username())
+        self.message_user(request, f'Cálculo #{run.pk} iniciado. Tarda unos minutos; recarga para ver la bitácora.')
+        return redirect('admin:world_areascorerun_change', run.pk)
+
+    def map_view(self, request):
+        context = {
+            **self.admin_site.each_context(request),
+            'title': 'Mapa del índice de habitabilidad',
+            'opts': self.model._meta,
+            'axes': AXES,
+            'area_type': request.GET.get('type', 'ageb'),
+            'axis': request.GET.get('axis', 'score'),
+        }
+        return TemplateResponse(request, 'admin/world/areascore/map.html', context)
+
+    def map_data_view(self, request):
+        """Every area of a type as simplified GeoJSON with the chosen value, for the admin map."""
+        import json
+
+        from django.contrib.gis.db.models.functions import AsGeoJSON
+        from django.contrib.gis.db.models import functions as gis_functions
+
+        area_type = request.GET.get('type', 'ageb')
+        axis = request.GET.get('axis', 'score')
+        if axis not in dict(AXES) and axis != 'score':
+            axis = 'score'
+        rows = (AreaScore.objects.filter(area_type=area_type)
+                .annotate(shape=AsGeoJSON(gis_functions.SnapToGrid('geometry', 0.00005), precision=5))
+                .values_list('pk', 'name', 'code', 'municipality', axis, 'rank', 'shape'))
+        features = [{
+            'type': 'Feature',
+            'geometry': json.loads(shape),
+            'properties': {'id': pk, 'name': name or code, 'municipality': municipality, 'value': value, 'rank': rank},
+        } for pk, name, code, municipality, value, rank, shape in rows if shape]
+        return JsonResponse({'type': 'FeatureCollection', 'features': features})
+
+admin.site.register(AreaScore, AreaScoreAdmin)
+
+
+class AreaScoreRunAdmin(admin.ModelAdmin):
+    """The log of every calculation, from the admin's button or the command line."""
+    list_display = ['started_at', 'status', 'trigger', 'actor', 'area_types', 'took']
+    list_filter = ['status', 'trigger']
+    readonly_fields = ['status', 'trigger', 'actor', 'area_types', 'started_at', 'finished_at', 'took', 'log_view']
+    exclude = ['log']
+    ordering = ['-started_at']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def took(self, obj):
+        seconds = obj.duration_seconds
+        return '— en curso —' if seconds is None else f'{seconds:.0f} s'
+    took.short_description = 'Duración'
+
+    def log_view(self, obj):
+        return format_html(
+            '<pre style="white-space:pre-wrap;max-height:32em;overflow:auto;'
+            'background:#f6f6f6;padding:1em;border:1px solid #ddd;border-radius:4px;">{}</pre>',
+            obj.log or 'Sin líneas todavía.',
+        )
+    log_view.short_description = 'Bitácora'
+
+admin.site.register(AreaScoreRun, AreaScoreRunAdmin)

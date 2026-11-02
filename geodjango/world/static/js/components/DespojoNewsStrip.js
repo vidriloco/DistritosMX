@@ -78,7 +78,7 @@ function DespojoNewsStrip({ inline }) {
             <button
                 type="button"
                 className="despojo-news-head"
-                onClick={() => setOpen(o => !o)}
+                onClick={() => { window.analyticsService && window.analyticsService.track('despojo_noticias', { abiertas: !open }); setOpen(o => !o); }}
                 aria-expanded={open}
             >
                 <span className="despojo-eyebrow">En las noticias</span>

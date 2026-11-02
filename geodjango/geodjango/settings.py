@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -51,7 +52,7 @@ ALLOWED_HOSTS = [
     h.strip()
     for h in os.getenv(
         "DJANGO_ALLOWED_HOSTS",
-        "127.0.0.1,192.168.178.209,localhost,metrobus.localhost",
+        "127.0.0.1,192.168.178.209,localhost,metrobus.localhost,ordena.localhost,despojos.localhost",
     ).split(",")
     if h.strip()
 ]
@@ -78,6 +79,11 @@ FOOT_TRAFFIC_FILE = os.environ.get(
     'FOOT_TRAFFIC_FILE', os.path.join(BASE_DIR, 'data', 'foot_traffic', 'foot_traffic.parquet')
 )
 
+# Natural hazards for the zone report ("Terreno y clima"), downloaded from the
+# Atlas de Riesgos CDMX by `manage.py build_hazards`. Without the folder the
+# report leaves the block out.
+HAZARDS_DIR = os.environ.get('HAZARDS_DIR', os.path.join(BASE_DIR, 'data', 'hazards'))
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -89,6 +95,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'world',
+    'consulta',
     'django_apscheduler',
     'leaflet',
     'tinymce',
@@ -280,6 +287,15 @@ LOCALE_PATHS = [
 
 ROOT_HOSTCONF = 'geodjango.hosts'
 DEFAULT_HOST = 'www'
+
+# --- Opine, the POZMVM consultation (ordena.laciudad.mx) ---------------------
+# The consultation's dates, mail and links, shared with the frontend through
+# /api/consulta/ on that host. The frontend itself is the Vite build in ordena/,
+# compiled into ORDENA_DIST by the Dockerfile (or `npm run build` locally).
+_POZMVM = json.loads((BASE_DIR / "consulta" / "content" / "pozmvm.json").read_text(encoding="utf-8"))
+POZMVM_CONSULTA = _POZMVM["consulta"]
+POZMVM_FINANCIAMIENTO = _POZMVM["financiamiento"]
+ORDENA_DIST = BASE_DIR.parent / "ordena" / "dist"
 
 TAGGIT_CASE_INSENSITIVE = True
 

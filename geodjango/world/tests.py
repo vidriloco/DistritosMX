@@ -1,3 +1,4 @@
+import json
 from datetime import date, datetime, time, timedelta
 
 from django.contrib.gis.geos import Point
@@ -275,3 +276,212 @@ class PhoneEndpointAccessTests(TestCase):
         from django.contrib.auth.models import User
         self.client.force_login(User.objects.create_user('visitor', password='x'))
         self.assertEqual(self.client.get(self.URLS[0]).status_code, 302)
+
+
+class HazardsTests(TestCase):
+    """
+    The Terreno y clima build from Atlas-shaped GeoJSON and the report's
+    lookup on its output. The geotechnical zones come in UTM 14N, as the
+    Atlas serves most layers, to cover the move to lon/lat.
+    """
+
+    def setUp(self):
+        import tempfile
+        self.folder = tempfile.mkdtemp()
+        self.layers = {}
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.folder, ignore_errors=True)
+
+    @staticmethod
+    def square(at, half, srid=4326):
+        """A square GeoJSON polygon around `at`, `half` degrees across, in `srid`."""
+        from django.contrib.gis.geos import Polygon
+        x, y = at.x, at.y
+        polygon = Polygon(((x - half, y - half), (x + half, y - half), (x + half, y + half),
+                           (x - half, y + half), (x - half, y - half)), srid=4326)
+        if srid != 4326:
+            polygon.transform(srid)
+        return json.loads(polygon.geojson)
+
+    def serve(self, layer_id, features, srid=None):
+        collection = {'type': 'FeatureCollection', 'features': [
+            {'type': 'Feature', 'geometry': geometry, 'properties': properties} for geometry, properties in features]}
+        if srid:
+            collection['crs'] = {'type': 'name', 'properties': {'name': f'EPSG:{srid}'}}
+        self.layers[layer_id] = collection
+
+    def point(self, at):
+        return {'type': 'Point', 'coordinates': [at.x, at.y]}
+
+    def build(self):
+        from world.hazards import build
+        empty = {'type': 'FeatureCollection', 'features': []}
+        return build(self.folder, fetch=lambda service, kind, layer_id: self.layers.get(
+            (service.rsplit('/', 1)[-1], layer_id), empty))
+
+    def report(self, at=CENTRO):
+        from django.test import override_settings
+        from world.views_categorized.api import terrain_and_climate
+        with override_settings(HAZARDS_DIR=self.folder):
+            return terrain_and_climate(at.x, at.y, 350)
+
+    def test_reads_the_ground_and_the_census_zone_under_the_point(self):
+        levels = {'sismo': 'Muy Alto', 'inundacion': 'Alto', 'precipitac': 'Medio', 'granizo': 'Bajo',
+                  'tom_elec': 'Bajo', 'tem_max': 'Alto', 'sus_ladera': 'Muy Bajo'}
+        self.serve(('Servicio_Indicadores_AGEB', 0), [(self.square(CENTRO, 0.002), {'cvegeo': '0901500010010', **levels})])
+        self.serve(('Geologicos', 27), [(self.square(CENTRO, 0.05, srid=6369),
+                                          {'INTENSIDAD': 'Zona III', 'NOMBRE': 'Zona de lago'})], srid=6369)
+        self.serve(('Geologicos', 6), [(self.square(CENTRO, 0.05), {'magni_num': '11-20'})])
+        self.serve(('Geologicos', 5), [(self.point(NEAR), {}), (self.point(FAR), {})])
+        self.serve(('Geologicos', 7), [(self.point(NEAR), {})])
+        self.serve(('Geologicos', 9), [(self.point(CENTRO), {})])
+        self.serve(('Geologicos', 2), [({'type': 'LineString', 'coordinates': [[NEAR.x - 0.01, NEAR.y], [NEAR.x + 0.01, NEAR.y]]}, {})])
+        counts, skipped = self.build()
+
+        result = self.report()
+
+        self.assertEqual((counts['mines'], counts['sinkholes'], skipped), (2, 2, {}))
+        self.assertEqual(result['levels'], levels)
+        self.assertEqual(result['geotechnical_zone'], {'zone': 'III', 'name': 'Zona de lago'})
+        self.assertEqual(result['subsidence_cm_year'], '11-20')
+        self.assertIsNone(result['crack_zone'])
+        self.assertEqual(result['mines']['count'], 1)                 # the far one is 2 km out
+        self.assertAlmostEqual(result['mines']['nearest_m'], 111, delta=3)
+        self.assertEqual(result['sinkholes'], {'count': 2, 'nearest_m': 0, 'from_year': 2017, 'to_year': 2025})
+        self.assertEqual(result['fractures']['count'], 1)
+        self.assertAlmostEqual(result['fractures']['nearest_m'], 111, delta=3)
+        # Nothing reported is still reported over the years the layer covers.
+        self.assertEqual(result['waterlogging'], {'count': 0, 'nearest_m': None, 'from_year': 2016, 'to_year': 2025})
+
+    def test_outside_the_city_or_without_files_there_is_no_block(self):
+        self.serve(('Servicio_Indicadores_AGEB', 0), [(self.square(CENTRO, 0.002), {'cvegeo': '0901500010010'})])
+        self.build()
+
+        self.assertIsNone(self.report(at=FAR))
+        self.assertIsNotNone(self.report())
+        self.folder = f'{self.folder}/missing'
+        self.assertIsNone(self.report())
+
+
+class AreaScoreTests(TestCase):
+    """The Índice de habitabilidad: percentiles, ranks, hand edits and the API."""
+
+    # Three AGEBs a kilometre apart along a street; the census below makes the
+    # first the best housed, and only the third is too small to rank.
+    CENSUS = {
+        '0901500010010': {'POBTOT': 3000, 'VIVPAR_HAB': 1000, 'VPH_1CUART': 10, 'VPH_PISOTI': 0, 'VPH_DRENAJ': 1000,
+                          'VPH_INTER': 900, 'VPH_AGUADV': 1000, 'VPH_AGUAFV': 0},
+        '0901500010025': {'POBTOT': 2000, 'VIVPAR_HAB': 600, 'VPH_1CUART': 120, 'VPH_PISOTI': 30, 'VPH_DRENAJ': 580,
+                          'VPH_INTER': 300, 'VPH_AGUADV': 500, 'VPH_AGUAFV': 100},
+        '090150001003A': {'POBTOT': 40, 'VIVPAR_HAB': 12, 'VPH_1CUART': '*', 'VPH_PISOTI': '*', 'VPH_DRENAJ': 12,
+                          'VPH_INTER': 6, 'VPH_AGUADV': 12, 'VPH_AGUAFV': 0},
+    }
+
+    def setUp(self):
+        import csv
+        import tempfile
+
+        from django.contrib.gis.geos import Polygon
+        from world.area_scores import CENSUS_COLUMNS
+        from world.models import GeoZone
+
+        self.folder = tempfile.mkdtemp()
+        self.census = f'{self.folder}/ageb_09.csv'
+        with open(self.census, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['ENTIDAD', 'NOM_ENT', 'MUN', 'NOM_MUN', 'LOC', 'NOM_LOC', 'AGEB', 'MZA', *CENSUS_COLUMNS])
+            writer.writerow(['09', 'CDMX', '015', 'Cuauhtémoc', '0000', 'Total del municipio', '0000', '000',
+                             *['0'] * len(CENSUS_COLUMNS)])
+            for cvegeo, values in self.CENSUS.items():
+                row = ['09', 'CDMX', '015', 'Cuauhtémoc', '0001', 'Total AGEB urbana', cvegeo[-4:]]
+                writer.writerow(row + ['000'] + [values[c] for c in CENSUS_COLUMNS])
+                writer.writerow(row + ['001'] + ['1'] * len(CENSUS_COLUMNS))   # a block, ignored
+        for index, cvegeo in enumerate(self.CENSUS):
+            x = CENTRO.x + index * 0.01
+            GeoZone.objects.create(CVEGEO=cvegeo, CVE_ENT='09', CVE_MUN='015', CVE_LOC='0001', CVE_AGEB=cvegeo[-4:],
+                                   geometry=Polygon(((x, 19.43), (x + 0.004, 19.43), (x + 0.004, 19.434),
+                                                     (x, 19.434), (x, 19.43)), srid=4326))
+
+    def build(self):
+        from django.test import override_settings
+        from world.area_scores import build
+        with override_settings(CENSUS_AGEB_FILE=self.census, HAZARDS_DIR=f'{self.folder}/no-hazards'):
+            return build(('ageb',), log=lambda line: None)
+
+    def test_scores_rank_and_keep_hand_edits(self):
+        from world.models import AreaScore
+
+        self.assertEqual(self.build(), {'ageb': 3})
+        best, worse, tiny = (AreaScore.objects.get(code=c) for c in self.CENSUS)
+        self.assertGreater(best.vivienda, worse.vivienda)
+        self.assertEqual((best.rank, worse.rank, best.rank_of), (1, 2, 2))
+        self.assertFalse(tiny.rankable)
+        self.assertIsNone(tiny.rank)
+        self.assertEqual(best.municipality, 'Cuauhtémoc')
+        # "*" is withheld by INEGI, not zero.
+        withheld = {i['key']: i['value'] for i in tiny.indicators['vivienda']}
+        self.assertIsNone(withheld['piso_tierra'])
+        # Nothing loaded for these axes: empty, not zero.
+        self.assertIsNone(best.seguridad)
+        self.assertIsNone(best.riesgo)
+
+        worse.vivienda, worse.agua, worse.edited = 10, 10, True
+        worse.save()
+        self.build()
+        worse.refresh_from_db()
+        best.refresh_from_db()
+        self.assertEqual((worse.vivienda, worse.agua), (10, 10))
+        self.assertEqual((worse.rank, best.rank), (1, 2))
+
+    def test_api_finds_an_area_by_code_or_point(self):
+        self.build()
+        by_code = self.client.get('/api/area-score', {'type': 'ageb', 'code': '0901500010010'}).json()
+        self.assertEqual(by_code['rank'], 1)
+        self.assertEqual([axis['key'] for axis in by_code['axes']],
+                         ['vivienda', 'transporte', 'seguridad', 'oportunidades', 'agua', 'riesgo'])
+        by_point = self.client.get('/api/area-score', {'type': 'ageb', 'lng': CENTRO.x + 0.012, 'lat': 19.432}).json()
+        self.assertEqual(by_point['code'], '0901500010025')
+        self.assertEqual(self.client.get('/api/area-score', {'type': 'ageb', 'code': 'nope'}).status_code, 404)
+        self.assertEqual(self.client.get('/api/area-score', {'type': 'municipio'}).status_code, 400)
+        outline = self.client.get('/api/area-score', {'type': 'ageb', 'code': '0901500010010', 'geometry': '1'}).json()
+        self.assertEqual(outline['geometry']['type'], 'Polygon')
+
+    def test_ranking_lists_areas_by_place(self):
+        self.build()
+        ranking = self.client.get('/api/area-score/ranking', {'type': 'ageb', 'from': 0, 'to': 5}).json()
+        self.assertEqual([row['rank'] for row in ranking['rows']], list(range(1, ranking['rank_of'] + 1)))
+        self.assertEqual(ranking['rows'][0]['code'], '0901500010010')
+        self.assertEqual(self.client.get('/api/area-score/ranking', {'type': 'ageb', 'from': 1, 'to': 100}).status_code, 400)
+        self.assertEqual(self.client.get('/api/area-score/ranking', {'type': 'ageb'}).status_code, 400)
+
+    def test_distribution_cuts_the_ranking_into_runs(self):
+        self.build()
+        strip = self.client.get('/api/area-score/distribution', {'type': 'ageb', 'buckets': 50}).json()
+        self.assertEqual(strip['buckets'][0]['from'], 1)
+        self.assertEqual(strip['buckets'][-1]['to'], strip['rank_of'])
+        scores = [bucket['score'] for bucket in strip['buckets']]
+        self.assertEqual(scores, sorted(scores, reverse=True))
+        self.assertEqual(self.client.get('/api/area-score/distribution', {'buckets': 0}).status_code, 400)
+
+    def test_admin_edit_marks_the_area_and_reranks(self):
+        from django.contrib.auth.models import User
+        from world.models import AreaScore
+
+        self.build()
+        worse = AreaScore.objects.get(code='0901500010025')
+        self.client.force_login(User.objects.create_superuser('admin', 'a@example.com', 'x'))
+        page = self.client.get(f'/admin/world/areascore/{worse.pk}/change/')
+        self.assertContains(page, '<svg')
+        data = {key: 10 for key in ('vivienda', 'transporte', 'oportunidades', 'agua')}
+        data.update({'seguridad': '', 'riesgo': '', 'note': 'Revisado en campo', 'rankable': 'on',
+                     'geometry': worse.geometry.geojson})
+        response = self.client.post(f'/admin/world/areascore/{worse.pk}/change/', data)
+        self.assertEqual(response.status_code, 302, getattr(response, 'context', None) and response.context['adminform'].form.errors)
+        worse.refresh_from_db()
+        self.assertTrue(worse.edited)
+        self.assertEqual((worse.score, worse.rank), (10, 1))
+        self.assertContains(self.client.get('/admin/world/areascore/'), 'Recalcular')
+        self.assertEqual(self.client.get('/admin/world/areascore/mapa.geojson', {'type': 'ageb'}).json()['features'][0]['type'],
+                         'Feature')

@@ -1378,6 +1378,123 @@ def foot_traffic_by_hour(lng, lat, radius):
     return hourly_index(lng, lat, radius, settings.FOOT_TRAFFIC_FILE)
 
 
+def terrain_and_climate(lng, lat, radius):
+    """Natural hazards around a point; see world/hazards.py."""
+    from django.conf import settings
+    from world.hazards import zone_report
+
+    return zone_report(lng, lat, radius, settings.HAZARDS_DIR)
+
+
+def get_business_location_hazards(request):
+    """
+    GET ?lng=&lat=&radius= -> the hazards within the radius as GeoJSON, for
+    the Negocios map. Loaded only when the user turns the layer on.
+    """
+    from django.conf import settings
+    from world.hazards import map_features
+
+    try:
+        lng = float(request.GET['lng'])
+        lat = float(request.GET['lat'])
+        radius = float(request.GET.get('radius', 350))
+    except (KeyError, ValueError):
+        return JsonResponse({'message': 'lng, lat and radius are required numbers'}, status=400)
+    if not (0 < radius <= 2000):
+        return JsonResponse({'message': 'radius must be between 0 and 2000 metres'}, status=400)
+    return JsonResponse(map_features(lng, lat, radius, settings.HAZARDS_DIR))
+
+
+def get_area_score(request):
+    """
+    GET ?type=ageb|colonia&code=  or  ?type=&lng=&lat=  -> the Índice de
+    habitabilidad of that AGEB or colonia (AreaScore), for the area card.
+    &geometry=1 adds its outline, for opening an area the map hasn't loaded.
+    404 when the area has not been scored, or lies outside CDMX.
+    """
+    from world.models import AreaScore
+    from world.models.area_score import AXES
+
+    area_type = request.GET.get('type', 'ageb')
+    if area_type not in AreaScore.AreaType.values:
+        return JsonResponse({'message': 'type must be ageb or colonia'}, status=400)
+    rows = AreaScore.objects.filter(area_type=area_type)
+    if request.GET.get('code'):
+        row = rows.filter(code=request.GET['code']).first()
+    else:
+        try:
+            point = Point(float(request.GET['lng']), float(request.GET['lat']), srid=4326)
+        except (KeyError, ValueError):
+            return JsonResponse({'message': 'code, or lng and lat, are required'}, status=400)
+        row = rows.filter(geometry__intersects=point).first()
+    if not row:
+        return JsonResponse({'message': 'area not scored'}, status=404)
+    return JsonResponse({
+        'type': row.area_type,
+        'code': row.code,
+        'name': row.name,
+        'municipality': row.municipality,
+        'population': row.population,
+        'score': row.score,
+        'rank': row.rank,
+        'rank_of': row.rank_of,
+        'axes': [{'key': key, 'label': label, 'value': getattr(row, key),
+                  'indicators': (row.indicators or {}).get(key, [])} for key, label in AXES],
+        'computed_at': row.computed_at.isoformat() if row.computed_at else None,
+        **({'geometry': json.loads(row.geometry.json)} if request.GET.get('geometry') == '1' else {}),
+    })
+
+
+def get_area_score_distribution(request):
+    """
+    GET ?type=ageb|colonia&buckets=50 -> the ranking cut into equal runs of
+    places, best first, with each run's places and average score: the strip
+    the area card's ranking slider draws.
+    """
+    from world.models import AreaScore
+
+    area_type = request.GET.get('type', 'ageb')
+    if area_type not in AreaScore.AreaType.values:
+        return JsonResponse({'message': 'type must be ageb or colonia'}, status=400)
+    try:
+        count = int(request.GET.get('buckets', 50))
+    except ValueError:
+        return JsonResponse({'message': 'buckets must be a number'}, status=400)
+    if not 1 <= count <= 200:
+        return JsonResponse({'message': 'buckets must be 1..200'}, status=400)
+    scores = list(AreaScore.objects.filter(area_type=area_type, rank__isnull=False)
+                  .order_by('rank').values_list('score', flat=True))
+    size = max(-(-len(scores) // count), 1)
+    buckets = [{'from': start + 1, 'to': min(start + size, len(scores)),
+                'score': round(sum(scores[start:start + size]) / len(scores[start:start + size]), 2)}
+               for start in range(0, len(scores), size)]
+    return JsonResponse({'type': area_type, 'rank_of': len(scores), 'buckets': buckets})
+
+
+def get_area_score_ranking(request):
+    """
+    GET ?type=ageb|colonia&from=&to= -> the areas ranked from..to (inclusive,
+    at most 50) by the Índice de habitabilidad, for the card's ranking list.
+    """
+    from world.models import AreaScore
+
+    area_type = request.GET.get('type', 'ageb')
+    if area_type not in AreaScore.AreaType.values:
+        return JsonResponse({'message': 'type must be ageb or colonia'}, status=400)
+    try:
+        first, last = int(request.GET['from']), int(request.GET['to'])
+    except (KeyError, ValueError):
+        return JsonResponse({'message': 'from and to are required'}, status=400)
+    first = max(first, 1)
+    if last < first or last - first >= 50:
+        return JsonResponse({'message': 'to must be from..from+49'}, status=400)
+    rows = (AreaScore.objects.filter(area_type=area_type, rank__gte=first, rank__lte=last)
+            .order_by('rank').values('rank', 'code', 'name', 'municipality', 'score'))
+    rank_of = (AreaScore.objects.filter(area_type=area_type)
+               .values_list('rank_of', flat=True).first())
+    return JsonResponse({'type': area_type, 'rank_of': rank_of, 'rows': list(rows)})
+
+
 @csrf_exempt
 def get_business_location_stats(request):
     """Get business statistics within a radius of given coordinates"""
@@ -1503,6 +1620,7 @@ def get_business_location_stats(request):
                     'category_stats': category_stats,
                     'business_robbery_by_time': business_robbery_by_time(point, radius),
                     'foot_traffic': foot_traffic_by_hour(coordinates['lng'], coordinates['lat'], radius),
+                    'terrain_climate': terrain_and_climate(coordinates['lng'], coordinates['lat'], radius),
                 }
             })
             

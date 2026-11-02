@@ -99,6 +99,11 @@ function BusinessInspector({
     onRemoveGiro,
     onReset,
     isMobile,
+    hazardsOn,
+    onHazardsToggle,
+    recent,
+    onOpenRecent,
+    onForgetRecent,
     chipsSlot
 }) {
     const [copied, setCopied] = React.useState(false);
@@ -366,16 +371,175 @@ function BusinessInspector({
         );
     };
 
-    const renderEmpty = () => (
-        <section className="xb-empty">
-            <h2 className="xb-title">Estudia una zona antes de abrir</h2>
-            <p className="xb-muted">Competencia, población y entorno alrededor de un punto.</p>
-            <ol className="xb-steps">
+    // Natural hazards from the Atlas de Riesgos CDMX: the levels of the census
+    // zone the point falls in, the ground under it, and what lies within the
+    // radius. Null outside the city, where the Atlas has nothing to say.
+    const terrain = stats && stats.terrain_climate;
+    const NB_LEVELS = ['Muy Bajo', 'Bajo', 'Medio', 'Alto', 'Muy Alto'];
+    const levelName = (level) => level.charAt(0) + level.slice(1).toLowerCase();
+    const renderLevel = (level) => {
+        const step = NB_LEVELS.indexOf(level);
+        if (step < 0) return <span className="xb-muted">Sin dato</span>;
+        return (
+            <span className={'nb-level is-' + step}>
+                <span className="nb-level-meter" aria-hidden="true">
+                    {NB_LEVELS.map((_, i) => <span key={i} className={i <= step ? 'is-on' : ''}></span>)}
+                </span>
+                {levelName(level)}
+            </span>
+        );
+    };
+    const fact = (name, value, detail) => (
+        <div className="nb-fact" key={name}>
+            <span className="nb-fact-name">{name}</span>
+            <span className="nb-fact-value">
+                {value}
+                {detail ? <small>{detail}</small> : null}
+            </span>
+        </div>
+    );
+    // The building code's geotechnical zones, by what they mean for a building.
+    const NB_GROUND = {
+        'I': ['Lomas', 'Suelo firme: los sismos se sienten menos.'],
+        'II': ['Transición', 'Entre suelo firme y blando.'],
+        'III': ['Lago', 'Antiguo lago: suelo blando que amplifica los sismos.'],
+    };
+    const nbList = (items) => items.length > 1 ? items.slice(0, -1).join(', ') + ' y ' + items[items.length - 1] : items[0];
+    const nbYears = (found) => found.from_year === found.to_year ? String(found.from_year) : found.from_year + '–' + found.to_year;
+    const renderTerrain = () => {
+        if (!terrain) return null;
+        const levels = terrain.levels || {};
+        const climate = [['inundacion', 'Inundación'], ['precipitac', 'Lluvias'], ['granizo', 'Granizo'], ['tom_elec', 'Tormentas eléctricas'], ['tem_max', 'Calor']];
+        const high = [['sismo', 'sismo'], ...climate, ['sus_ladera', 'laderas inestables']]
+            .filter(([key]) => levels[key] === 'Alto' || levels[key] === 'Muy Alto')
+            .map(([, label]) => label.toLowerCase());
+        const zone = terrain.geotechnical_zone;
+        const { mines, sinkholes, fractures, faults, waterlogging } = terrain;
+        return renderSection('Terreno y clima', (
+            <React.Fragment>
+                <p className="nb-insight">
+                    {high.length ? <React.Fragment>Peligro alto por <b>{nbList(high)}</b>.</React.Fragment> : 'Ningún peligro natural alto en esta zona.'}
+                </p>
+                <div className="nb-sub" aria-label="Suelo">
+                    <div className="xb-eyebrow">Suelo</div>
+                    <div className="nb-facts">
+                        {zone && NB_GROUND[zone.zone] && fact('Tipo de suelo', NB_GROUND[zone.zone][0] + ' · zona ' + zone.zone, NB_GROUND[zone.zone][1])}
+                        {levels.sismo && fact('Peligro sísmico', renderLevel(levels.sismo))}
+                        {fact('Hundimiento del suelo',
+                            terrain.subsidence_cm_year ? terrain.subsidence_cm_year.replace('-', '–') + ' cm al año' : 'Sin hundimiento regional',
+                            terrain.subsidence_cm_year ? 'Puede agrietar muros y pisos con los años.' : null)}
+                        {terrain.crack_zone && fact('Zona de agrietamiento', terrain.crack_zone)}
+                        {fractures.count > 0 && fact('Fracturas en el terreno', 'La más cercana a ' + nbNumber(fractures.nearest_m) + ' m')}
+                        {faults.count > 0 && fact('Fallas geológicas', 'La más cercana a ' + nbNumber(faults.nearest_m) + ' m')}
+                        {fact('Minas antiguas', mines.count ? nbNumber(mines.count) + ' en el radio' : 'Ninguna en el radio',
+                            mines.count ? 'La más cercana a ' + nbNumber(mines.nearest_m) + ' m' : null)}
+                        {fact('Socavones', sinkholes.count ? nbNumber(sinkholes.count) + ' en el radio' : 'Ninguno en el radio',
+                            'Reportados ' + nbYears(sinkholes))}
+                        {(levels.sus_ladera === 'Medio' || levels.sus_ladera === 'Alto' || levels.sus_ladera === 'Muy Alto') &&
+                            fact('Laderas inestables', renderLevel(levels.sus_ladera))}
+                    </div>
+                </div>
+                <div className="nb-sub" aria-label="Agua y clima">
+                    <div className="xb-eyebrow">Agua y clima</div>
+                    <div className="nb-facts">
+                        {fact('Encharcamientos', waterlogging.count ? nbNumber(waterlogging.count) + ' en el radio' : 'Ninguno en el radio',
+                            'Reportados ' + nbYears(waterlogging))}
+                        {climate.filter(([key]) => levels[key]).map(([key, label]) => fact(label, renderLevel(levels[key])))}
+                    </div>
+                    {terrain.levels && <p className="nb-note">Niveles del Atlas de Riesgos de la CDMX para la zona censal (AGEB) del punto.</p>}
+                </div>
+            </React.Fragment>
+        ), (
+            <button type="button" className={'nb-map-toggle nb-screen-only' + (hazardsOn ? ' is-active' : '')}
+                aria-pressed={!!hazardsOn} onClick={onHazardsToggle}>
+                <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2z" /><path d="M9 4v14M15 6v14" />
+                </svg>
+                {hazardsOn ? 'En el mapa' : 'Ver en el mapa'}
+            </button>
+        ));
+    };
+
+    // "hace 3 h", "ayer", "12 mar": how long ago a recent report was opened.
+    const nbAgo = (time) => {
+        const minutes = Math.round((Date.now() - time) / 60000);
+        const rtf = new Intl.RelativeTimeFormat('es-MX', { numeric: 'auto' });
+        if (minutes < 1) return 'ahora';
+        if (minutes < 60) return rtf.format(-minutes, 'minute');
+        if (minutes < 60 * 24) return rtf.format(-Math.round(minutes / 60), 'hour');
+        if (minutes < 60 * 24 * 7) return rtf.format(-Math.round(minutes / 1440), 'day');
+        return new Date(time).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+    };
+
+    const renderRecent = () => (
+        <section className="nb-recent" aria-label="Zonas recientes">
+            <div className="nb-recent-head">
+                <div className="xb-eyebrow">Recientes</div>
+                <button type="button" className="xb-link nb-recent-forget" onClick={onForgetRecent}>Borrar</button>
+            </div>
+            <ul className="nb-recent-list">
+                {recent.map((entry) => {
+                    const place = entry.address || entry.lat.toFixed(5) + ', ' + entry.lng.toFixed(5);
+                    const giroText = entry.giros.length === 1 ? entry.giros[0].nombre_act : entry.giros.length + ' giros';
+                    const radiusText = entry.radius >= 1000 ? (entry.radius / 1000) + ' km' : entry.radius + ' m';
+                    return (
+                        <li key={entry.lat + ',' + entry.lng + ',' + entry.giros.map((g) => g.codigo_act).join(',')}>
+                            <button type="button" className="nb-recent-item" onClick={() => onOpenRecent(entry)}>
+                                <span className="nb-recent-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" />
+                                    </svg>
+                                </span>
+                                <span className="nb-recent-text">
+                                    <span className="nb-recent-place">{place}</span>
+                                    <span className="nb-recent-meta">{giroText} · {radiusText}</span>
+                                </span>
+                                <span className="nb-recent-side">
+                                    <span className="nb-recent-total">{nbNumber(entry.total)}</span>
+                                    <span className="nb-recent-ago">{nbAgo(entry.at)}</span>
+                                </span>
+                            </button>
+                        </li>
+                    );
+                })}
+            </ul>
+        </section>
+    );
+
+    // Nothing studied yet: a drawing of a street corner with a pin, and the
+    // three steps.
+    const renderNoRecent = () => (
+        <section className="nb-no-recent" aria-label="Sin zonas recientes">
+            <svg className="nb-no-recent-art" width="148" height="112" viewBox="0 0 148 112" fill="none" aria-hidden="true">
+                <ellipse cx="74" cy="100" rx="58" ry="7" fill="#EFEFEC" />
+                <rect x="22" y="40" width="58" height="56" rx="4" fill="#FFFFFF" stroke="#D9D9D5" strokeWidth="2" />
+                <path d="M18 40h66l-6-16H24z" fill="#F3F3F0" stroke="#D9D9D5" strokeWidth="2" strokeLinejoin="round" />
+                <path d="M33 24l-3 16M44 24l-1 16M55 24l1 16M66 24l3 16" stroke="#D9D9D5" strokeWidth="2" />
+                <rect x="31" y="54" width="18" height="16" rx="2" fill="#F7F7F4" stroke="#D9D9D5" strokeWidth="2" />
+                <rect x="56" y="54" width="15" height="42" rx="2" fill="#F7F7F4" stroke="#D9D9D5" strokeWidth="2" />
+                <rect x="88" y="58" width="38" height="38" rx="4" fill="#FFFFFF" stroke="#D9D9D5" strokeWidth="2" />
+                <path d="M88 70h38M107 58v38" stroke="#EFEFEC" strokeWidth="2" />
+                <path d="M108 50s-14-12.4-14-23a14 14 0 0 1 28 0c0 10.6-14 23-14 23z" fill="#2456B5" />
+                <circle cx="108" cy="27" r="5.5" fill="#FFFFFF" />
+            </svg>
+            <h3 className="nb-no-recent-title">Aún no has estudiado ninguna zona</h3>
+            <p className="xb-muted">Tus informes aparecerán aquí para volver a ellos.</p>
+            <ol className="xb-steps nb-no-recent-steps">
                 <li>Busca una dirección o marca un punto en el mapa.</li>
                 <li>Elige hasta {maxGiros} giros.</li>
                 <li>Ajusta el radio.</li>
             </ol>
         </section>
+    );
+
+    const renderEmpty = () => (
+        <React.Fragment>
+            <section className="xb-empty">
+                <h2 className="xb-title">Estudia una zona antes de abrir</h2>
+                <p className="xb-muted">Competencia, población y entorno alrededor de un punto.</p>
+            </section>
+            {recent && recent.length > 0 ? renderRecent() : renderNoRecent()}
+        </React.Fragment>
     );
 
     const renderPicker = () => (
@@ -509,7 +673,10 @@ function BusinessInspector({
                 <figure className="nb-print-only nb-print-map">
                     <img src={mapImage} alt={'Mapa del radio de ' + radiusLabel + ' con los negocios encontrados'} />
                     <figcaption>
-                        <span>Radio de {radiusLabel} alrededor del punto negro{summary && summary.total_businesses > 0 ? '; cada círculo de color es un negocio de los giros elegidos' : ''}.</span>
+                        <span>
+                            Radio de {radiusLabel} alrededor del punto negro{summary && summary.total_businesses > 0 ? '; cada círculo de color es un negocio de los giros elegidos' : ''}.
+                            {hazardsOn ? ' Anillos y líneas punteadas: encharcamientos, socavones, minas, fracturas y fallas (ver Terreno y clima).' : ''}
+                        </span>
                         <span>© Mapbox © OpenStreetMap</span>
                     </figcaption>
                 </figure>
@@ -583,12 +750,15 @@ function BusinessInspector({
                 </React.Fragment>
             ))}
 
+            {renderTerrain()}
+
             <section className="nb-sources" aria-label="Fuentes">
                 <div className="xb-eyebrow">Fuentes</div>
                 <div>DENUE 2025, INEGI · unidades económicas y personal ocupado</div>
                 <div>Censo de Población y Vivienda 2020, INEGI · por AGEB</div>
                 <div>Carpetas de investigación, FGJ CDMX · 2022{robberyYears ? ` · hora de los robos ${robberyYears}` : ''}</div>
                 <div>Ciudad MX · redes de transporte</div>
+                {terrain && <div>Atlas de Riesgos CDMX, SGIRPC · peligros por AGEB, zonificación geotécnica (NTC 2017), hundimientos, grietas, minas, socavones {nbYears(terrain.sinkholes)}, encharcamientos {nbYears(terrain.waterlogging)}</div>}
                 {footTraffic && footTraffic.enough && <div>Muestra de ubicaciones de teléfonos, datos agregados · {nbDay(footTraffic.from_date)} al {nbDay(footTraffic.to_date)}</div>}
             </section>
 

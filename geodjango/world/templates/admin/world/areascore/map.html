@@ -1,0 +1,92 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
+  <script src="{% static 'leaflet/leaflet.js' %}"></script>
+  <style>
+    #score-map { height: calc(100vh - 260px); min-height: 420px; border: 1px solid #ddd; border-radius: 4px; }
+    .score-controls { display: flex; gap: 1em; align-items: center; flex-wrap: wrap; margin-bottom: 1em; }
+    .score-legend span { display: inline-block; padding: 2px 8px; border-radius: 999px; color: #fff; margin-right: 4px; }
+  </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Inicio</a> ›
+    <a href="{% url 'admin:world_areascore_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a> › Mapa
+  </div>
+{% endblock %}
+
+{% block content %}
+  <form class="score-controls" method="get">
+    <label>Áreas
+      <select name="type" onchange="this.form.submit()">
+        <option value="ageb" {% if area_type == 'ageb' %}selected{% endif %}>AGEB</option>
+        <option value="colonia" {% if area_type == 'colonia' %}selected{% endif %}>Colonias</option>
+      </select>
+    </label>
+    <label>Color por
+      <select name="axis" onchange="this.form.submit()">
+        <option value="score" {% if axis == 'score' %}selected{% endif %}>Índice general</option>
+        {% for key, label in axes %}
+          <option value="{{ key }}" {% if axis == key %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <span class="score-legend">
+      <span style="background:#ef4444">&lt; 4</span><span style="background:#f97316">4–5</span><span
+        style="background:#eab308">5–7</span><span style="background:#22c55e">7–10</span><span
+        style="background:#9CA3AF">sin dato</span>
+    </span>
+    <span id="score-status">Cargando…</span>
+  </form>
+  <div id="score-map"></div>
+
+  <script>
+    (function () {
+      var map = L.map('score-map').setView([19.39, -99.14], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap', maxZoom: 19
+      }).addTo(map);
+
+      function color(v) {
+        if (v === null || v === undefined) return '#9CA3AF';
+        if (v < 4) return '#ef4444';
+        if (v < 5) return '#f97316';
+        if (v < 7) return '#eab308';
+        return '#22c55e';
+      }
+      var changeUrl = "{% url 'admin:world_areascore_change' 0 %}";
+      var url = "{% url 'admin:world_areascore_map_data' %}?type={{ area_type|urlencode }}&axis={{ axis|urlencode }}";
+      fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (data) {
+        document.getElementById('score-status').textContent = data.features.length.toLocaleString('es-MX') + ' áreas';
+        L.geoJSON(data, {
+          style: function (f) {
+            return { color: '#ffffff', weight: 0.5, fillColor: color(f.properties.value), fillOpacity: 0.75 };
+          },
+          onEachFeature: function (f, layer) {
+            var p = f.properties;
+            var value = p.value === null ? '—' : p.value.toFixed(1);
+            var rank = p.rank ? ' · #' + p.rank : '';
+            var box = document.createElement('div');
+            var title = document.createElement('strong');
+            title.textContent = p.name;
+            box.appendChild(title);
+            box.appendChild(document.createElement('br'));
+            box.appendChild(document.createTextNode((p.municipality || '') + ' · ' + value + rank));
+            box.appendChild(document.createElement('br'));
+            var link = document.createElement('a');
+            link.href = changeUrl.replace('/0/', '/' + p.id + '/');
+            link.textContent = 'Abrir / editar';
+            box.appendChild(link);
+            layer.bindPopup(box);
+          }
+        }).addTo(map);
+      }).catch(function () {
+        document.getElementById('score-status').textContent = 'No se pudo cargar el mapa.';
+      });
+    })();
+  </script>
+{% endblock %}

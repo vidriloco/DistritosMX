@@ -1,0 +1,30 @@
+{% extends "admin/change_list.html" %}
+
+{# Buttons rather than links: a recalculation rewrites the table, so it goes over POST. #}
+{% block object-tools-items %}
+  <li><a href="{% url 'admin:world_areascore_map' %}" class="viewlink">Ver mapa</a></li>
+  <li>
+    <form method="post" action="{% url 'admin:world_areascore_run_now' %}" style="display:inline">
+      {% csrf_token %}
+      <input type="hidden" name="type" value="all">
+      <button type="submit" class="button" style="cursor:pointer">Recalcular AGEBs y colonias</button>
+    </form>
+  </li>
+  {{ block.super }}
+{% endblock %}
+
+{% block content %}
+  <p style="margin:0 0 1em 0; padding:.8em 1em; background:#f6f6f6; border-left:4px solid #999;">
+    Cada eje va de 0 a 10: el promedio de los percentiles de sus indicadores frente a las demás áreas del
+    mismo tipo (10 = mejor, también en Riesgo). El cálculo es <code>manage.py build_area_scores</code>;
+    los ejes editados a mano se conservan al recalcular.
+    {% if last_run %}
+      Último cálculo:
+      <a href="{% url 'admin:world_areascorerun_change' last_run.pk %}">{{ last_run.started_at|date:"j M Y, H:i" }}
+        — {{ last_run.get_status_display }}</a>.
+    {% else %}
+      Aún no se ha calculado.
+    {% endif %}
+  </p>
+  {{ block.super }}
+{% endblock %}

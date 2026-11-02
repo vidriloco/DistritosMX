@@ -35,6 +35,12 @@ services:
       AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME:-us-east-2}
     ports:
       - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8000}:8000"
+    # The Atlas de Riesgos layers behind "Terreno y clima" (GeoParquet files,
+    # not tables). The image bakes geodjango/data/ in at build time, so files
+    # built inside the container would be gone after the next deploy; a volume
+    # keeps them. deploy-production.sh fills it when it is empty.
+    volumes:
+      - hazards:/usr/src/app/geodjango/data/hazards
     depends_on:
       - db
     # Single line: in a YAML folded block the deeper-indented flag lines keep
@@ -56,3 +62,4 @@ services:
 
 volumes:
   pgdata:
+  hazards:

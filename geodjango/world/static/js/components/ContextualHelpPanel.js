@@ -48,7 +48,7 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
                 steps: [
                     {
                         number: '1',
-                        text: 'Elige la unidad espacial: AGEB, colonia o isocronas'
+                        text: 'Elige la unidad espacial: AGEB o colonia'
                     },
                     {
                         number: '2',
@@ -56,7 +56,7 @@ function ContextualHelpPanel({ isVisible, onClose, routeType, cookieName }) {
                     },
                     {
                         number: '3',
-                        text: 'Pasa el cursor o toca el mapa para ver el valor de cada zona, o mueve el pin para cambiar el radio'
+                        text: 'Pasa el cursor o toca el mapa para ver el valor de cada zona; ábrela para ver su Índice de habitabilidad'
                     }
                 ]
             };
