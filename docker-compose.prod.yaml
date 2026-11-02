@@ -41,6 +41,9 @@ services:
     # keeps them. deploy-production.sh fills it when it is empty.
     volumes:
       - hazards:/usr/src/app/geodjango/data/hazards
+      # Foot traffic for the /negocios report, fetched from the private
+      # distritosmx-data bucket by deploy-production.sh (see there).
+      - foot_traffic:/usr/src/app/geodjango/data/foot_traffic
     depends_on:
       - db
     # Single line: in a YAML folded block the deeper-indented flag lines keep
@@ -63,3 +66,4 @@ services:
 volumes:
   pgdata:
   hazards:
+  foot_traffic:

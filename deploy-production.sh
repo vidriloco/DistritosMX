@@ -15,6 +15,9 @@
 #   ./deploy-production.sh --seed-hazards re-download the Atlas de Riesgos layers
 #                                      behind "Terreno y clima" (otherwise only
 #                                      fetched when the hazards volume is empty)
+#   ./deploy-production.sh --seed-foot-traffic re-download the foot-traffic file
+#                                      behind the /negocios hourly chart from S3
+#                                      (otherwise only when the volume lacks it)
 #   ./deploy-production.sh --seed-scores recompute the Índice de habitabilidad per
 #                                      AGEB and colonia (otherwise only when the
 #                                      table is empty; the admin can also rerun it)
@@ -50,6 +53,7 @@ SEED_FGJ=false
 SEED_DENUE=false
 SEED_HAZARDS=false
 SEED_SCORES=false
+SEED_FOOT_TRAFFIC=false
 for arg in "$@"; do
     case "$arg" in
         --pull) PULL=true ;;
@@ -58,6 +62,7 @@ for arg in "$@"; do
         --seed-denue) SEED_DENUE=true ;;
         --seed-hazards) SEED_HAZARDS=true ;;
         --seed-scores) SEED_SCORES=true ;;
+        --seed-foot-traffic) SEED_FOOT_TRAFFIC=true ;;
         *) echo "Unknown option: $arg" >&2; exit 1 ;;
     esac
 done
@@ -286,6 +291,39 @@ if [ "$SEED_HAZARDS" = true ] || ! $COMPOSE exec -T app test -f geodjango/data/h
     echo "==> Downloading the Atlas de Riesgos layers (Terreno y clima, ~3MB, a minute or two)..."
     $COMPOSE exec -T app bash -c "cd geodjango && python3 manage.py build_hazards" || \
         echo "WARNING: could not build the hazard layers; Terreno y clima stays as it was. Retry with --seed-hazards." >&2
+fi
+
+# The hourly foot-traffic chart in the /negocios report reads one GeoParquet
+# file built from licensed Veraset pings by `manage.py build_foot_traffic`. It
+# cannot be built here (the pings never leave the laptop) and is gitignored, so
+# its master copy lives in the private distritosmx-data bucket and lands in the
+# `foot_traffic` volume. Without it the report hides the chart without a word,
+# hence the loud warning. The key is read-only and passed to this one command
+# only: the app's own AWS_* variables switch django-storages on and stay unset.
+# Refresh with --seed-foot-traffic after uploading a new build:
+#   aws s3 cp geodjango/data/foot_traffic/foot_traffic.parquet s3://distritosmx-data/foot_traffic/
+FOOT_TRAFFIC_S3_URI="${FOOT_TRAFFIC_S3_URI:-s3://distritosmx-data/foot_traffic/foot_traffic.parquet}"
+if [ "$SEED_FOOT_TRAFFIC" = true ] || ! $COMPOSE exec -T app test -f geodjango/data/foot_traffic/foot_traffic.parquet; then
+    if [ -z "${FOOT_TRAFFIC_AWS_ACCESS_KEY_ID:-}" ] || [ -z "${FOOT_TRAFFIC_AWS_SECRET_ACCESS_KEY:-}" ]; then
+        echo "WARNING: no foot-traffic file and no FOOT_TRAFFIC_AWS_* key in $ENV_FILE; the /negocios hourly chart stays hidden." >&2
+    else
+        echo "==> Downloading the foot-traffic file from ${FOOT_TRAFFIC_S3_URI}..."
+        $COMPOSE exec -T \
+            -e AWS_ACCESS_KEY_ID="$FOOT_TRAFFIC_AWS_ACCESS_KEY_ID" \
+            -e AWS_SECRET_ACCESS_KEY="$FOOT_TRAFFIC_AWS_SECRET_ACCESS_KEY" \
+            -e AWS_DEFAULT_REGION="${FOOT_TRAFFIC_AWS_REGION:-us-east-2}" \
+            -e FOOT_TRAFFIC_S3_URI="$FOOT_TRAFFIC_S3_URI" \
+            app python3 - <<'PY' || echo "WARNING: could not download the foot-traffic file; the chart keeps the previous one, if any. Retry with --seed-foot-traffic." >&2
+import os, boto3
+bucket, key = os.environ["FOOT_TRAFFIC_S3_URI"][len("s3://"):].split("/", 1)
+target = "geodjango/data/foot_traffic/foot_traffic.parquet"
+os.makedirs(os.path.dirname(target), exist_ok=True)
+# Into a temporary name first, so a request never reads a half-written file.
+boto3.client("s3").download_file(bucket, key, target + ".tmp")
+os.replace(target + ".tmp", target)
+print(f"    -> {target} ({os.path.getsize(target) // 1024} KB)")
+PY
+    fi
 fi
 
 # The Índice de habitabilidad (AreaScore) is computed from what the seeds above
