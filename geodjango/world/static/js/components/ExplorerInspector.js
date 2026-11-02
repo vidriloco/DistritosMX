@@ -30,6 +30,21 @@ const EXPLORER_SECTIONS = [
     }
 ];
 
+// Each theme's icon and tint on the empty panel's buttons.
+const EXPLORER_SECTION_ICONS = {
+    oportunidades: { tone: 'blue', shape: <React.Fragment><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V4h8v3M3 13h18" /></React.Fragment> },
+    inseguridad: { tone: 'clay', shape: <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z" /> },
+    rentas_temporales: { tone: 'green', shape: <path d="M3 11l9-7 9 7M5 10v10h14V10M10 20v-5h4v5" /> },
+    movilidad: { tone: 'amber', shape: <React.Fragment><rect x="4" y="3" width="16" height="14" rx="2" /><path d="M4 11h16M7 17v3M17 17v3" /></React.Fragment> }
+};
+
+// The axes of a zone's card, in the card's own colours.
+const EXPLORER_CARD_AXES = [
+    { label: 'Oportunidades', color: '#8B5CF6' }, { label: 'Seguridad', color: '#F59E0B' },
+    { label: 'Vivienda', color: '#3B82F6' }, { label: 'Transporte', color: '#10B981' },
+    { label: 'Agua', color: '#06B6D4' }, { label: 'Riesgo', color: '#64748B' }
+];
+
 // The livability-index axis each tab belongs to, highlighted in the area card.
 const EXPLORER_SECTION_AXES = {
     oportunidades: 'oportunidades',
@@ -425,8 +440,13 @@ function ExplorerInspector({
                 )}
 
                 {!selectedGeozone && !section && (
+                    // Two ways in: paint the map by a theme, or tap a zone for
+                    // its card. The download shows on top while it runs.
                     <section className="xb-empty">
-                        <h2 className="xb-title">Explora el territorio</h2>
+                        <div>
+                            <h2 className="xb-title">Explora el territorio</h2>
+                            <p className="xb-muted">Dos formas de empezar.</p>
+                        </div>
                         {indicatorsLoading && (
                             <div className="xb-notice" role="status" aria-live="polite">
                                 <div className="xb-notice-row">
@@ -439,7 +459,39 @@ function ExplorerInspector({
                                 </div>
                             </div>
                         )}
-                        <p className="xb-muted">Elige un tema arriba. Las zonas se pintan según el indicador que selecciones.</p>
+                        <div className="xb-way">
+                            <div className="xb-way-head"><span className="xb-way-num">1</span><h3>Pinta el mapa por un tema</h3></div>
+                            <div className="xb-way-themes">
+                                {EXPLORER_SECTIONS.map((s) => (
+                                    <button key={s.id} type="button" className="xb-way-theme" disabled={tabsDisabled}
+                                        onClick={() => handleTabClick(s.id)}>
+                                        <span className={'xb-way-icon is-' + EXPLORER_SECTION_ICONS[s.id].tone}>
+                                            <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{EXPLORER_SECTION_ICONS[s.id].shape}</svg>
+                                        </span>
+                                        {s.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="xb-way">
+                            <div className="xb-way-head"><span className="xb-way-num">2</span><h3>Toca una zona del mapa</h3></div>
+                            <div className="xb-way-zone">
+                                {/* A finger on a highlighted block of the map. */}
+                                <svg width="92" height="80" viewBox="0 0 92 80" aria-hidden="true">
+                                    <rect x="2" y="2" width="88" height="76" rx="10" fill="#EAF0FA" />
+                                    <path d="M2 28h88M2 54h88M30 2v76M62 2v76" stroke="#C9D6F0" strokeWidth="3" />
+                                    <rect x="30" y="28" width="32" height="26" fill="#F5C84B" stroke="#163A80" strokeWidth="2.5" />
+                                    <path d="M50 46v-14a4 4 0 0 1 8 0v12l8 2a5 5 0 0 1 4 6l-2 12H54l-10-10a4 4 0 0 1 6-6z" fill="#FFFFFF" stroke="#163A80" strokeWidth="2.5" strokeLinejoin="round" />
+                                </svg>
+                                <p className="xb-muted">Verás su ficha: una calificación de 0 a 10 en cada eje y los datos detrás.</p>
+                            </div>
+                            <div className="xb-way-axes" aria-label="Ejes de la ficha">
+                                {EXPLORER_CARD_AXES.map((a) => (
+                                    <span key={a.label}><i style={{ background: a.color }} aria-hidden="true"></i>{a.label}</span>
+                                ))}
+                            </div>
+                        </div>
                     </section>
                 )}
 
