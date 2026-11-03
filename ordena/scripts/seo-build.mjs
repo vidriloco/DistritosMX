@@ -1,6 +1,7 @@
 // Runs after `vite build`. Writes one static HTML file per route with its own title, description,
 // canonical, social tags, structured data and a crawlable text version of the page inside #root
 // (React replaces it on load). Also writes sitemap.xml and robots.txt.
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -55,7 +56,10 @@ const routes = [
   })),
 ];
 
-const OG_DEFAULT = { src: `${SITE}/og.png`, width: 1200, height: 630, alt: 'Íconos de los nueve temas del plan alrededor del título ¿Qué opinas?, con la fecha de cierre de la consulta y ordena.laciudad.mx' };
+// Versioned by its contents: X, Facebook and Cloudflare cache a preview image by its address, so a new og.png
+// gets a new address and is fetched again instead of the cached old one.
+const ogVersion = crypto.createHash('md5').update(fs.readFileSync(path.join(dist, 'og.png'))).digest('hex').slice(0, 8);
+const OG_DEFAULT = { src: `${SITE}/og.png?v=${ogVersion}`, width: 1200, height: 630, alt: 'Íconos de los nueve temas del plan alrededor del título ¿Qué opinas?, con la fecha de cierre de la consulta y ordena.laciudad.mx' };
 
 for (const r of routes) {
   const img = r.image ?? OG_DEFAULT;
