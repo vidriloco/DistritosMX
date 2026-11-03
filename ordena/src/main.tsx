@@ -6,6 +6,7 @@ import App from './App';
 import { PageError } from './components/PageError';
 import { lazyPage } from './lib/lazyPage';
 import { DocViewerProvider } from './components/DocViewer';
+import { iniciarConteo } from './lib/respuestas';
 import '@fontsource-variable/inter-tight';
 import './index.css';
 import { AreaPage } from './pages/AreaPage';
@@ -20,6 +21,9 @@ const Resumen = lazyPage(() => import('./pages/Resumen').then((m) => m.Resumen))
 const Resultados = lazyPage(() => import('./pages/Resultados').then((m) => m.Resultados));
 const fallback = <Loading />;
 initAnalytics();
+
+// Answers reach the public count as they change, and on leaving the page.
+iniciarConteo();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

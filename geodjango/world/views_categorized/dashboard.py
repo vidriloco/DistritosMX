@@ -19,6 +19,8 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.shortcuts import get_object_or_404, redirect, render
 
+from consulta.models import Area, MuestraInicial, Opcion, Respuesta
+
 from world.models.contact_lead import ContactLead
 from world.models.despojo_news import (
     DespojoNewsFeed,
@@ -418,3 +420,86 @@ def dashboard_reports(request):
     if not isinstance(result, dict):
         return result
     return _render(request, 'dashboard/reports.html', {'section': 'reports', **result})
+
+
+@staff_member_required
+def dashboard_resultados(request):
+    """
+    The starting sample of ¿Qué opinas?'s public results (ordena.laciudad.mx/resultados).
+
+    While it is on, each option's base number is added to its real count and
+    the page says the figures include a starting sample; switched off, only
+    real answers are shown. The real counts sit next to each field, so the
+    sample can be turned off once they carry the page on their own.
+    """
+    muestra = MuestraInicial.load()
+    opciones = Opcion.objects.select_related('pregunta', 'pregunta__area').order_by(
+        'pregunta__area__orden', 'pregunta__orden', 'orden')
+
+    if request.method == 'POST':
+        errores = []
+        try:
+            respuestas = int(request.POST.get('respuestas') or 0)
+            if respuestas < 0:
+                raise ValueError
+        except ValueError:
+            errores.append('El número de personas de la muestra tiene que ser un entero de 0 en adelante.')
+            respuestas = muestra.respuestas
+        bases = {}
+        for opcion in opciones:
+            try:
+                valor = int(request.POST.get(f'base_{opcion.pk}') or 0)
+                if valor < 0:
+                    raise ValueError
+                bases[opcion.pk] = valor
+            except ValueError:
+                errores.append(f'«{opcion.etiqueta}»: la base tiene que ser un entero de 0 en adelante.')
+        if errores:
+            for error in errores:
+                messages.error(request, error)
+        else:
+            for opcion in opciones:
+                if opcion.base != bases[opcion.pk]:
+                    opcion.base = bases[opcion.pk]
+                    opcion.save(update_fields=['base'])
+            muestra.activa = request.POST.get('activa') == 'on'
+            muestra.respuestas = respuestas
+            muestra.updated_by = request.user.get_username()
+            muestra.save()
+            messages.success(
+                request,
+                'Muestra inicial activada: los resultados la suman y lo dicen en la página.'
+                if muestra.activa else 'Muestra inicial apagada: los resultados muestran solo respuestas reales.',
+            )
+        return redirect('dashboard_resultados')
+
+    # Real counts per option, from the stored answers.
+    reales = {}
+    total = 0
+    for elecciones in Respuesta.objects.values_list('elecciones', flat=True):
+        total += 1
+        for pregunta, valor in elecciones.items():
+            reales[(pregunta, valor)] = reales.get((pregunta, valor), 0) + 1
+
+    areas = []
+    for area in Area.objects.order_by('orden'):
+        preguntas = []
+        for pregunta in area.preguntas.order_by('orden'):
+            filas = [
+                {'opcion': o, 'real': reales.get((pregunta.slug, o.valor), 0)}
+                for o in opciones if o.pregunta_id == pregunta.pk
+            ]
+            preguntas.append({
+                'pregunta': pregunta,
+                'filas': filas,
+                'base_total': sum(f['opcion'].base for f in filas),
+                'real_total': sum(f['real'] for f in filas),
+            })
+        areas.append({'area': area, 'preguntas': preguntas})
+
+    return _render(request, 'dashboard/resultados.html', {
+        'section': 'resultados',
+        'muestra': muestra,
+        'reales': total,
+        'areas': areas,
+    })

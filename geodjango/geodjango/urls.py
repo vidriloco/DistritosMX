@@ -30,6 +30,7 @@ from world.views_categorized.dashboard import (
     dashboard_run,
     dashboard_leads,
     dashboard_reports,
+    dashboard_resultados,
 )
 from django.views.static import serve
 import os
@@ -135,6 +136,7 @@ urlpatterns = [
     path('dashboard/ejecuciones/<int:pk>/', dashboard_run, name='dashboard_run'),
     path('dashboard/leads/', dashboard_leads, name='dashboard_leads'),
     path('dashboard/reportes/', dashboard_reports, name='dashboard_reports'),
+    path('dashboard/resultados/', dashboard_resultados, name='dashboard_resultados'),
 
     path('admin/', admin.site.urls),
 ]

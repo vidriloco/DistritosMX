@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from collections import Counter
 
 from django.conf import settings
@@ -9,7 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
 
-from .models import Area, Opcion, Pregunta, Respuesta
+from .models import Area, MuestraInicial, Opcion, Pregunta, Respuesta
 from .opinion import componer
 
 
@@ -67,7 +68,7 @@ def area_detalle(request, slug):
 @csrf_exempt
 @require_http_methods(["POST"])
 def opinion(request):
-    """Draft the letter. With `guardar: true` the answers are also stored for the aggregate."""
+    """Draft the letter. Nothing is stored here: the answers reach the aggregate through `respuesta`."""
     try:
         cuerpo = json.loads(request.body or b"{}")
     except json.JSONDecodeError:
@@ -83,18 +84,59 @@ def opinion(request):
     comentarios = {str(k)[:80]: str(v)[:1500] for k, v in comentarios.items()}
 
     borrador = componer(elecciones, comentarios, municipio, firma)
-    if cuerpo.get("guardar") and elecciones:
-        # The aggregate never stores the name or the street-level address: only the municipality.
-        anonimo = componer(elecciones, comentarios, municipio)
-        Respuesta.objects.create(
-            municipio=municipio, elecciones=elecciones, comentarios=comentarios, texto=anonimo["texto"]
-        )
     return JsonResponse({**borrador, "consulta": settings.POZMVM_CONSULTA})
+
+
+VISITANTE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def respuesta(request):
+    """Store one browser's current answers for the aggregate, replacing what it sent before.
+
+    The site calls this as the answers change. It never receives the name or
+    the colonia of the signature, only the municipality; no answers left
+    removes the browser's row.
+    """
+    try:
+        cuerpo = json.loads(request.body or b"{}")
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "JSON inválido"}, status=400)
+    visitante = str(cuerpo.get("visitante") or "").lower()
+    elecciones = cuerpo.get("elecciones") or {}
+    comentarios = cuerpo.get("comentarios") or {}
+    if not VISITANTE.match(visitante) or not isinstance(elecciones, dict) or not isinstance(comentarios, dict):
+        return JsonResponse({"error": "formato"}, status=400)
+    elecciones = {str(k)[:80]: str(v)[:80] for k, v in elecciones.items()}
+    comentarios = {str(k)[:80]: str(v)[:1500] for k, v in comentarios.items() if str(v).strip()}
+    municipio = str(cuerpo.get("municipio") or "")[:120]
+
+    if not elecciones and not comentarios:
+        Respuesta.objects.filter(visitante=visitante).delete()
+        return JsonResponse({"guardado": False})
+    Respuesta.objects.update_or_create(
+        visitante=visitante,
+        defaults={
+            "municipio": municipio,
+            "elecciones": elecciones,
+            "comentarios": comentarios,
+            "texto": componer(elecciones, comentarios, municipio)["texto"],
+        },
+    )
+    return JsonResponse({"guardado": True})
 
 
 @require_GET
 def resultados(request):
-    """How other citizens answered, per question, so a reader can see they are not alone."""
+    """How other citizens answered, per question, so a reader can see they are not alone.
+
+    While the starting sample is on, its numbers are added in and `muestra`
+    says how many people it stands for, so the page can say so; `reales` is
+    always the count of real answers alone.
+    """
+    muestra = MuestraInicial.load()
+    con_muestra = muestra.activa
     conteo: dict[str, Counter] = {}
     total = 0
     todas = list(Respuesta.objects.values_list("elecciones", flat=True))
@@ -102,21 +144,22 @@ def resultados(request):
         total += 1
         for slug, valor in elecciones.items():
             conteo.setdefault(slug, Counter())[valor] += 1
+    salida = []
+    base_por_pregunta: dict[str, int] = {}
+    for p in Pregunta.objects.select_related("area").prefetch_related("opciones"):
+        c = conteo.get(p.slug, Counter())
+        opciones = [
+            {"valor": o.valor, "etiqueta": o.etiqueta, "n": c.get(o.valor, 0) + (o.base if con_muestra else 0)}
+            for o in p.opciones.all()
+        ]
+        base_por_pregunta[p.slug] = sum(o.base for o in p.opciones.all()) if con_muestra else 0
+        salida.append({"pregunta": p.slug, "texto": p.texto, "area": p.area.slug, "total": sum(o["n"] for o in opciones), "opciones": opciones})
     areas = []
     for area in Area.objects.prefetch_related("preguntas"):
         slugs = set(area.preguntas.values_list("slug", flat=True))
         participantes = sum(1 for e in todas if slugs & set(e.keys()))
+        # The sample's people for a topic: as many as answered its most-answered question.
+        participantes += max((base_por_pregunta.get(s, 0) for s in slugs), default=0)
         areas.append({"slug": area.slug, "titulo": area.titulo, "participantes": participantes})
-    salida = []
-    for p in Pregunta.objects.select_related("area").prefetch_related("opciones"):
-        c = conteo.get(p.slug, Counter())
-        salida.append(
-            {
-                "pregunta": p.slug,
-                "texto": p.texto,
-                "area": p.area.slug,
-                "total": sum(c.values()),
-                "opciones": [{"valor": o.valor, "etiqueta": o.etiqueta, "n": c.get(o.valor, 0)} for o in p.opciones.all()],
-            }
-        )
-    return JsonResponse({"respuestas": total, "areas": areas, "preguntas": salida})
+    base = muestra.respuestas if con_muestra else 0
+    return JsonResponse({"respuestas": total + base, "reales": total, "muestra": base, "areas": areas, "preguntas": salida})

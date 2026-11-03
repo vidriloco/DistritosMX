@@ -1,0 +1,109 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Resultados de ¿Qué opinas?{% endblock %}
+
+{% block content %}
+<h1 class="dsh-title">Resultados de ¿Qué opinas?</h1>
+<p class="dsh-lede">
+    Una muestra inicial para <a href="https://ordena.laciudad.mx/resultados" target="_blank" rel="noopener">ordena.laciudad.mx/resultados</a>.
+    Mientras está activa, cada base se suma a las respuestas reales y la página indica que los
+    resultados incluyen una muestra inicial de {{ muestra.respuestas }} respuesta(s). Hay
+    <strong>{{ reales }} respuesta(s) real(es)</strong>.
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    <div class="dsh-card">
+        <div class="dsh-row" style="align-items:flex-end">
+            <label class="dsh-field" style="flex:0 0 auto; flex-direction:row; align-items:center; gap:8px">
+                <input type="checkbox" name="activa" {% if muestra.activa %}checked{% endif %}>
+                <span>Sumar la muestra inicial</span>
+            </label>
+            <div class="dsh-field" style="flex:0 0 180px">
+                <label for="muestra-respuestas">Personas en la muestra</label>
+                <input class="dsh-input" id="muestra-respuestas" type="number" name="respuestas" min="0" value="{{ muestra.respuestas }}">
+            </div>
+            <button type="button" class="dsh-btn" id="generar-base">Generar distribución</button>
+            <button type="submit" class="dsh-btn is-primary">Guardar</button>
+        </div>
+        <p class="dsh-small dsh-muted" style="margin:8px 0 0">
+            «Generar distribución» llena las bases con un reparto al azar por tema para ese número de
+            personas; no se guarda hasta que presiones Guardar.<br>
+            {% if muestra.activa %}Activa{% else %}Apagada{% endif %}{% if muestra.updated_by %} · cambiada por {{ muestra.updated_by }} el {{ muestra.updated_at|date:"j M Y, H:i" }}{% endif %}.
+            Aplica de inmediato.
+        </p>
+    </div>
+
+    {% for bloque in areas %}
+      <div data-area>
+        <h2 class="dsh-title" style="font-size:20px; margin-top:28px">{{ bloque.area.titulo }}</h2>
+        {% for item in bloque.preguntas %}
+            <div class="dsh-card" style="padding:0" data-pregunta>
+                <div class="dsh-table-wrap">
+                    <table class="dsh-table">
+                        <thead>
+                            <tr>
+                                <th>{{ item.pregunta.texto }}</th>
+                                <th style="width:140px">Base</th>
+                                <th style="width:110px">Reales</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fila in item.filas %}
+                                <tr>
+                                    <td>{{ fila.opcion.etiqueta }}</td>
+                                    <td><input class="dsh-input" data-base type="number" min="0" name="base_{{ fila.opcion.pk }}" value="{{ fila.opcion.base }}" aria-label="Base de {{ fila.opcion.etiqueta }}"></td>
+                                    <td>{{ fila.real }}</td>
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <td class="dsh-muted">Total de la pregunta</td>
+                                <td><strong data-base-total>{{ item.base_total }}</strong></td>
+                                <td><strong>{{ item.real_total }}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    <p style="margin-top:20px"><button type="submit" class="dsh-btn">Guardar</button></p>
+</form>
+<script>
+// A plausible spread for the sample, topic by topic: each topic is opened by
+// 50-95% of the people, each of its questions answered by 85-100% of those,
+// and the options share a question's answers unevenly (gamma-shaped weights:
+// usually a clear leader, no option left empty), in whole numbers that add up.
+(() => {
+    const entre = (a, b) => a + Math.random() * (b - a);
+    const repartir = (total, n) => {
+        const pesos = Array.from({ length: n }, () => -Math.log(1 - Math.random()) - Math.log(1 - Math.random()));
+        const suma = pesos.reduce((a, b) => a + b, 0);
+        const exactos = pesos.map((w) => (w / suma) * total);
+        const enteros = exactos.map(Math.floor);
+        // Largest remainders take the units left over by rounding down.
+        let faltan = total - enteros.reduce((a, b) => a + b, 0);
+        exactos.map((x, i) => [x - enteros[i], i]).sort((a, b) => b[0] - a[0]).forEach(([, i]) => {
+            if (faltan > 0) { enteros[i] += 1; faltan -= 1; }
+        });
+        return enteros;
+    };
+    document.getElementById('generar-base').addEventListener('click', () => {
+        const personas = parseInt(document.getElementById('muestra-respuestas').value, 10) || 0;
+        if (personas <= 0) { alert('Escribe primero cuántas personas tiene la muestra.'); return; }
+        document.querySelectorAll('[data-area]').forEach((tema) => {
+            const delTema = Math.round(personas * entre(0.5, 0.95));
+            tema.querySelectorAll('[data-pregunta]').forEach((tarjeta) => {
+                const campos = [...tarjeta.querySelectorAll('[data-base]')];
+                if (!campos.length) return;
+                const total = Math.round(delTema * entre(0.85, 1));
+                repartir(total, campos.length).forEach((v, i) => { campos[i].value = v; });
+                tarjeta.querySelector('[data-base-total]').textContent = total;
+            });
+        });
+    });
+})();
+</script>
+{% endblock %}

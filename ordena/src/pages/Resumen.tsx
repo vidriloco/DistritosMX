@@ -13,7 +13,6 @@ export function Resumen() {
   const [borrador, setBorrador] = useState<Borrador | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
-  const [guardado, setGuardado] = useState(false);
   const n = Object.keys(elecciones).length;
   const faltaQuienPaga = n > 0 && !elecciones['quien-paga-prioridad'] && !elecciones['quien-paga-situacion'];
 
@@ -23,10 +22,6 @@ export function Resumen() {
   }, [elecciones, comentarios, municipio, firma]);
 
   const copiar = async () => { if (!borrador) return; try { await navigator.clipboard.writeText(borrador.texto); setCopiado(true); track('carta_copiada', { puntos: n, firmada: !!firma.nombre }); setTimeout(() => setCopiado(false), 2000); } catch { track('carta_copia_fallida', { puntos: n }); /* text stays selectable */ } };
-  const guardar = async () => {
-    try { await api.opinion({ elecciones, comentarios, municipio, firma, guardar: true }); setGuardado(true); track('opinion_contada', { puntos: n }); }
-    catch { track('opinion_contada_error', { puntos: n }); }
-  };
   const mailto = borrador ? `mailto:${borrador.consulta.correo}?subject=${encodeURIComponent('Opinión ciudadana sobre el proyecto de POZMVM')}&body=${encodeURIComponent(borrador.texto)}` : '#';
 
   return (
@@ -57,7 +52,6 @@ export function Resumen() {
         <div className="acciones">
           <button type="button" className="btn ghost" onClick={copiar} disabled={n === 0}>{copiado ? 'Copiado' : 'Copiar texto'}</button>
           <a className="btn rust ph-no-capture" href={mailto} aria-disabled={n === 0} onClick={(e) => n === 0 ? e.preventDefault() : track('carta_enviada_correo', { puntos: n, firmada: !!firma.nombre, municipio: !!municipio })}>Enviar por correo a SEDATU<Check size={22} /></a>
-          <button type="button" className="btn ghost" onClick={guardar} disabled={n === 0 || guardado}>{guardado ? 'Contado' : 'Contar mi opinión aquí'}</button>
         </div>
         {n > 0 ? <button type="button" onClick={() => { if (confirm('¿Borrar todas tus respuestas?')) limpiar(); else track('respuestas_borrar_cancelado', { puntos: n }); }} style={{ background: 'none', border: 0, color: 'var(--rust)', textDecoration: 'underline', cursor: 'pointer', alignSelf: 'flex-start', padding: 0 }}>Borrar mis respuestas</button> : null}
       </div>
@@ -70,7 +64,7 @@ export function Resumen() {
             <li>También puedes llevarla a un foro presencial o subirla en la página oficial de la consulta.</li>
           </ol>
         </div>
-        <p className="small" style={{ margin: 0 }}>"Contar mi opinión aquí" guarda tus respuestas de forma anónima en este sitio para mostrar qué opinan otras personas. No se envía nada a SEDATU por ti.</p>
+        <p className="small" style={{ margin: 0 }}>Tus respuestas se suman de forma anónima a <Link to="/resultados">Qué opinan otros</Link>: sin tu nombre ni tu colonia, solo tu municipio si lo escribes. No se envía nada a SEDATU por ti.</p>
       </div>
     </article>
   );

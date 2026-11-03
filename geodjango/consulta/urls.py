@@ -8,5 +8,6 @@ urlpatterns = [
     path("areas/", views.areas),
     path("areas/<slug:slug>/", views.area_detalle),
     path("opinion/", views.opinion),
+    path("respuesta/", views.respuesta),
     path("resultados/", views.resultados),
 ]

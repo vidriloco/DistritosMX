@@ -16,7 +16,10 @@ export interface Borrador {
   consulta: Consulta;
 }
 export interface Resultados {
+  /** Real answers plus the starting sample while it is on; `reales` alone; `muestra` the sample (0 when off). */
   respuestas: number;
+  reales: number;
+  muestra: number;
   areas: { slug: string; titulo: string; participantes: number }[];
   preguntas: { pregunta: string; texto: string; area: string; total: number; opciones: { valor: string; etiqueta: string; n: number }[] }[];
 }
@@ -40,11 +43,14 @@ export const api = {
   area: (slug: string) => get<Area>(`/areas/${slug}/`),
   resultados: () => get<Resultados>('/resultados/'),
   financiamiento: () => get<Financiamiento>('/financiamiento/'),
-  opinion: async (body: { elecciones: Record<string, string>; comentarios: Record<string, string>; municipio: string; firma?: { nombre: string; colonia: string; estado: string }; guardar?: boolean }) => {
+  opinion: async (body: { elecciones: Record<string, string>; comentarios: Record<string, string>; municipio: string; firma?: { nombre: string; colonia: string; estado: string } }) => {
     const r = await fetch(`${BASE}/opinion/`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
     if (!r.ok) throw new Error(`${r.status} opinion`);
     return r.json() as Promise<Borrador>;
   },
+  /** A browser's current answers for the public count (a JSON body built by `respuestas`). */
+  respuesta: (body: string, keepalive = false) =>
+    fetch(`${BASE}/respuesta/`, { method: 'POST', headers: { 'content-type': 'application/json' }, body, keepalive }).then((r) => r.ok),
 };
 
 /** Link to a page of the consultation PDF. */

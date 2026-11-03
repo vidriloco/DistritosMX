@@ -41,7 +41,6 @@ export function Resultados() {
       <div>
         <span className="k" style={{ color: 'var(--violet)' }}>Resultados</span>
         <h1 className="h-light" style={{ margin: 0, fontSize: 'clamp(36px, 5vw, 48px)' }}>Qué opinan <strong>otras personas</strong></h1>
-        <p className="muted" style={{ margin: '8px 0 0', fontSize: 15, maxWidth: '62ch' }}>{data.respuestas === 0 ? 'Nadie ha contado su opinión todavía. Sé la primera persona.' : `${data.respuestas} persona${data.respuestas === 1 ? '' : 's'} han contado su opinión en este sitio. Es una muestra de quienes pasaron por aquí, no una encuesta representativa.`}</p>
       </div>
 
       {temas.length ? (

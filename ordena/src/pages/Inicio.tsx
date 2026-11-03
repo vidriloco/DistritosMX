@@ -118,7 +118,7 @@ export function Inicio() {
           <div>
             <span className="k" style={{ color: 'var(--violet)' }}>Sobre este sitio</span>
             <p>Es un sitio ciudadano independiente. No es de SEDATU ni de ningún gobierno o partido. Lo hicimos para que las 203 páginas del plan se puedan leer, discutir y contestar desde un teléfono.</p>
-            <p>Tus respuestas se guardan solo en tu navegador. Contamos visitas y clics de forma anónima y sin cookies, con PostHog (servidores en la Unión Europea), para saber qué partes del sitio sirven; nunca lo que escribes. Si eliges "contar mi opinión", se suman de forma anónima al conteo público{resultados && resultados.respuestas > 0 ? `, donde ya hay ${resultados.respuestas} ${resultados.respuestas === 1 ? 'opinión contada' : 'opiniones contadas'}` : ''}. La carta la envías tú, desde tu correo.</p>
+            <p>Tus respuestas y comentarios se suman de forma anónima al conteo público{resultados && resultados.reales > 0 ? `, donde ya hay ${resultados.reales} ${resultados.reales === 1 ? 'opinión' : 'opiniones'}` : ''}: sin tu nombre ni tu colonia, solo tu municipio si lo escribes. Contamos visitas y clics de forma anónima y sin cookies, con PostHog (servidores en la Unión Europea), para saber qué partes del sitio sirven; PostHog nunca recibe lo que escribes. La carta la envías tú, desde tu correo.</p>
           </div>
           <div>
             <span className="k" style={{ color: 'var(--violet)' }}>La consulta oficial</span>

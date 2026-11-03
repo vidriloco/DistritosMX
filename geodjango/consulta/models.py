@@ -41,6 +41,8 @@ class Opcion(models.Model):
     etiqueta = models.CharField(max_length=200)
     # The sentence the citizen can send to the consultation if they pick this option.
     opinion = models.TextField()
+    # Starting count for this option, added to the real ones while the sample is on (see MuestraInicial).
+    base = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ["orden"]
@@ -50,10 +52,50 @@ class Opcion(models.Model):
         return self.etiqueta
 
 
+class MuestraInicial(models.Model):
+    """
+    A starting sample for the public results, switched on and off from /dashboard.
+
+    One row, always. While `activa`, each option's `base` is added to its real
+    count and `respuestas` to the number of people, and /resultados says that
+    the figures include this sample.
+    """
+
+    activa = models.BooleanField(default=False)
+    respuestas = models.PositiveIntegerField(default=0, help_text="Personas que representa la muestra.")
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.CharField(max_length=150, blank=True)
+
+    class Meta:
+        verbose_name = "Muestra inicial de resultados"
+        verbose_name_plural = "Muestra inicial de resultados"
+
+    def __str__(self):
+        return f"Muestra inicial: {self.respuestas} ({'activa' if self.activa else 'apagada'})"
+
+    def save(self, *args, **kwargs):
+        # One sample, so one row, even if something calls create() directly.
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        """The settings row, created switched off the first time it is read."""
+        obj, _created = cls.objects.get_or_create(pk=1)
+        return obj
+
+
 class Respuesta(models.Model):
-    """One citizen's pass through the questionnaire, kept so the aggregate can be shown."""
+    """One browser's answers, kept anonymously so the aggregate can be shown.
+
+    The site sends them as they are given; `visitante` is a random id the
+    browser makes for itself, so later changes update this row instead of
+    adding another.
+    """
 
     creado = models.DateTimeField(auto_now_add=True)
+    actualizado = models.DateTimeField(auto_now=True)
+    visitante = models.CharField(max_length=36, blank=True, db_index=True)
     municipio = models.CharField(max_length=120, blank=True)
     # {"pregunta-slug": "valor", ...} and {"area-slug": "free text", ...}
     elecciones = models.JSONField(default=dict)

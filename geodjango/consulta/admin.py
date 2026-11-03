@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Area, Opcion, Pregunta, Respuesta
+from .models import Area, MuestraInicial, Opcion, Pregunta, Respuesta
 
 
 class OpcionInline(admin.TabularInline):
@@ -23,5 +23,10 @@ class AreaAdmin(admin.ModelAdmin):
 
 @admin.register(Respuesta)
 class RespuestaAdmin(admin.ModelAdmin):
-    list_display = ("id", "creado", "municipio")
-    readonly_fields = ("creado",)
+    list_display = ("id", "creado", "actualizado", "municipio")
+    readonly_fields = ("creado", "actualizado", "visitante")
+
+
+@admin.register(MuestraInicial)
+class MuestraInicialAdmin(admin.ModelAdmin):
+    list_display = ("__str__", "updated_at", "updated_by")

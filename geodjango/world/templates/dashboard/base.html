@@ -33,6 +33,7 @@
                 Reportes de despojo
                 {% if nav_reports_new %}<span class="dsh-badge is-pending">{{ nav_reports_new }}</span>{% endif %}
             </a>
+            <a href="{% url 'dashboard_resultados' %}" class="{% if section == 'resultados' %}is-current{% endif %}">¿Qué opinas?</a>
         </nav>
 
         <div class="dsh-who">

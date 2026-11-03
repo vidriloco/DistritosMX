@@ -19,3 +19,4 @@ geodjango/geodjango/static/
 # Database dumps — contain personal data. Never commit.
 dumps/
 *.dump
+IDM_NM_dic25.csv
