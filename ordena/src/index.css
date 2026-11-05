@@ -668,29 +668,36 @@ footer { margin-top: 32px; padding: 20px 0 24px; border-top: 1px solid var(--lin
 .temas-head h1 { margin: 0; font-size: clamp(32px, 9vw, 48px); }
 .temas-head p { margin: 0; font-size: 15px; max-width: 60ch; }
 .temas-prog { font-size: 14px; }
-.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.tile { background: var(--bg); color: var(--bone); text-decoration: none; border-radius: 4px; padding: 12px 12px 12px; min-height: 196px; display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden; }
-.tile-top { display: flex; justify-content: space-between; align-items: center; opacity: .85; margin-bottom: 6px; }
-.tile-top svg { width: 26px; height: 26px; color: var(--soft); }
-.tile-fig { font-size: clamp(30px, 9vw, 40px); line-height: .95; letter-spacing: -.04em; }
-.tile-lab { font-weight: 300; font-size: 12px; line-height: 1.3; color: var(--soft); min-height: 2.6em; }
-.tile-title { font-weight: 600; font-size: 14px; line-height: 1.2; margin-top: auto; padding-top: 10px; }
-.tile-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; font-weight: 600; }
-.tile-bars { display: flex; gap: 3px; }
-.tile-bars i { width: 12px; height: 3px; background: var(--bone); opacity: .3; display: block; }
+/* Topic tiles on /temas: the topic's name leads, the plan's figure supports it. Phone: one compact row per topic. */
+.tiles { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.tile { background: var(--bg); color: #fff; text-decoration: none; border-radius: 4px; padding: 14px; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-areas: "ico title cta" ". dato bars"; column-gap: 12px; row-gap: 6px; align-items: center; }
+.tile-ico { grid-area: ico; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.14); color: var(--soft); align-self: start; }
+.tile-ico svg { width: 22px; height: 22px; }
+.tile-title { grid-area: title; font-size: 19px; line-height: 1.05; font-weight: 800; letter-spacing: -.025em; }
+.tile-cta { grid-area: cta; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 13px; font-weight: 700; }
+.tile-dato { grid-area: dato; display: flex; flex-direction: column; gap: 2px; }
+.tile-dato .k { display: none; }
+.tile-lab { font-size: 13px; line-height: 1.3; color: rgba(255,255,255,.88); }
+.tile-lab strong { color: #fff; font-weight: 800; }
+.tile-bars { grid-area: bars; display: flex; gap: 3px; justify-self: end; }
+.tile-bars i { width: 10px; height: 4px; background: #fff; opacity: .3; display: block; }
 .tile-bars i.on { opacity: 1; }
-.tile-cta { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .tile.done { outline: 2px solid var(--yellow); outline-offset: -2px; }
 .tile.done .tile-cta { color: var(--yellow); }
-.tile:nth-child(1) { grid-column: 1 / -1; min-height: 170px; }
-.tile:nth-child(1) .tile-fig { font-size: 56px; }
-.tile:nth-child(1) .tile-lab { font-size: 14px; max-width: 26ch; }
 @media (min-width: 861px) {
   .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-  .tile { padding: 20px; min-height: 240px; }
-  .tile:nth-child(1) { grid-column: auto; min-height: 240px; }
-  .tile:nth-child(1) .tile-fig { font-size: 48px; } .tile:nth-child(1) .tile-lab { font-size: 13px; }
-  .tile-fig { font-size: 48px; } .tile-lab { font-size: 13px; } .tile-title { font-size: 16px; }
+  .tile { padding: 22px; min-height: 230px; grid-template-columns: 52px minmax(0, 1fr) auto; grid-template-rows: auto auto 1fr; grid-template-areas: "ico title title" "dato dato dato" "bars bars cta"; column-gap: 14px; row-gap: 16px; }
+  .tile-ico { width: 52px; height: 52px; align-self: center; }
+  .tile-ico svg { width: 28px; height: 28px; }
+  .tile-title { font-size: 24px; letter-spacing: -.03em; }
+  .tile-dato { padding-top: 14px; border-top: 1px solid rgba(255,255,255,.22); }
+  .tile-dato .k { display: block; color: var(--soft); font-size: 12px; }
+  .tile-lab { font-size: 15px; line-height: 1.35; color: #fff; }
+  .tile-lab strong { font-size: 18px; }
+  .tile-bars { justify-self: start; align-self: end; }
+  .tile-bars i { width: 18px; height: 5px; }
+  .tile-cta { align-self: end; background: var(--bone); color: var(--ink); padding: 11px 16px; font-size: 15px; }
+  .tile.done .tile-cta { color: var(--ink); background: var(--yellow); }
 }
 
 .mas-info { font: inherit; font-size: 14px; font-weight: 600; color: var(--violet); background: transparent; border: 0; padding: 8px 0; min-height: 44px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; align-self: flex-start; }
@@ -797,3 +804,37 @@ footer { padding-bottom: 20px; }
 .res-fila .topic-icon { grid-row: 1 / span 3; align-self: start; }
 .res-top, .res-barra { grid-column: 2 / -1 !important; }
 .res-dh { display: flex; align-items: center; gap: 10px; }
+
+/* Topic map on /mi-opinion: which topics are in the letter and which are missing */
+.solo-web { display: none; }
+@media (min-width: 861px) { .solo-web { display: block; } .solo-movil { display: none; } }
+.mapa { display: flex; flex-direction: column; gap: 12px; }
+.mapa h2 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.mapa h2 span { color: var(--violet); }
+.mapa-barra { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 3px; }
+.mapa-barra i { height: 6px; background: var(--line); display: block; }
+.mapa-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.mapa-tema { display: flex; gap: 8px; align-items: center; min-height: 52px; padding: 8px; text-decoration: none; color: var(--ink); background: #fff; border: 1.5px dashed #b9b2a6; }
+.mapa-tema.hecho { color: #fff; border: 1.5px solid transparent; }
+.mapa-tema.hecho .topic-icon { background: rgba(255,255,255,.16) !important; }
+.mapa-tema .t { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.mapa-tema strong { font-size: 14px; line-height: 1.15; }
+.mapa-tema small { font-size: 12px; font-weight: 600; color: var(--violet); }
+.mapa-tema.hecho small { color: #fff; }
+.mapa-tema .mas { display: none; }
+.mapa-tema > svg { flex: 0 0 auto; align-self: flex-start; }
+.mapa-sig { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--ink); color: var(--bone); text-decoration: none; padding: 16px 18px; }
+.mapa-sig > span { display: flex; flex-direction: column; gap: 4px; }
+.mapa-sig .k { color: var(--lilac); font-size: 12px; }
+.mapa-sig strong { font-size: 16px; line-height: 1.3; }
+.mapa-sig b { white-space: nowrap; }
+@media (min-width: 861px) {
+  .mapa h2 { font-size: 28px; letter-spacing: -.03em; }
+  .mapa-barra i { height: 8px; }
+  .mapa-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .mapa-tema { flex-direction: column; align-items: flex-start; min-height: 118px; padding: 14px; gap: 10px; position: relative; }
+  .mapa-tema > svg { position: absolute; top: 14px; right: 14px; }
+  .mapa-tema strong { font-size: 15px; }
+  .mapa-tema small { margin-top: auto; font-size: 13px; }
+  .mapa-tema .mas { display: inline; }
+}

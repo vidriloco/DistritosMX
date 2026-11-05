@@ -2,10 +2,59 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { Check } from '../components/Check';
-import { api, type Borrador } from '../lib/api';
+import { TopicIcon } from '../components/TopicIcon';
+import { api, type AreaResumen, type Borrador } from '../lib/api';
 import { NO_SE, conOpinion, useRespuestas } from '../lib/respuestas';
+import { TOPIC_COLOR, TOPIC_SHORT } from '../lib/topics';
+import { TOPIC_FIGURES } from '../lib/heroSlides';
+import { useFetch } from '../lib/useFetch';
 import { useSeo } from '../lib/seo';
 import { track } from '../lib/analytics';
+
+const rutaTema = (slug: string) => (slug === 'quien-paga' ? '/quien-paga' : `/area/${slug}`);
+
+/** Which topics already have a point in the letter and which are missing, plus the one to do next. */
+function MapaTemas({ areas, elecciones, origen }: { areas: AreaResumen[]; elecciones: Record<string, string>; origen: string }) {
+  const temas = areas.map((a) => ({
+    ...a,
+    puntos: a.pregunta_slugs.filter((k) => elecciones[k] && elecciones[k] !== NO_SE).length,
+    vistas: a.pregunta_slugs.filter((k) => elecciones[k]).length,
+  }));
+  const hechos = temas.filter((t) => t.puntos > 0).length;
+  // ¿Quién paga? first: it is what the plan leaves out.
+  const siguiente = temas.find((t) => t.slug === 'quien-paga' && t.puntos === 0) ?? temas.find((t) => t.puntos === 0);
+  const dato = siguiente ? TOPIC_FIGURES[siguiente.slug] : undefined;
+  return (
+    <section className="mapa" aria-labelledby={`mapa-${origen}`}>
+      <h2 id={`mapa-${origen}`}>Tu carta cubre <span>{hechos} de {temas.length} temas</span></h2>
+      <div className="mapa-barra" role="img" aria-label={`${hechos} de ${temas.length} temas con opinión`}>
+        {temas.map((t) => <i key={t.slug} style={t.puntos > 0 ? { background: TOPIC_COLOR[t.slug]?.bg } : undefined} />)}
+      </div>
+      <div className="mapa-grid">
+        {temas.map((t) => {
+          const hecho = t.puntos > 0;
+          return (
+            <Link key={t.slug} to={rutaTema(t.slug)} className={`mapa-tema${hecho ? ' hecho' : ''}`} style={hecho ? { background: TOPIC_COLOR[t.slug]?.bg } : undefined}
+              onClick={() => track('mapa_tema', { tema: t.slug, hecho, origen })}>
+              <TopicIcon slug={t.slug} size={34} />
+              <span className="t">
+                <strong>{TOPIC_SHORT[t.slug] ?? t.titulo}</strong>
+                <small>{hecho ? <>{t.puntos === 1 ? '1 frase' : `${t.puntos} frases`}<span className="mas"> en tu carta · Editar</span></> : t.vistas > 0 ? `Seguir ${t.vistas}/${t.num_preguntas} →` : <><span className="mas">{t.num_preguntas} preguntas · </span>Opinar →</>}</small>
+              </span>
+              {hecho ? <Check size={18} /> : null}
+            </Link>
+          );
+        })}
+      </div>
+      {siguiente ? (
+        <Link to={rutaTema(siguiente.slug)} className="mapa-sig" onClick={() => track('mapa_siguiente', { tema: siguiente.slug, hechos, origen })}>
+          <span><span className="k">Siguiente tema sugerido</span><strong>{siguiente.titulo}{dato ? ` · ${dato.cifra} ${dato.etiqueta.split(' · ')[0]}` : ''}</strong></span>
+          <b>Opinar →</b>
+        </Link>
+      ) : null}
+    </section>
+  );
+}
 
 export function Resumen() {
   useSeo('/mi-opinion');
@@ -16,7 +65,7 @@ export function Resumen() {
   // `n` is the letter's points; "No sé" answers count as answered but add no point.
   const n = conOpinion(elecciones);
   const respondidas = Object.keys(elecciones).length;
-  const faltaQuienPaga = n > 0 && !Object.entries(elecciones).some(([k, v]) => k.startsWith('quien-paga-') && v !== NO_SE);
+  const { data: areas } = useFetch(api.areas, []);
 
   useEffect(() => {
     const t = setTimeout(() => { api.opinion({ elecciones, comentarios, municipio, firma }).then(setBorrador).catch((e: Error) => setError(e.message)); }, 250);
@@ -32,13 +81,7 @@ export function Resumen() {
         <span className="k" style={{ color: 'var(--violet)' }}>Paso 3 · Opinar</span>
         <h1 className="h-light" style={{ margin: 0, fontSize: 'clamp(36px, 5vw, 48px)' }}>Tu opinión, <strong>lista para enviar</strong></h1>
         <p className="muted" style={{ margin: 0, fontSize: 17 }}>{n === 0 ? <>{respondidas > 0 ? 'Por ahora respondiste «No sé» en todo, así que tu carta aún no tiene puntos.' : 'Todavía no has respondido ninguna pregunta.'} <Link to="/temas" style={{ display: 'inline-block', padding: '6px 0' }} onClick={() => track('nav', { destino: '/temas', origen: 'carta_vacia' })}>Empieza por un tema</Link> y vuelve aquí.</> : `Respondiste ${respondidas} pregunta${respondidas === 1 ? '' : 's'}. Esta carta junta lo que elegiste${respondidas > n ? ' (sin las que marcaste «No sé»)' : ''}, con la página del documento que respalda cada punto.`}</p>
-        {faltaQuienPaga ? (
-          <Link to="/quien-paga" className="nudge" onClick={() => track('nudge_quien_paga', { puntos: n })}>
-            <span className="num">$</span>
-            <span><strong>Falta lo que más pesa: ¿quién paga?</strong><span>El plan necesita miles de millones y no dice de dónde saldrán. Una pregunta más y tu carta lo exige.</span></span>
-            <span className="nudge-cta">1 pregunta<Check size={18} /></span>
-          </Link>
-        ) : null}
+        {areas ? <div className="solo-movil"><MapaTemas areas={areas} elecciones={elecciones} origen="movil" /></div> : null}
         <details className="firma ph-no-capture" open={!!(firma.nombre || firma.colonia || municipio)}>
           <summary onClick={(e) => track('firma_toggle', { abierta: !(e.currentTarget.parentElement as HTMLDetailsElement).open })}><span>Firmar la carta con tu nombre y dirección</span><span className="muted">opcional ▾</span></summary>
           <p className="muted small">Una carta firmada y con lugar pesa más. Nada de esto se guarda en este sitio: solo va en el texto que tú envías.</p>
@@ -58,6 +101,7 @@ export function Resumen() {
         {respondidas > 0 ? <button type="button" onClick={() => { if (confirm('¿Borrar todas tus respuestas?')) limpiar(); else track('respuestas_borrar_cancelado', { puntos: n }); }} style={{ background: 'none', border: 0, color: 'var(--rust)', textDecoration: 'underline', cursor: 'pointer', alignSelf: 'flex-start', padding: 0 }}>Borrar mis respuestas</button> : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {areas ? <div className="solo-web"><MapaTemas areas={areas} elecciones={elecciones} origen="web" /></div> : null}
         <div className="dark" style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <strong style={{ fontSize: 17 }}>Cómo enviarla</strong>
           <ol style={{ margin: 0, paddingLeft: 18, fontSize: 14, lineHeight: 1.55, display: 'flex', flexDirection: 'column', gap: 8, color: '#d9d0ea' }}>
