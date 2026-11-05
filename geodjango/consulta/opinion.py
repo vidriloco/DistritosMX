@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .models import Area, Opcion
+from .models import NO_SE, Area, Opcion
 
 def componer(elecciones: dict, comentarios: dict, municipio: str = "", firma: dict | None = None) -> dict:
     """Return the drafted letter and the per-area pieces it was built from."""
@@ -17,7 +17,7 @@ def componer(elecciones: dict, comentarios: dict, municipio: str = "", firma: di
         frases = []
         for pregunta in area.preguntas.all():
             valor = elecciones.get(pregunta.slug)
-            if not valor:
+            if not valor or valor == NO_SE:
                 continue
             opcion = opciones.get((pregunta.slug, valor))
             if opcion:

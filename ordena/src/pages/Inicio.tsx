@@ -7,7 +7,7 @@ import { SkylineCDMX } from '../components/Graphics';
 import { TOPIC_FIGURES } from '../lib/heroSlides';
 import { api, type Consulta } from '../lib/api';
 import { useFetch } from '../lib/useFetch';
-import { useRespuestas } from '../lib/respuestas';
+import { conOpinion, useRespuestas } from '../lib/respuestas';
 import { useSeo } from '../lib/seo';
 import { track } from '../lib/analytics';
 import { PostalesCarousel } from '../components/PostalesCarousel';
@@ -26,7 +26,8 @@ export function Inicio() {
   const { data: resultados } = useFetch(api.resultados, []);
   const { elecciones } = useRespuestas();
   const n = Object.keys(elecciones).length;
-  const totalPreguntas = areas?.reduce((s, a) => s + a.num_preguntas, 0) ?? 16;
+  const puntos = conOpinion(elecciones);
+  const totalPreguntas = areas?.reduce((s, a) => s + a.num_preguntas, 0) ?? 45;
   const cierre = consulta ? fecha(consulta.cierre) : '22 de noviembre';
 
   return (
@@ -41,7 +42,7 @@ export function Inicio() {
           <p className="muted">El gobierno decide cómo será el Valle de México en 2050. Hasta el <strong>{cierre}</strong> puedes mandarle tu opinión.</p>
           {n > 0 ? (
             <Link to="/mi-opinion" className="resume" onClick={() => track('nav', { destino: '/mi-opinion', origen: 'inicio_continuar', respuestas: n })}>
-              <span><strong>Llevas {n} de {totalPreguntas} preguntas.</strong> Tu carta ya tiene {n === 1 ? 'un punto' : `${n} puntos`}.</span>
+              <span><strong>Llevas {n} de {totalPreguntas} preguntas.</strong> Tu carta ya tiene {puntos === 1 ? 'un punto' : `${puntos} puntos`}.</span>
               <span className="resume-cta">Continuar<Check size={18} /></span>
             </Link>
           ) : null}

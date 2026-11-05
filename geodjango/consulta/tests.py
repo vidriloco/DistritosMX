@@ -3,7 +3,7 @@ import json
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 
-from .models import MuestraInicial, Opcion, Respuesta
+from .models import NO_SE, MuestraInicial, Opcion, Respuesta
 
 ORDENA = {'HTTP_HOST': 'ordena.localhost'}
 
@@ -89,6 +89,25 @@ class OrdenaHostTests(TestCase):
         self.assertEqual((apagada['respuestas'], apagada['muestra']), (0, 0))
         # Switching off keeps the numbers, ready to switch on again.
         self.assertEqual(Opcion.objects.get(pk=opciones[0].pk).base, 20)
+
+    def test_every_topic_has_five_questions(self):
+        for area in self.client.get('/api/areas/', **ORDENA).json()['areas']:
+            self.assertEqual(area['num_preguntas'], 5, area['slug'])
+
+    def test_no_se_stays_out_of_letter_and_counts(self):
+        preguntas = self.client.get('/api/areas/movilidad/', **ORDENA).json()['preguntas']
+        elegida, saltada = preguntas[0], preguntas[1]
+        elecciones = {elegida['slug']: elegida['opciones'][0]['valor'], saltada['slug']: NO_SE}
+        texto = self.client.post('/api/opinion/', json.dumps({'elecciones': elecciones}), content_type='application/json', **ORDENA).json()['texto']
+        self.assertIn(elegida['opciones'][0]['opinion'], texto)
+        self.assertEqual(texto.count('\n- '), 1)
+
+        enviar = lambda visitante, el: self.client.post('/api/respuesta/', json.dumps({'visitante': visitante, 'elecciones': el}), content_type='application/json', **ORDENA)
+        enviar('0b9f3c2e-6a1d-4c5e-9f7a-2d8b1e4c6a3f', elecciones)
+        enviar('1c8e2b3d-5f0a-4b6c-8e9d-3c7a2f1b5d4e', {saltada['slug']: NO_SE})
+        resultados = self.client.get('/api/resultados/', **ORDENA).json()
+        self.assertEqual(next(a for a in resultados['areas'] if a['slug'] == 'movilidad')['participantes'], 1)
+        self.assertEqual(next(p for p in resultados['preguntas'] if p['pregunta'] == saltada['slug'])['total'], 0)
 
     def test_answers_need_a_browser_id(self):
         r = self.client.post('/api/respuesta/', json.dumps({'visitante': 'x', 'elecciones': {'a': 'b'}}),

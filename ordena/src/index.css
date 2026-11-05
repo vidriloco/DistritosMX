@@ -277,6 +277,8 @@ svg { max-width: 100%; }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; }
 .pills button { font: inherit; font-size: 15px; line-height: 1.25; text-align: left; padding: 10px 14px; min-height: 44px; border-radius: 999px; border: 1.5px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
 .pills button[aria-pressed=true] { background: var(--ink); color: var(--bone); font-weight: 600; }
+.card .pills button.no-se { border-style: dashed; color: var(--ink-2); }
+.card .pills button.no-se[aria-pressed=true] { color: var(--bone); }
 .frase { margin: auto 0 0; padding: 12px 14px; border-left: 4px solid var(--violet); background: var(--bone); font-size: 14px; line-height: 1.45; color: var(--ink-2); }
 .frase .k { display: block; color: var(--ink); margin-bottom: 4px; }
 .frase-hint { margin-top: auto; }

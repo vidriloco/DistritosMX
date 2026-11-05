@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { Check } from '../components/Check';
 import { api, type Borrador } from '../lib/api';
-import { useRespuestas } from '../lib/respuestas';
+import { NO_SE, conOpinion, useRespuestas } from '../lib/respuestas';
 import { useSeo } from '../lib/seo';
 import { track } from '../lib/analytics';
 
@@ -13,8 +13,10 @@ export function Resumen() {
   const [borrador, setBorrador] = useState<Borrador | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
-  const n = Object.keys(elecciones).length;
-  const faltaQuienPaga = n > 0 && !elecciones['quien-paga-prioridad'] && !elecciones['quien-paga-situacion'];
+  // `n` is the letter's points; "No sé" answers count as answered but add no point.
+  const n = conOpinion(elecciones);
+  const respondidas = Object.keys(elecciones).length;
+  const faltaQuienPaga = n > 0 && !Object.entries(elecciones).some(([k, v]) => k.startsWith('quien-paga-') && v !== NO_SE);
 
   useEffect(() => {
     const t = setTimeout(() => { api.opinion({ elecciones, comentarios, municipio, firma }).then(setBorrador).catch((e: Error) => setError(e.message)); }, 250);
@@ -29,7 +31,7 @@ export function Resumen() {
       <div>
         <span className="k" style={{ color: 'var(--violet)' }}>Paso 3 · Opinar</span>
         <h1 className="h-light" style={{ margin: 0, fontSize: 'clamp(36px, 5vw, 48px)' }}>Tu opinión, <strong>lista para enviar</strong></h1>
-        <p className="muted" style={{ margin: 0, fontSize: 17 }}>{n === 0 ? <>Todavía no has respondido ninguna pregunta. <Link to="/temas" style={{ display: 'inline-block', padding: '6px 0' }} onClick={() => track('nav', { destino: '/temas', origen: 'carta_vacia' })}>Empieza por un tema</Link> y vuelve aquí.</> : `Respondiste ${n} pregunta${n === 1 ? '' : 's'}. Esta carta junta lo que elegiste, con la página del documento que respalda cada punto.`}</p>
+        <p className="muted" style={{ margin: 0, fontSize: 17 }}>{n === 0 ? <>{respondidas > 0 ? 'Por ahora respondiste «No sé» en todo, así que tu carta aún no tiene puntos.' : 'Todavía no has respondido ninguna pregunta.'} <Link to="/temas" style={{ display: 'inline-block', padding: '6px 0' }} onClick={() => track('nav', { destino: '/temas', origen: 'carta_vacia' })}>Empieza por un tema</Link> y vuelve aquí.</> : `Respondiste ${respondidas} pregunta${respondidas === 1 ? '' : 's'}. Esta carta junta lo que elegiste${respondidas > n ? ' (sin las que marcaste «No sé»)' : ''}, con la página del documento que respalda cada punto.`}</p>
         {faltaQuienPaga ? (
           <Link to="/quien-paga" className="nudge" onClick={() => track('nudge_quien_paga', { puntos: n })}>
             <span className="num">$</span>
@@ -53,7 +55,7 @@ export function Resumen() {
           <button type="button" className="btn ghost" onClick={copiar} disabled={n === 0}>{copiado ? 'Copiado' : 'Copiar texto'}</button>
           <a className="btn rust ph-no-capture" href={mailto} aria-disabled={n === 0} onClick={(e) => n === 0 ? e.preventDefault() : track('carta_enviada_correo', { puntos: n, firmada: !!firma.nombre, municipio: !!municipio })}>Enviar por correo a SEDATU<Check size={22} /></a>
         </div>
-        {n > 0 ? <button type="button" onClick={() => { if (confirm('¿Borrar todas tus respuestas?')) limpiar(); else track('respuestas_borrar_cancelado', { puntos: n }); }} style={{ background: 'none', border: 0, color: 'var(--rust)', textDecoration: 'underline', cursor: 'pointer', alignSelf: 'flex-start', padding: 0 }}>Borrar mis respuestas</button> : null}
+        {respondidas > 0 ? <button type="button" onClick={() => { if (confirm('¿Borrar todas tus respuestas?')) limpiar(); else track('respuestas_borrar_cancelado', { puntos: n }); }} style={{ background: 'none', border: 0, color: 'var(--rust)', textDecoration: 'underline', cursor: 'pointer', alignSelf: 'flex-start', padding: 0 }}>Borrar mis respuestas</button> : null}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div className="dark" style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 10 }}>

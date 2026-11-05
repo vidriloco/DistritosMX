@@ -153,6 +153,72 @@
             }
           ],
           "corto": "Agencia del Agua"
+        },
+        {
+          "slug": "agua-fuentes",
+          "texto": "¿El plan debería seguir trayendo agua de otras cuencas (Cutzamala, Lerma) o apostar por el agua de la propia cuenca?",
+          "opciones": [
+            {
+              "valor": "rehabilitar",
+              "etiqueta": "Rehabilitar Cutzamala y Lerma: sin ellos no alcanza",
+              "opinion": "Apoyo la rehabilitación del Sistema Cutzamala y del Alto Lerma como proyecto prioritario 10 (p. 115), con un calendario de obra y metas para reducir las pérdidas en la conducción."
+            },
+            {
+              "valor": "local",
+              "etiqueta": "Priorizar el agua de la cuenca: lluvia, recarga y reúso",
+              "opinion": "Pido que la inversión priorice las fuentes de la propia cuenca —cosecha de lluvia, pozos de recarga y reúso (p. 116)— sobre traer agua de fuera, que implica altos costos energéticos y vulnerabilidad operativa (p. 22)."
+            },
+            {
+              "valor": "ambas",
+              "etiqueta": "Las dos cosas, con metas para depender menos de fuera",
+              "opinion": "Acepto rehabilitar el Cutzamala y el Lerma (p. 115) como medida de transición, siempre que el programa fije metas anuales para reducir la dependencia de agua importada con fuentes locales (p. 116)."
+            }
+          ],
+          "corto": "Agua de fuera"
+        },
+        {
+          "slug": "agua-texcoco",
+          "texto": "¿Qué debería pasar con el antiguo Lago de Texcoco y los humedales del oriente?",
+          "opciones": [
+            {
+              "valor": "restaurar",
+              "etiqueta": "Restaurarlo como lago y humedal, sin urbanizar",
+              "opinion": "Apoyo la restauración del Lago de Texcoco (p. 116) y pido que su polígono quede como no urbanizable en el Modelo de Ordenamiento, para que funcione como regulador de agua e inundaciones."
+            },
+            {
+              "valor": "parque",
+              "etiqueta": "Restaurarlo y abrirlo como parque para el oriente",
+              "opinion": "Apoyo la restauración del Lago de Texcoco (p. 116) con acceso público, para que también sea un espacio verde para el oriente metropolitano, donde hoy faltan parques (p. 44)."
+            },
+            {
+              "valor": "otro",
+              "etiqueta": "Hay prioridades de agua más urgentes",
+              "opinion": "Considero que antes que la restauración del Lago de Texcoco (p. 116) deben atenderse las fugas y la falta de agua entubada en las colonias (pp. 58 y 141)."
+            }
+          ],
+          "corto": "Lago de Texcoco"
+        },
+        {
+          "slug": "agua-reparto",
+          "texto": "En el oriente hay tandeos y baja presión mientras otras zonas tienen agua estable. ¿Qué pedirías?",
+          "opciones": [
+            {
+              "valor": "equidad",
+              "etiqueta": "Repartir el agua con criterio de equidad entre zonas",
+              "opinion": "Pido que el programa establezca un criterio metropolitano de reparto equitativo del agua, ya que el oriente sufre tandeos y baja presión mientras las zonas centrales tienen un suministro más estable (p. 21)."
+            },
+            {
+              "valor": "medicion",
+              "etiqueta": "Medir y publicar cuánta agua llega a cada zona",
+              "opinion": "Pido que la medición telemétrica y la macromedición (p. 118) publiquen en datos abiertos cuánta agua se entrega a cada municipio y alcaldía, para que el reparto pueda vigilarse."
+            },
+            {
+              "valor": "progresiva",
+              "etiqueta": "Cobrar más a quien más consume",
+              "opinion": "Propongo tarifas progresivas que cobren más a los grandes consumidores y que lo recaudado se destine a llevar agua continua a las zonas con tandeos (p. 21)."
+            }
+          ],
+          "corto": "Reparto del agua"
         }
       ]
     },
@@ -288,6 +354,50 @@
             }
           ],
           "corto": "Movilidad del cuidado"
+        },
+        {
+          "slug": "movilidad-cetram",
+          "texto": "Pantitlán e Indios Verdes operan por encima de su capacidad. ¿Qué debería hacerse con los paraderos (CETRAM)?",
+          "opciones": [
+            {
+              "valor": "integrar",
+              "etiqueta": "Ordenarlos, con transbordos cortos y tarifa integrada",
+              "opinion": "Pido que la reordenación de los CETRAM (p. 117) empiece por Pantitlán e Indios Verdes, que operan por encima de su capacidad (p. 54), con transbordos cortos e integración tarifaria."
+            },
+            {
+              "valor": "seguridad",
+              "etiqueta": "Hacerlos seguros: luz, accesibilidad y contra el acoso",
+              "opinion": "Pido que la reordenación de los CETRAM (p. 117) incluya iluminación, accesibilidad universal y medidas contra el acoso, con los criterios de género que el plan propone para el transporte (p. 146)."
+            },
+            {
+              "valor": "directas",
+              "etiqueta": "Que no todo pase por ellos: más rutas directas",
+              "opinion": "Propongo que, además de reordenar los CETRAM (p. 117), el sistema integrado de transporte (p. 120) ofrezca rutas que no obliguen a transbordar en nodos saturados como Pantitlán e Indios Verdes (p. 54)."
+            }
+          ],
+          "corto": "CETRAM"
+        },
+        {
+          "slug": "movilidad-meta",
+          "texto": "El plan propone bajar el tiempo de traslado diario de 180 a 90 minutos en 2050. ¿Qué opinas?",
+          "opciones": [
+            {
+              "valor": "intermedias",
+              "etiqueta": "Bien, si se miden sus metas intermedias cada año",
+              "opinion": "Apoyo la meta de bajar el tiempo de traslado de 180 a 90 minutos (Cuadro 14, p. 191) y pido que sus metas intermedias —150 minutos en 2030 y 120 en 2040— se midan y publiquen cada año por municipio."
+            },
+            {
+              "valor": "lejos",
+              "etiqueta": "Es poco ambiciosa: 2050 está muy lejos",
+              "opinion": "Considero insuficiente esperar a 2050 para reducir a la mitad el tiempo de traslado (p. 191); pido adelantar la meta con proyectos de corto plazo para quienes viajan desde la periferia."
+            },
+            {
+              "valor": "presupuesto",
+              "etiqueta": "No es creíble sin presupuesto ni calendario",
+              "opinion": "La meta de 90 minutos de traslado (p. 191) no es verificable sin presupuesto ni calendario por proyecto; pido que el programa los incluya."
+            }
+          ],
+          "corto": "Meta de traslado"
         }
       ]
     },
@@ -390,6 +500,77 @@
             }
           ],
           "corto": "Predial a baldíos"
+        },
+        {
+          "slug": "vivienda-densidad",
+          "texto": "¿Estás de acuerdo con permitir edificios más altos junto a estaciones de transporte masivo?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, si incluyen vivienda asequible",
+              "opinion": "Apoyo el Desarrollo Cercano al Transporte (p. 75) siempre que cada proyecto incluya un porcentaje obligatorio de vivienda asequible y espacio público."
+            },
+            {
+              "valor": "servicios",
+              "etiqueta": "Sí, solo si antes se garantiza agua y drenaje",
+              "opinion": "Acepto más densidad junto al transporte (p. 75) solo donde se garanticen antes agua, drenaje y equipamiento suficientes para la nueva población."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, saturaría mi colonia",
+              "opinion": "Me opongo a densificar las colonias alrededor de las estaciones (p. 75) sin consulta vecinal previa, porque la infraestructura existente ya está saturada."
+            }
+          ],
+          "corto": "Más altura"
+        },
+        {
+          "slug": "vivienda-asequible",
+          "texto": "¿Qué ayudaría más a que haya vivienda que la gente pueda pagar?",
+          "opciones": [
+            {
+              "valor": "zeis",
+              "etiqueta": "Zonas de interés social en lugares bien ubicados",
+              "opinion": "Apoyo las Zonas Especiales de Interés Social (ZEIS, p. 156) y pido que se apliquen sobre todo en zonas centrales con empleo y transporte, no solo en la periferia."
+            },
+            {
+              "valor": "cooperativa",
+              "etiqueta": "Vivienda cooperativa, sin intermediarios",
+              "opinion": "Apoyo el fomento a la vivienda cooperativa (p. 156) y pido que se habilite legalmente en el Estado de México, Hidalgo y Morelos con crédito público accesible."
+            },
+            {
+              "valor": "mejoramiento",
+              "etiqueta": "Mejorar y ampliar la vivienda que ya existe",
+              "opinion": "Pido que el Programa de Vivienda para el Bienestar (p. 117) priorice el mejoramiento y la ampliación de la vivienda existente en colonias populares sobre la construcción de conjuntos nuevos."
+            },
+            {
+              "valor": "renta",
+              "etiqueta": "Renta social a precio accesible",
+              "opinion": "Apoyo los esquemas de arrendamiento social en vivienda abandonada rehabilitada (p. 157) y pido que se extiendan a vivienda pública en renta accesible en zonas centrales."
+            }
+          ],
+          "corto": "Vivienda asequible"
+        },
+        {
+          "slug": "vivienda-espacio-publico",
+          "texto": "Hoy 7.5 millones de personas viven a menos de 300 m de un espacio público; el plan quiere llegar a 12 millones en 2050. ¿Qué falta más cerca de tu casa?",
+          "opciones": [
+            {
+              "valor": "parque",
+              "etiqueta": "Un parque o área verde",
+              "opinion": "Pido que la meta de 12 millones de personas a 300 m de un espacio público (p. 191) se cumpla primero en la periferia, con parques y áreas verdes donde hoy faltan (p. 44)."
+            },
+            {
+              "valor": "deportivo",
+              "etiqueta": "Un deportivo o centro cultural",
+              "opinion": "Pido que la ampliación de centros culturales y deportivos metropolitanos (p. 117) se ubique en el sur, sureste y norte de la metrópoli, donde hoy casi no existen (p. 44)."
+            },
+            {
+              "valor": "calle",
+              "etiqueta": "Calles y plazas seguras para caminar",
+              "opinion": "Pido que los Corredores de Calle Completa y los Senderos Seguros (p. 117) cuenten dentro de la meta de espacio público a 300 m (p. 191), con prioridad en colonias de la periferia."
+            }
+          ],
+          "corto": "Espacio público"
         }
       ]
     },
@@ -503,6 +684,77 @@
             }
           ],
           "corto": "Separar residuos"
+        },
+        {
+          "slug": "ambiente-conservacion",
+          "texto": "¿Qué debería hacerse con los asentamientos que ya ocupan suelo de conservación?",
+          "opciones": [
+            {
+              "valor": "contener",
+              "etiqueta": "Contenerlos: que no crezcan más",
+              "opinion": "Pido que la huella de asentamientos en suelo de conservación (16,469 hectáreas, p. 99) se congele con vigilancia efectiva y que ninguna construcción nueva ahí reciba servicios ni regularización."
+            },
+            {
+              "valor": "regularizar",
+              "etiqueta": "Regularizar a quien ya vive ahí, con compensación ambiental",
+              "opinion": "Propongo regularizar los asentamientos consolidados en suelo de conservación (p. 99) a cambio de compromisos de compensación ambiental y límites claros a su crecimiento."
+            },
+            {
+              "valor": "reubicar",
+              "etiqueta": "Reubicar a quien está en zonas de riesgo o de recarga",
+              "opinion": "Pido reubicar, con vivienda digna y cercana y con su participación, a las familias asentadas en zonas de recarga o de riesgo dentro del suelo de conservación (p. 99)."
+            }
+          ],
+          "corto": "Suelo de conservación"
+        },
+        {
+          "slug": "ambiente-calor",
+          "texto": "¿Qué medida te parece más útil contra el calor y la mala calidad del aire?",
+          "opciones": [
+            {
+              "valor": "arboles",
+              "etiqueta": "Árboles y azoteas verdes en las colonias",
+              "opinion": "Pido que la arborización urbana y los techos y muros verdes (p. 116) se concentren en las colonias con menos cobertura vegetal, donde la isla de calor es más intensa (p. 44)."
+            },
+            {
+              "valor": "parques",
+              "etiqueta": "Parques que funcionen como refugios de frescura",
+              "opinion": "Apoyo rehabilitar parques metropolitanos como nodos de enfriamiento (p. 150) y pido que abran con horario extendido durante las olas de calor."
+            },
+            {
+              "valor": "monitoreo",
+              "etiqueta": "Medir el aire en más lugares y avisar a tiempo",
+              "opinion": "Pido que la ampliación del monitoreo ambiental (p. 118) instale estaciones en los municipios periféricos y publique alertas por colonia."
+            },
+            {
+              "valor": "autos",
+              "etiqueta": "Menos coches y transporte público limpio",
+              "opinion": "Pido que el plan vincule la mejora del aire con menos uso del automóvil y la renovación de la flota de transporte público, dado el impacto del parque vehicular en la calidad del aire (p. 56)."
+            }
+          ],
+          "corto": "Calor y aire"
+        },
+        {
+          "slug": "ambiente-tiraderos",
+          "texto": "La basura de toda la metrópoli termina en municipios periféricos. ¿Qué pedirías?",
+          "opciones": [
+            {
+              "valor": "compensar",
+              "etiqueta": "Compensar con dinero y obras a quien la recibe",
+              "opinion": "Pido que el SIGIRES-ZMVM (p. 118) incluya compensación económica y obras para los municipios que reciben la disposición final de los residuos de toda la metrópoli (p. 29)."
+            },
+            {
+              "valor": "cerrar",
+              "etiqueta": "Cerrar y sanear los tiraderos a cielo abierto",
+              "opinion": "Pido un calendario para cerrar y sanear los tiraderos a cielo abierto, con monitoreo de su impacto en la salud y el acuífero, como parte del SIGIRES-ZMVM (p. 118)."
+            },
+            {
+              "valor": "reducir",
+              "etiqueta": "Que se genere menos basura desde el origen",
+              "opinion": "Propongo metas de reducción de residuos por persona (hoy 1.13 kg al día, p. 29) dentro del sistema metropolitano de residuos, para que llegue menos basura a los municipios receptores."
+            }
+          ],
+          "corto": "Tiraderos"
         }
       ]
     },
@@ -600,6 +852,72 @@
             }
           ],
           "corto": "Alerta temprana"
+        },
+        {
+          "slug": "riesgos-hundimientos",
+          "texto": "El hundimiento del suelo por sacar demasiada agua del subsuelo daña casas, calles y tuberías. ¿Qué pedirías?",
+          "opciones": [
+            {
+              "valor": "extraccion",
+              "etiqueta": "Sacar menos agua del subsuelo donde más se hunde",
+              "opinion": "Pido que el programa fije metas para reducir la extracción del acuífero en las zonas con mayor hundimiento (p. 22), ligadas a la recarga y el reúso (p. 116)."
+            },
+            {
+              "valor": "reparar",
+              "etiqueta": "Apoyo para reparar las casas dañadas",
+              "opinion": "Pido un programa para diagnosticar y reparar viviendas dañadas por hundimientos diferenciales (p. 22), dentro de los programas de atención a viviendas en zonas de riesgo (p. 118)."
+            },
+            {
+              "valor": "mapa",
+              "etiqueta": "Un mapa público de dónde se hunde el suelo",
+              "opinion": "Pido que el Atlas de Riesgos Metropolitano (p. 131) incluya mapas de hundimiento actualizados y consultables por colonia."
+            }
+          ],
+          "corto": "Hundimientos"
+        },
+        {
+          "slug": "riesgos-refugios",
+          "texto": "¿Qué debería tener la red metropolitana de refugios y albergues para emergencias?",
+          "opciones": [
+            {
+              "valor": "cerca",
+              "etiqueta": "Uno cerca de cada colonia, que la gente conozca",
+              "opinion": "Pido que la red de refugios y albergues (p. 132) tenga al menos un inmueble identificado por colonia en zonas de riesgo, con señalización y simulacros."
+            },
+            {
+              "valor": "brigadas",
+              "etiqueta": "Brigadas vecinales capacitadas",
+              "opinion": "Apoyo la capacitación de brigadas comunitarias prevista en la red de refugios (p. 132) y pido que tenga recursos permanentes y llegue a todas las colonias en zonas de riesgo."
+            },
+            {
+              "valor": "calor",
+              "etiqueta": "Que también abran en olas de calor",
+              "opinion": "Pido que la red de refugios (p. 132) también opere como refugio climático durante las olas de calor, que el propio plan reconoce cada vez más frecuentes (p. 30)."
+            }
+          ],
+          "corto": "Refugios"
+        },
+        {
+          "slug": "riesgos-agencia",
+          "texto": "¿Estás de acuerdo con crear una Agencia Metropolitana de Gestión de Riesgos, Protección Civil y Cambio Climático?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, las emergencias no respetan límites",
+              "opinion": "Apoyo la Agencia Metropolitana de Gestión Integral de Riesgos, Protección Civil y Cambio Climático (p. 159), con protocolos únicos para las cuatro entidades."
+            },
+            {
+              "valor": "condicion",
+              "etiqueta": "Sí, si llega con presupuesto y personal propio",
+              "opinion": "Apoyo la Agencia Metropolitana de Riesgos (p. 159) solo si cuenta con presupuesto, personal y atribuciones propias, y no como una oficina más sin capacidad de respuesta."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, mejor fortalecer a protección civil local",
+              "opinion": "Prefiero fortalecer a las unidades de protección civil municipales y estatales antes que crear una nueva agencia metropolitana (p. 159)."
+            }
+          ],
+          "corto": "Agencia de riesgos"
         }
       ]
     },
@@ -674,6 +992,94 @@
             }
           ],
           "corto": "Servicio lejano"
+        },
+        {
+          "slug": "proximidad-cuidam",
+          "texto": "Los CUIDAM juntarían servicios públicos y de cuidado en un solo lugar. ¿Qué no debería faltar?",
+          "opciones": [
+            {
+              "valor": "infancia",
+              "etiqueta": "Guardería con horario amplio",
+              "opinion": "Pido que los CUIDAM (prioritario 2, p. 120) incluyan guarderías con horario amplio, dado que las mujeres dedican 25 horas a la semana a mover a dependientes (p. 45)."
+            },
+            {
+              "valor": "mayores",
+              "etiqueta": "Atención a personas mayores y con discapacidad",
+              "opinion": "Pido que los CUIDAM (p. 120) incluyan centros de día para personas mayores y con discapacidad, ante la transición demográfica que el propio plan anticipa (p. 63)."
+            },
+            {
+              "valor": "tramites",
+              "etiqueta": "Trámites, salud básica e internet en un solo lugar",
+              "opinion": "Pido que los CUIDAM (p. 120) concentren trámites, salud básica e internet gratuito, ya que menos de la mitad de los hogares tiene internet regular (p. 44)."
+            }
+          ],
+          "corto": "CUIDAM"
+        },
+        {
+          "slug": "proximidad-salud",
+          "texto": "¿Cómo deberían elegirse los sitios de los cuatro hospitales de alta especialidad?",
+          "opciones": [
+            {
+              "valor": "lejania",
+              "etiqueta": "Donde la gente viaja más lejos para atenderse",
+              "opinion": "Pido que los cuatro nodos de salud de alta especialidad (p. 120) se ubiquen según el tiempo que hoy tarda la gente en llegar a un hospital, y que el criterio se publique."
+            },
+            {
+              "valor": "transporte",
+              "etiqueta": "Junto a una estación de transporte masivo",
+              "opinion": "Pido que los nodos de salud de alta especialidad (p. 120) se construyan junto a estaciones del sistema de transporte masivo, para poder llegar sin auto."
+            },
+            {
+              "valor": "existentes",
+              "etiqueta": "Mejor fortalecer clínicas y hospitales que ya existen",
+              "opinion": "Propongo que, junto a los nodos de alta especialidad (p. 120), se fortalezcan con personal y equipo los hospitales generales y las clínicas que ya existen en la periferia."
+            }
+          ],
+          "corto": "Hospitales"
+        },
+        {
+          "slug": "proximidad-empleo",
+          "texto": "¿Qué haría más para que haya empleo formal cerca de donde vives?",
+          "opciones": [
+            {
+              "valor": "centralidades",
+              "etiqueta": "Nuevos polos de empleo en la periferia",
+              "opinion": "Apoyo la Consolidación y Creación de Centralidades Metropolitanas (p. 117) y pido que cada una tenga metas de empleo formal, dado que la informalidad supera el 65 % en el oriente (p. 43)."
+            },
+            {
+              "valor": "incentivos",
+              "etiqueta": "Incentivos a empresas que se instalen en la periferia",
+              "opinion": "Propongo incentivos fiscales para las empresas que creen empleo formal en municipios con alta informalidad (p. 43), como parte de la política de Desarrollo Económico (p. 76)."
+            },
+            {
+              "valor": "locales",
+              "etiqueta": "Capacitación y apoyo a negocios locales",
+              "opinion": "Pido programas de capacitación y apoyo a negocios locales para formalizar el empleo en la periferia, donde la informalidad llega hasta el 90 % (p. 43)."
+            }
+          ],
+          "corto": "Empleo cerca"
+        },
+        {
+          "slug": "proximidad-internet",
+          "texto": "Menos de la mitad de los hogares tiene internet regular. ¿El plan debería ocuparse de eso?",
+          "opciones": [
+            {
+              "valor": "publico",
+              "etiqueta": "Sí, internet gratuito en espacios públicos",
+              "opinion": "Pido que el acceso gratuito a internet (p. 146) llegue a plazas, escuelas y CUIDAM de la periferia, ya que menos de la mitad de los hogares tiene acceso regular (p. 44)."
+            },
+            {
+              "valor": "hogares",
+              "etiqueta": "Sí, con apoyo para conectar los hogares",
+              "opinion": "Pido que el programa incluya una meta de hogares con internet regular, hoy menos de la mitad (p. 44), con apoyo a las familias de menores ingresos."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No es tarea de este plan",
+              "opinion": "Considero que la conectividad digital no debe ser prioridad de este programa; prefiero que los recursos se dirijan a transporte, agua y salud."
+            }
+          ],
+          "corto": "Internet"
         }
       ]
     },
@@ -743,6 +1149,94 @@
             }
           ],
           "corto": "Apoyo al campo"
+        },
+        {
+          "slug": "campo-chinampas",
+          "texto": "¿Cómo proteger la zona chinampera de Xochimilco, Tláhuac y Chalco?",
+          "opciones": [
+            {
+              "valor": "agua",
+              "etiqueta": "Agua limpia para los canales",
+              "opinion": "Pido que el Proyecto Integral Xochimilco-Tláhuac-Xico-Chalco (prioritario 8, p. 125) garantice agua tratada de buena calidad para los canales y la producción chinampera."
+            },
+            {
+              "valor": "urbanizacion",
+              "etiqueta": "Frenar la urbanización sobre las chinampas",
+              "opinion": "Pido que la zona chinampera quede como no urbanizable y con vigilancia efectiva dentro del prioritario 8 (p. 125), frente a la presión urbana documentada en Xochimilco y Milpa Alta (p. 32)."
+            },
+            {
+              "valor": "chinamperos",
+              "etiqueta": "Pagar a quien la sigue trabajando",
+              "opinion": "Pido que el pago por servicios ambientales (p. 116) incluya a las familias chinamperas que mantienen activa la zona del prioritario 8 (p. 125)."
+            }
+          ],
+          "corto": "Chinampas"
+        },
+        {
+          "slug": "campo-ejidos",
+          "texto": "Mucha urbanización irregular ocurre en tierras ejidales y comunales. ¿Qué debería hacer el plan?",
+          "opciones": [
+            {
+              "valor": "proteger",
+              "etiqueta": "Proteger esa tierra de la urbanización",
+              "opinion": "Pido que el Modelo de Ordenamiento (p. 74) proteja como productiva o de conservación la tierra ejidal y comunal hoy amenazada por la urbanización irregular (p. 32)."
+            },
+            {
+              "valor": "inmobiliaria",
+              "etiqueta": "Que los ejidos urbanicen ellos mismos, con reglas",
+              "opinion": "Apoyo las inmobiliarias sociales ejidales (p. 173) para que ejidatarios y comuneros participen en el desarrollo de su suelo, con capacitación y vigilancia pública."
+            },
+            {
+              "valor": "asamblea",
+              "etiqueta": "Que cada cambio lo decida la asamblea, con información",
+              "opinion": "Pido que cualquier cambio de uso de suelo en ejidos y comunidades (p. 74) se decida en asamblea con información completa y con acompañamiento de las autoridades agrarias."
+            }
+          ],
+          "corto": "Ejidos"
+        },
+        {
+          "slug": "campo-riego",
+          "texto": "Parte del campo se riega con aguas residuales sin tratar. ¿Qué pedirías?",
+          "opciones": [
+            {
+              "valor": "tratar",
+              "etiqueta": "Tratar el agua antes de usarla para riego",
+              "opinion": "Pido que el agua residual usada para riego reciba tratamiento previo con calendario y metas, ya que hoy pone en riesgo la salud, los suelos y los ecosistemas (p. 33)."
+            },
+            {
+              "valor": "eficiencia",
+              "etiqueta": "Riego más eficiente y técnicas tradicionales",
+              "opinion": "Apoyo la meta de eficiencia hídrica en la agricultura (de 3 a 4 kg/m³ en 2050, p. 191) y pido apoyos para técnicas tradicionales como chinampa, milpa y terrazas (p. 138)."
+            },
+            {
+              "valor": "control",
+              "etiqueta": "Vigilar lo que se cultiva con aguas negras",
+              "opinion": "Pido controles sanitarios a los cultivos regados con aguas residuales y apoyo a los productores para cambiar a cultivos seguros mientras se construyen plantas de tratamiento (p. 33)."
+            }
+          ],
+          "corto": "Riego"
+        },
+        {
+          "slug": "campo-alimentos",
+          "texto": "¿Cómo debería apoyarse la venta de lo que se produce en el campo metropolitano?",
+          "opciones": [
+            {
+              "valor": "mercados",
+              "etiqueta": "Mercados y tianguis de productores en la ciudad",
+              "opinion": "Pido espacios de venta directa para productores metropolitanos en los mercados urbanos formales, hoy de difícil acceso para ellos (p. 34)."
+            },
+            {
+              "valor": "compras",
+              "etiqueta": "Que escuelas, hospitales y comedores públicos les compren",
+              "opinion": "Propongo que las compras públicas de alimentos de escuelas, hospitales y comedores den preferencia a productores agroecológicos de la metrópoli, como parte del eje de fortalecimiento agroecológico (p. 101)."
+            },
+            {
+              "valor": "sello",
+              "etiqueta": "Un sello que distinga lo producido aquí",
+              "opinion": "Propongo un distintivo metropolitano para los alimentos agroecológicos y de chinampa, que dé valor a la producción local (p. 101)."
+            }
+          ],
+          "corto": "Vender lo del campo"
         }
       ]
     },
@@ -841,6 +1335,72 @@
             }
           ],
           "corto": "Quién paga"
+        },
+        {
+          "slug": "gobernanza-ley",
+          "texto": "El plan depende de una nueva Ley de Desarrollo Metropolitano y de reformas a la Constitución. ¿Qué opinas?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "De acuerdo: sin ley, el plan no obliga a nadie",
+              "opinion": "Apoyo la Ley de Desarrollo Metropolitano del Valle de México y las reformas a los artículos 73, 115, 116 y 122 (p. 161), y pido un calendario legislativo público para aprobarlas."
+            },
+            {
+              "valor": "contenido",
+              "etiqueta": "De acuerdo, si la ley trae participación y sanciones",
+              "opinion": "Apoyo la Ley de Desarrollo Metropolitano (p. 161) siempre que establezca participación ciudadana vinculante, transparencia y sanciones por incumplir el programa."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, primero hay que aplicar las leyes que ya existen",
+              "opinion": "Considero que antes de una nueva Ley de Desarrollo Metropolitano (p. 161) deben aplicarse y coordinarse mejor los instrumentos legales ya vigentes."
+            }
+          ],
+          "corto": "Ley metropolitana"
+        },
+        {
+          "slug": "gobernanza-instituto",
+          "texto": "¿Debería crearse un Instituto Metropolitano de Planeación que gestione los proyectos y compre suelo para ellos?",
+          "opciones": [
+            {
+              "valor": "tecnico",
+              "etiqueta": "Sí, con perfil técnico y no político",
+              "opinion": "Apoyo el Instituto Metropolitano de Planeación y Gestión de Proyectos (p. 186) con una dirección técnica elegida por concurso y planes que trasciendan sexenios."
+            },
+            {
+              "valor": "suelo",
+              "etiqueta": "Sí, y que compre suelo para vivienda social y espacio público",
+              "opinion": "Apoyo que el Instituto Metropolitano de Planeación (p. 186) adquiera suelo de forma preventiva para destinarlo a vivienda social, equipamiento y espacio público."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, ya hay demasiadas instituciones",
+              "opinion": "Me preocupa que el Instituto Metropolitano de Planeación (p. 186) duplique funciones; pido que primero se fortalezcan las comisiones metropolitanas existentes (p. 159)."
+            }
+          ],
+          "corto": "Instituto de planeación"
+        },
+        {
+          "slug": "gobernanza-seguimiento",
+          "texto": "¿Cómo debería vigilarse que el plan se cumpla?",
+          "opciones": [
+            {
+              "valor": "revision",
+              "etiqueta": "Revisarlo cada cinco años con nueva consulta",
+              "opinion": "Pido que el programa se revise cada cinco años con una nueva consulta pública, usando sus metas verificables a 2030, 2040 y 2050 (p. 68)."
+            },
+            {
+              "valor": "tablero",
+              "etiqueta": "Un tablero en línea siempre actualizado",
+              "opinion": "Pido un tablero en línea con el avance de cada proyecto del programa y de sus indicadores (p. 191), con datos abiertos descargables."
+            },
+            {
+              "valor": "contraloria",
+              "etiqueta": "Una contraloría ciudadana independiente",
+              "opinion": "Propongo una contraloría ciudadana independiente que evalúe el cumplimiento de los indicadores del programa (p. 191) y pueda emitir recomendaciones públicas."
+            }
+          ],
+          "corto": "Seguimiento"
         }
       ]
     },
@@ -957,6 +1517,72 @@
             }
           ],
           "corto": "Prioridad del dinero"
+        },
+        {
+          "slug": "quien-paga-plusvalias",
+          "texto": "Cuando un terreno vale más porque el gobierno permite construir más alto o cambiar su uso, ¿quién debería quedarse con esa ganancia?",
+          "opciones": [
+            {
+              "valor": "compartir",
+              "etiqueta": "Que una parte regrese a la ciudad",
+              "opinion": "Apoyo la gestión de la valorización del suelo (pp. 173 y 174) para que parte de la ganancia por más edificabilidad o cambio de uso se destine a vivienda asequible y espacio público."
+            },
+            {
+              "valor": "colonia",
+              "etiqueta": "Que se pague en obras para la misma colonia",
+              "opinion": "Pido que la captura de plusvalías (p. 173) se pague en obras y equipamiento en la misma colonia donde se construye, y no solo en dinero a un fondo general."
+            },
+            {
+              "valor": "dueno",
+              "etiqueta": "Es del dueño: no debería cobrarse",
+              "opinion": "Me opongo a la captura de plusvalías (p. 173); considero que la valorización del suelo corresponde a su propietario."
+            }
+          ],
+          "corto": "Plusvalías"
+        },
+        {
+          "slug": "quien-paga-predial-fondo",
+          "texto": "¿Debería una parte del predial de tu municipio ir al Fideicomiso Metropolitano?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "Sí, las obras metropolitanas nos benefician a todos",
+              "opinion": "Apoyo que una proporción del predial se transfiera al Fideicomiso Metropolitano (p. 174), con reglas públicas sobre cuánto aporta y cuánto recibe cada municipio."
+            },
+            {
+              "valor": "retorno",
+              "etiqueta": "Sí, si regresa en obras a mi municipio",
+              "opinion": "Acepto que parte del predial vaya al Fideicomiso Metropolitano (p. 174) solo si hay un mínimo garantizado de inversión en cada municipio que aporta."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, el predial debe quedarse en el municipio",
+              "opinion": "Me opongo a transferir predial al Fideicomiso Metropolitano (p. 174); los municipios periféricos necesitan esos recursos para sus propios servicios."
+            }
+          ],
+          "corto": "Predial al fondo"
+        },
+        {
+          "slug": "quien-paga-mejoras",
+          "texto": "El plan propone que quienes se benefician de una nueva línea de transporte masivo aporten a su costo. ¿Qué opinas?",
+          "opciones": [
+            {
+              "valor": "si",
+              "etiqueta": "De acuerdo, si se demuestra el beneficio",
+              "opinion": "Apoyo la contribución de mejoras para transporte masivo (p. 176) siempre que el beneficio se demuestre con estudios públicos y haya acuerdo previo con los beneficiarios."
+            },
+            {
+              "valor": "grandes",
+              "etiqueta": "Solo desarrolladores y grandes propietarios",
+              "opinion": "Pido que la contribución de mejoras (p. 176) recaiga en desarrolladores y grandes propietarios, y que exente a la vivienda única de hogares de bajos ingresos."
+            },
+            {
+              "valor": "no",
+              "etiqueta": "No, el transporte debe pagarlo el gobierno",
+              "opinion": "Me opongo a cobrar contribución de mejoras por obras de transporte masivo (p. 176); deben financiarse con presupuesto público federal y estatal."
+            }
+          ],
+          "corto": "Pagar el transporte"
         }
       ]
     }

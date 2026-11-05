@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Check } from './Check';
 import { TopicIcon } from './TopicIcon';
 import type { Area, AreaResumen, Opcion, Pregunta } from '../lib/api';
-import { useRespuestas } from '../lib/respuestas';
+import { NO_SE, useRespuestas } from '../lib/respuestas';
 import { track } from '../lib/analytics';
 
 const Prev = () => <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 6l-6 6 6 6" /></svg>;
@@ -24,6 +24,8 @@ export function QuestionFlow({ area, areas, titulo, extra, diagHref = '#contexto
   const esComentario = step >= total;
   const p = esComentario ? null : area.preguntas[step];
   const elegida = p ? p.opciones.find((o) => o.valor === elecciones[p.slug]) : undefined;
+  const noSe = p ? elecciones[p.slug] === NO_SE : false;
+  const contestada = !!elegida || noSe;
   const go = (k: number, via: string) => { track('pregunta_nav', { tema: area.slug, desde: step, hacia: k, via }); setStep(k); };
 
   return (
@@ -35,7 +37,7 @@ export function QuestionFlow({ area, areas, titulo, extra, diagHref = '#contexto
       </div>
 
       <section className="qscreen" aria-live="polite">
-        <div className="deck" onTouchStart={(e) => setX0(e.touches[0].clientX)} onTouchEnd={(e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; setX0(null); if (dx < -50 && (esComentario ? false : !!elegida || step < total)) go(Math.min(step + 1, total), 'deslizar'); if (dx > 50) go(Math.max(step - 1, 0), 'deslizar'); }}>
+        <div className="deck" onTouchStart={(e) => setX0(e.touches[0].clientX)} onTouchEnd={(e) => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; setX0(null); if (dx < -50 && (esComentario ? false : contestada || step < total)) go(Math.min(step + 1, total), 'deslizar'); if (dx > 50) go(Math.max(step - 1, 0), 'deslizar'); }}>
           {step < total ? <div className="deck-back" aria-hidden="true" /> : null}
           <div className="card" key={p ? p.slug : 'comentario'}>
             {p ? (
@@ -48,8 +50,11 @@ export function QuestionFlow({ area, areas, titulo, extra, diagHref = '#contexto
                       {elegida?.valor === o.valor ? <Check size={16} /> : null}{o.etiqueta}
                     </button>
                   ))}
+                  <button type="button" className="no-se" aria-pressed={noSe} onClick={() => elegir(p.slug, NO_SE, area.slug)}>
+                    {noSe ? <Check size={16} /> : null}No sé / no tengo opinión
+                  </button>
                 </div>
-                {elegida ? <blockquote className="frase"><span className="k">Tu frase para la carta</span>{elegida.opinion}</blockquote> : <p className="muted hint frase-hint">Elige una opción y te mostramos la frase que irá en tu carta.</p>}
+                {elegida ? <blockquote className="frase"><span className="k">Tu frase para la carta</span>{elegida.opinion}</blockquote> : noSe ? <p className="muted hint frase-hint">Sin problema: esta pregunta no irá en tu carta.</p> : <p className="muted hint frase-hint">Elige una opción y te mostramos la frase que irá en tu carta.</p>}
                 {extra ? extra(p, elegida) : null}
               </fieldset>
             ) : (
@@ -78,7 +83,7 @@ export function QuestionFlow({ area, areas, titulo, extra, diagHref = '#contexto
           ) : (
             <>
               <button type="button" className="btn ghost" disabled={step === 0} onClick={() => go(step - 1, 'anterior')}><Prev />Anterior</button>
-              <button type="button" className="btn" disabled={!elegida} onClick={() => go(step + 1, 'siguiente')}>Siguiente<Check size={22} /></button>
+              <button type="button" className="btn" disabled={!contestada} onClick={() => go(step + 1, 'siguiente')}>Siguiente<Check size={22} /></button>
             </>
           )}
         </div>

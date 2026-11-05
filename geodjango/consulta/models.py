@@ -1,5 +1,8 @@
 from django.db import models
 
+# The "No sé / no tengo opinión" answer the site offers on every question: it never reaches the letter or the counts.
+NO_SE = "no-se"
+
 
 class Area(models.Model):
     """One of the big topics the POZMVM covers, with what the plan proposes and what it found."""

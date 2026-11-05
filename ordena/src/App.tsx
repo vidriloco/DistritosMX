@@ -5,7 +5,7 @@ import { Check, LogoMark } from './components/Check';
 import { PageError } from './components/PageError';
 import { api } from './lib/api';
 import { useFetch } from './lib/useFetch';
-import { useRespuestas } from './lib/respuestas';
+import { conOpinion, useRespuestas } from './lib/respuestas';
 import { track } from './lib/analytics';
 
 export default function App() {
@@ -22,7 +22,7 @@ export default function App() {
     document.addEventListener('keydown', onKey);
     return () => { document.body.style.overflow = prev; document.removeEventListener('keydown', onKey); };
   }, [open]);
-  const n = Object.keys(elecciones).length;
+  const n = conOpinion(elecciones);
   // The main laciudad.mx site, whichever host this is (ordena.laciudad.mx, ordena.localhost locally)
   const ciudadUrl = `${location.protocol}//${location.hostname.replace(/^ordena\./, '')}${location.port ? `:${location.port}` : ''}/`;
   const total = consulta ? Math.max(1, Math.round((new Date(consulta.cierre + 'T23:59:59-06:00').getTime() - new Date(consulta.inicio + 'T00:00:00-06:00').getTime()) / 86400000)) : 60;
@@ -39,7 +39,7 @@ export default function App() {
             </svg>
           </button>
           <nav id="nav" aria-label="Principal">
-            <NavLink to="/temas" onClick={nav('/temas')}><span className="nav-n" aria-hidden="true">01</span><span className="nav-t"><span>Temas</span><small>Nueve temas, dos o tres preguntas cada uno</small></span></NavLink>
+            <NavLink to="/temas" onClick={nav('/temas')}><span className="nav-n" aria-hidden="true">01</span><span className="nav-t"><span>Temas</span><small>Nueve temas, cinco preguntas cada uno</small></span></NavLink>
             <NavLink to="/quien-paga" onClick={nav('/quien-paga')}><span className="nav-n" aria-hidden="true">02</span><span className="nav-t"><span>¿Quién paga?</span><small>De dónde saldría el dinero del plan</small></span></NavLink>
             <NavLink to="/mi-opinion" onClick={nav('/mi-opinion')}><span className="nav-n" aria-hidden="true">03</span><span className="nav-t"><span>Mi opinión{n > 0 ? <span className="badge" aria-label={`${n} respuestas`}>{n}</span> : null}</span><small>{n > 0 ? `Tu carta lleva ${n} ${n === 1 ? 'punto' : 'puntos'}` : 'Tu carta, lista para enviar'}</small></span></NavLink>
             <NavLink to="/resultados" onClick={nav('/resultados')}><span className="nav-n" aria-hidden="true">04</span><span className="nav-t"><span>Qué opinan otros</span><small>Lo más elegido por tema</small></span></NavLink>

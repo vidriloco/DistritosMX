@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
 
-from .models import Area, MuestraInicial, Opcion, Pregunta, Respuesta
+from .models import NO_SE, Area, MuestraInicial, Opcion, Pregunta, Respuesta
 from .opinion import componer
 
 
@@ -157,7 +157,8 @@ def resultados(request):
     areas = []
     for area in Area.objects.prefetch_related("preguntas"):
         slugs = set(area.preguntas.values_list("slug", flat=True))
-        participantes = sum(1 for e in todas if slugs & set(e.keys()))
+        # "No sé" answers say the person has no opinion on the topic, so they are left out of its participants.
+        participantes = sum(1 for e in todas if any(k in slugs and v != NO_SE for k, v in e.items()))
         # The sample's people for a topic: as many as answered its most-answered question.
         participantes += max((base_por_pregunta.get(s, 0) for s in slugs), default=0)
         areas.append({"slug": area.slug, "titulo": area.titulo, "participantes": participantes})

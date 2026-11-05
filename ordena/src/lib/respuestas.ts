@@ -13,6 +13,12 @@ export interface Respuestas {
   firma: { nombre: string; colonia: string; estado: string };
 }
 
+/** The "No sé / no tengo opinión" answer: it counts as answered but adds nothing to the letter or the results. */
+export const NO_SE = 'no-se';
+
+/** How many answers carry an opinion, i.e. the points the letter will have. */
+export const conOpinion = (elecciones: Record<string, string>) => Object.values(elecciones).filter((v) => v !== NO_SE).length;
+
 const KEY = 'pozmvm.respuestas.v1';
 const EMPTY: Respuestas = { elecciones: {}, comentarios: {}, municipio: '', firma: { nombre: '', colonia: '', estado: '' } };
 const listeners = new Set<() => void>();
